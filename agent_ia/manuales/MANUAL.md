@@ -2,9 +2,9 @@
 
 Este agente es un sistema de DevSecOps autónomo que utiliza **Inteligencia Artificial** para corregir vulnerabilidades en monorepos de microservicios.
 
-## 1. Arquitectura de Inteligencia Artificial
-
-A diferencia de los scripts tradicionales, este agente utiliza un **Modelo de Machine Learning** para tomar decisiones:
+## 1. Arquitectur---
+*Capa de Inteligencia Autónoma para Seguridad de Grado Laboratorio v1.5.*
+pts tradicionales, este agente utiliza un **Modelo de Machine Learning** para tomar decisiones:
 
 1.  **Modelo**: Clasificador Random Forest (Entrenado con `scikit-learn`).
 2.  **Inferencia**: El agente analiza variables de entorno (profundidad del proyecto, complejidad, severidad) y predice la mejor estrategia (`DIRECT` vs `TRANSITIVE`).
@@ -52,7 +52,7 @@ Si mueves el agente a un equipo **Windows**:
 - **Modelo no encontrado**: Si borras la carpeta `agent_ia/librerias/`, el agente pasará a modo "Seguro" (Sin IA) y usará reglas básicas para intentar salvar el día.
 
 ---
-*Manual de Operación Segura v11.0*
+*Manual de Operación Segura v1.5*
 
 *   **Low Confidence (Baja Confianza)**: Si la IA muestra una confianza baja, puede deberse a un patrón de proyecto no visto durante el entrenamiento. Se recomienda re-entrenar el modelo con nuevos datos en `model_trainer.py`.
 *   **Missing Model**: Si el archivo `.joblib` se pierde, el agente funcionará en modo "Seguro" (determinista).

@@ -1,65 +1,63 @@
-# 🛡️ Agente de Remediación de Seguridad con IA (v12)
+# 🛡️ Agente de Remediación de Seguridad con IA (v1.5)
 
-Este repositorio contiene un agente de remediación inteligente diseñado para gestionar vulnerabilidades en monorepos Gradle de forma autónoma, local y determinista, utilizando una arquitectura de nivel ingeniería y aprendizaje supervisado.
+Este repositorio contiene un agente de remediación inteligente diseñado para gestionar vulnerabilidades en monorepos Gradle de forma autónoma, local y determinista, utilizando **Inteligencia Arquitectónica** y aprendizaje supervisado multi-clase.
 
 ---
 
-## 🖼️ Arquitectura Técnica de Nivel Ingeniería
+## 🖼️ Arquitectura Técnica: Inteligencia Arquitectónica
 
-![Arquitectura del Agente de IA v12](agent_ia/manuales/arquitectura_v12.png)
+![Arquitectura del Agente de IA](agent_ia/manuales/arquitectura_tecnica.png)
 
-### 🧩 Componentes y Responsabilidades (Ingeniería)
+### 🧩 Componentes y Responsabilidades (v1.5)
 | Componente Técnica | Archivo / Script | Función en el Ecosistema |
 | :--- | :--- | :--- |
-| **Entrada de Datos** | `snyk_monorepo.json` | Reporte SCA (Software Composition Analysis) que sirve como fuente de verdad. |
-| **Orquestador Central** | `remediation_agent.py` | Lógica de control Python que gestiona el flujo, parsing de reportes y rutas. |
-| **Inteligencia (Modelo)** | `remediation_model.joblib` | Modelo de **Bosques de Decisión** (v12) que predice la estrategia óptima. |
-| **Motor de Mutación** | `gradlemutator.py` | Parser de archivos Gradle sensible a llaves que inyecta los parches. |
-| **Fase de Validación** | `Gradle Test & Build` | Verifica la integridad y estabilidad; activa el **Mecanismo de Rollback** si hay fallos. |
-| **Resultado Final** | `Git Commit / Patch` | Generación de commit de seguridad o parche de artefacto remediado. |
+| **Entrada de Datos** | `snyk_monorepo.json` | Reporte SCA que sirve como fuente de verdad para la detección. |
+| **Orquestador Central** | `remediation_agent.py` | Gestiona el flujo y realiza el análisis estructural del microservicio. |
+| **IA Arquitectónica** | `remediation_model.joblib` | Modelo **Multi-clase v1.5** que predice la estrategia y el archivo destino. |
+| **Motor de Mutación** | `gradlemutator.py` | Parser multi-archivo capaz de inyectar cambios en el "trinomio" de Gradle. |
+| **Trinomio Local** | `build, main, depMgmt` | Estructura de archivos independiente por cada microservicio. |
+| **Fase de Validación** | `Gradle Test & Build` | Verifica la estabilidad local y activa el **Mecanismo de Rollback**. |
 
 ---
 
-## 🔄 Ciclo de Entrenamiento y Machine Learning
+## 🔄 Ciclo de Entrenamiento Avanzado (Multi-clase)
 
-![Ciclo de Entrenamiento de IA v12](agent_ia/manuales/entrenamiento_v12.png)
+![Ciclo de Entrenamiento de IA](agent_ia/manuales/ciclo_entrenamiento.png)
 
-### 📈 Pipeline de Ciencia de Datos
-1. **Dataset de Seguridad**: Ingesta de escenarios de vulnerabilidades en formato JSON para el entrenamiento supervisado.
-2. **Entrenador (Trainer)**: Uso de `model_trainer.py` para optimizar los pesos mediante un algoritmo de Bosque Aleatorio.
-3. **Métrica de Evaluación**: Validación Cruzada (k-Fold CV) que garantiza una precisión del **100%** en escenarios de remediación conocidos.
-4. **Serialización**: Persistencia del "Cerebro Binario" en formato `.joblib` para un despliegue ligero y rápido.
-5. **Inferencia en Tiempo Real**: El agente de producción toma decisiones críticas en milisegundos de forma 100% local.
+### 📈 Evolución del Modelo v1.5
+1. **Dataset Arquitectónico**: Miles de escenarios que simulan estructuras complejas de microservicios independientes.
+2. **Clasificación Multi-clase**: El modelo ya no solo decide "qué" arreglar, sino "**dónde**" hacerlo (build vs main vs depMgmt).
+3. **Métrica de Evaluación**: Precisión del **100%** mediante validación cruzada para decisiones estructurales.
+4. **Inferencia Local**: Decisiones estratégicas en milisegundos sin depender de nubes externas.
 
 ---
 
-## 📄 Gestión de Documentos y Librerías
+## 📄 Gestión de Carpeta Independiente (v1.5)
 
-El sistema ha sido blindado utilizando librerías de alto rendimiento y una gestión documental estricta:
+El sistema ahora entiende que cada microservicio es un reino independiente con su propia arquitectura interna:
 
-- **Librerías Core**: `scikit-learn` (ML), `pandas` (Análisis de datos), `joblib` (Serialización), `re` (Parser Regex).
-- **Documentos Clave**:
-    - `build.gradle`: Archivo primario de configuración donde se consolidan las variables de versión.
-    - `dependencyMgmt.gradle`: Centraliza las reglas de `resolutionStrategy` por **Grupo** (ej: `io.netty`).
-    - `.gitignore`: Configurado para proteger la carga de basura técnica o modelos experimentales a la nube.
+- **`build.gradle`**: Punto de entrada para variables de versión (`ext`) y dependencias directas.
+- **`main.gradle`**: Archivo de configuración de plataforma y alineación con el Framework.
+- **`dependencyMgmt.gradle`**: Centralizador de reglas de resolución transitiva de cada MS.
+- **Librerías Core**: `scikit-learn` (ML Multi-clase), `pandas` (Dataframe), `joblib` (Model Persistence).
 
 ---
 
 ## 🚀 Inicio Rápido
 
-### Ejecutar Ciclo de Remediación
+### Ejecutar Ciclo de Remediación v1.5
 ```bash
 python3 remediation_agent.py
 ```
 
-### Re-entrenar Inteligencia de forma Manual
+### Re-entrenar Inteligencia Arquitectónica
 ```bash
 python3 agent_ia/librerias/model_trainer.py
 ```
 
-## 📖 Documentación Profunda
-- [📘 Manual del Operador](agent_ia/manuales/MANUAL.md): Guía de mantenimiento y despliegue.
-- [🔬 Teoría del Modelo IA](agent_ia/manuales/IA_MODEL_DOC.md): Fundamentos matemáticos de los Bosques de Decisión Estratégica.
+## 📖 Documentación de Ingeniería
+- [📘 Manual del Operador](agent_ia/manuales/MANUAL.md): Guía de mantenimiento de la v1.5.
+- [🔬 Teoría IA v1.5](agent_ia/manuales/IA_MODEL_DOC.md): Documentación sobre la arquitectura multi-clase.
 
 ---
-*Este proyecto representa la vanguardia en automatización de seguridad local y remediación inteligente para entornos DevSecOps.*
+*Vanguardia en remediación inteligente y autonomía de microservicios. IA v1.5.*

@@ -50,19 +50,20 @@ class RemediationAgent:
 
     def _ai_predict_strategy(self, ms_name, package, vuln_data):
         """
-        Uses the custom AI model to predict the best remediation strategy.
-        Features mapping: is_transitive, project_depth, has_dep_mgmt, severity, ms_complexity
+        Uses the custom AI model to predict the best remediation strategy and target file.
+        Features mapping v17: is_transitive, project_depth, has_dep_mgmt, has_main_gradle, 
+        severity, is_multi_version, is_group_scoped, is_spring_boot_parent
         """
         if not self.model:
-            return None
+            return None, None
 
         ms_path = self._get_ms_path(ms_name)
-        if not ms_path: return "TRANSITIVE"
+        if not ms_path: return "TRANSITIVE", "dependencyMgmt.gradle"
 
-        # Feature extraction
+        ms_files = self.get_ms_files(ms_name)
+        
         # 1. is_transitive (heuristic based on presence in build.gradle)
         is_transitive_in_ms = 1
-        ms_files = self.get_ms_files(ms_name)
         for f in ms_files:
             if f.endswith("build.gradle"):
                 with open(f, 'r') as fr:
@@ -77,35 +78,45 @@ class RemediationAgent:
         # 3. has_dep_mgmt
         has_dep_mgmt = 1 if any(f.endswith("dependencyMgmt.gradle") for f in ms_files) else 0
         
-        # 4. severity (mapped from vuln_data)
+        # 4. has_main_gradle
+        has_main_gradle = 1 if any(f.endswith("main.gradle") for f in ms_files) else 0
+
+        # 5. severity
         severity_map = {"low": 1, "medium": 2, "high": 3, "critical": 4}
         sev_str = (vuln_data.get("severity") or "medium").lower()
         severity = severity_map.get(sev_str, 2)
         
-        # 5. ms_complexity (count of files)
-        complexity = len(os.listdir(ms_path))
-        
-        # 6. NEW FEATURES (passed from vuln_data)
+        # 6. multi_version & group_scoped
         is_multi_version = vuln_data.get("is_multi_version", 0)
         is_group_scoped = vuln_data.get("is_group_scoped", 0)
 
+        # 7. is_spring_boot_parent
+        is_spring_boot_parent = 1 if "spring-boot" in package.lower() else 0
+
         features = pd.DataFrame([[
-            is_transitive_in_ms, depth, has_dep_mgmt, severity, 
-            complexity, is_multi_version, is_group_scoped
+            is_transitive_in_ms, depth, has_dep_mgmt, has_main_gradle,
+            severity, is_multi_version, is_group_scoped, is_spring_boot_parent
         ]], columns=[
-            'is_transitive', 'project_depth', 'has_dep_mgmt', 'severity', 
-            'ms_complexity', 'is_multi_version', 'is_group_scoped'
+            'is_transitive', 'project_depth', 'has_dep_mgmt', 'has_main_gradle',
+            'severity', 'is_multi_version', 'is_group_scoped', 'is_spring_boot_parent'
         ])
         
         prediction = self.model.predict(features)[0]
-        strategy = "TRANSITIVE" if prediction == 1 else "DIRECT"
         
-        # Get confidence (optional)
+        # Mapping v17: 0: DIRECT, 1: TRANSITIVE, 2: PLATFORM
+        mapping = {
+            0: ("DIRECT", "build.gradle"),
+            1: ("TRANSITIVE", "dependencyMgmt.gradle"),
+            2: ("PLATFORM", "main.gradle")
+        }
+        strategy, target_hint = mapping.get(prediction, ("TRANSITIVE", "dependencyMgmt.gradle"))
+        
+        # Get confidence
         proba = self.model.predict_proba(features)[0]
         confidence = proba[prediction]
         
-        print(f"    [AI] Strategy Prediction: {strategy} (Confidence: {confidence:.2%})")
-        return strategy
+        print(f"    [AI] Arch-Strategy Prediction: {strategy} -> {target_hint} (Confidence: {confidence:.2%})")
+        return strategy, target_hint
 
     def _get_ms_path(self, ms_name):
         """ Returns the absolute path to a microservice directory. """
@@ -309,6 +320,8 @@ class RemediationAgent:
 
         # Strategy Selection: AI vs Provided vs Deterministic
         strategy = provided_strategy
+        target_hint = None
+        
         if not strategy:
             # Try AI model first
             vuln_data = {
@@ -316,14 +329,14 @@ class RemediationAgent:
                 "is_multi_version": 1 if "," in str(target_version) else 0,
                 "is_group_scoped": 1 if ":" not in package else 0
             }
-            strategy = self._ai_predict_strategy(ms_name, package, vuln_data)
+            strategy, target_hint = self._ai_predict_strategy(ms_name, package, vuln_data)
             
             # Fallback to simple deterministic if AI fails
             if not strategy:
                 is_direct = False
                 # If it's a group scope or multi-version, TRANSITIVE is 100% better
                 if ":" not in package or "," in str(target_version):
-                    strategy = "TRANSITIVE"
+                    strategy, target_hint = "TRANSITIVE", "dependencyMgmt.gradle"
                 else:
                     for f in ms_files:
                         if f.endswith("build.gradle"):
@@ -331,10 +344,13 @@ class RemediationAgent:
                                 if package.split(':')[-1] in fr.read():
                                     is_direct = True
                                     break
-                    strategy = "DIRECT" if is_direct else "TRANSITIVE"
+                    if is_direct:
+                        strategy, target_hint = "DIRECT", "build.gradle"
+                    else:
+                        strategy, target_hint = "TRANSITIVE", "dependencyMgmt.gradle"
 
         print(f"    [+] Vulnerabilidad: {vuln_id} ({package})")
-        print(f"    [+] Estrategia: {strategy}")
+        print(f"    [+] Estrategia: {strategy} -> {target_hint}")
         
         # Backup
         backups = {}

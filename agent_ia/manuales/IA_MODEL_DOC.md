@@ -54,4 +54,4 @@ Una de las mayores ventajas de este agente es que es **totalmente privado**:
 Las reglas simples se rompen fácilmente cuando el proyecto cambia. La IA es más **flexible**: puede ver patrones complejos y se adapta a monorepos dinámicos, garantizando que el parche se aplique siempre en el lugar con menor riesgo de romper el build.
 
 ---
-*Capa de Inteligencia Autónoma para Seguridad de Grado Laboratorio.*
+*Capa de Inteligencia Autónoma para Seguridad de Grado Laboratorio v1.5.*
