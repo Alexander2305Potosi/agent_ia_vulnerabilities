@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+import time
 import shutil
 import subprocess
 import joblib
@@ -234,7 +235,14 @@ class RemediationAgent:
             print(f"    [!] Git error: {str(e)}")
 
     def run(self):
-        print(f"[*] Starting Microservice-Aware Remediation Agent (Auto-Discovery Mode)")
+        start_time = time.time()
+        print("\n" + "="*60)
+        print("🚀 INICIANDO SESIÓN DE REMEDIACIÓN IA")
+        print("="*60)
+        print(f"[*] Modo: Auto-Discovery & Intelligent Remediation")
+        print(f"[*] Reporte: {self.report_path}")
+        print(f"[*] Directorio Raíz: {self.root_path}")
+        print("="*60 + "\n")
         
         if not os.path.exists(self.report_path):
             print(f"[!] Error: Report {self.report_path} not found.")
@@ -254,6 +262,10 @@ class RemediationAgent:
         # Git Commit (if enabled and fixes were made)
         if any(e["status"] == "FIXED" for e in self.history):
             self._git_lifecycle()
+
+        end_time = time.time()
+        duration = end_time - start_time
+        print(f"\n[OK] Process finished in {duration:.2f} seconds.")
 
     def _process_vuln_entry(self, entry):
         # Map fields (New schema vs Old schema support)
@@ -286,8 +298,13 @@ class RemediationAgent:
             self._handle_remediation(ms, vuln_id, package, target_version, strategy)
 
     def _handle_remediation(self, ms_name, vuln_id, package, target_version, provided_strategy):
+        print(f"\n    " + "-"*40)
+        print(f"    📦 MS: {ms_name} | INICIANDO PROCESO")
+        print(f"    " + "-"*40)
+        
         ms_files = self.get_ms_files(ms_name)
         if not ms_files:
+            print(f"    [!] No gradle files found for {ms_name}. Skipping.")
             return
 
         # Strategy Selection: AI vs Provided vs Deterministic
@@ -316,7 +333,8 @@ class RemediationAgent:
                                     break
                     strategy = "DIRECT" if is_direct else "TRANSITIVE"
 
-        print(f"\n[+] Processing {vuln_id} ({package}) in {ms_name} [Strategy: {strategy}]")
+        print(f"    [+] Vulnerabilidad: {vuln_id} ({package})")
+        print(f"    [+] Estrategia: {strategy}")
         
         # Backup
         backups = {}
@@ -324,38 +342,42 @@ class RemediationAgent:
             bak = f + ".bak"
             shutil.copy2(f, bak)
             backups[f] = bak
+        
+        try:
+            # Mutation
+            mutated = GradleMutator.apply_coordinated_remediation(
+                ms_files,
+                strategy,
+                package,
+                target_version,
+                reason=f"Fixes {vuln_id}"
+            )
 
-        # Mutation
-        mutated = GradleMutator.apply_coordinated_remediation(
-            ms_files,
-            strategy,
-            package,
-            target_version,
-            reason=f"Fixes {vuln_id}"
-        )
-
-        if mutated == "ALREADY_FIXED":
-            print(f"    [SKIP] Library already at safe version (or higher) in {ms_name}.")
-            self.history.append({"id": vuln_id, "status": "ALREADY_FIXED", "ms": ms_name})
-            for f, bak in backups.items(): os.remove(bak)
-            return
-
-        success = False
-        if mutated:
-            # VALIDATION
-            if self._validate_ms(ms_name):
-                success = True
+            if mutated == "ALREADY_FIXED":
+                print(f"    [SKIP] Ya se encuentra en la versión segura (o superior).")
+                self.history.append({"id": vuln_id, "status": "ALREADY_FIXED", "ms": ms_name})
+                for f, bak in backups.items(): os.remove(bak)
             else:
-                print(f"    [!] Validation failed for {ms_name}. Initiating rollback.")
+                success = False
+                if mutated:
+                    # VALIDATION
+                    if self._validate_ms(ms_name):
+                        success = True
+                    else:
+                        print(f"    [!] Error en Validación. Iniciando Rollback...")
 
-        if success:
-            print(f"    [OK] Remediation and Validation successful for {ms_name}.")
-            self.history.append({"id": vuln_id, "status": "FIXED", "ms": ms_name})
-            for bak in backups.values(): os.remove(bak)
-        else:
-            # Rollback
-            self.history.append({"id": vuln_id, "status": "ERROR", "ms": ms_name})
-            for f, bak in backups.items(): shutil.move(bak, f)
+                if success:
+                    print(f"    [OK] Remediación y Validación exitosa para {ms_name}.")
+                    self.history.append({"id": vuln_id, "status": "FIXED", "ms": ms_name})
+                    for bak in backups.values(): os.remove(bak)
+                else:
+                    # Rollback
+                    self.history.append({"id": vuln_id, "status": "ERROR", "ms": ms_name})
+                    for f, bak in backups.items(): shutil.move(bak, f)
+        finally:
+            print(f"    " + "-"*40)
+            print(f"    🏁 MS: {ms_name} | FINALIZADO")
+            print(f"    " + "-"*40)
 
     def _print_summary(self):
         print("\n" + "="*40)
