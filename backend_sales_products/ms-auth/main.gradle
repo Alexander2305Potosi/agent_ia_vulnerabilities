@@ -1,0 +1,6 @@
+allprojects {
+    apply from: "dependencyMgmt.gradle"
+    dependencies {
+        implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+    }
+}
