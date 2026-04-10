@@ -1,7 +1,9 @@
 import os
 import shutil
 
-root_dir = "/Volumes/Macintosh HD - Data/repaso/laboratorio/IA/laboratorio agente/backend_sales_products"
+# Determinar la raíz del proyecto de forma dinámica (dos niveles arriba de este script)
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+root_dir = os.path.join(PROJECT_ROOT, "backend_sales_products")
 
 # Valid empty shell for dependencyMgmt.gradle
 RESET_CONTENT = """// Standardized Dependency Management - Centralized AI Security Rules

@@ -20,6 +20,35 @@ class GradleMutator:
         return GradleMutator._version_to_tuple(current_version) >= GradleMutator._version_to_tuple(safe_version)
 
     @staticmethod
+    def _purge_redundant_variables(content, family_var_name):
+        """ 
+        ELIMINA variables obsoletas del bloque ext si son 'hijas' de una familia.
+        Ej: Si inyectamos 'nettyCodecVersion', elimina 'nettyCodecHttpVersion'.
+        """
+        if not family_var_name.endswith("Version"): return content
+        
+        base_name = family_var_name.replace("Version", "")
+        # Buscamos variables que:
+        # 1. Empiecen por el base_name
+        # 2. Sean diferentes a la original
+        # 3. Estén en el bloque ext
+        # Regex más flexible para capturar variables específicas
+        pattern = rf"\s*({base_name}\w+Version)\s*=\s*['\"].*?['\"]"
+        
+        lines = content.splitlines()
+        new_lines = []
+        for line in lines:
+            match = re.search(pattern, line)
+            if match:
+                var_found = match.group(1)
+                if var_found != family_var_name:
+                    print(f"    [LIMPIEZA] Eliminando variable redundante: {var_found}")
+                    continue
+            new_lines.append(line)
+        
+        return "\n".join(new_lines)
+
+    @staticmethod
     def update_ext_variable(content, var_name, new_version):
         """
         Updates a variable definition in any ext block.
@@ -158,6 +187,7 @@ configurations.all {
     @staticmethod
     def apply_coordinated_remediation(project_files, strategy, package, version, reason=None, override_var_name=None):
         artifact_name = package.split(':')[-1]
+        has_changes = False
         
         definer_file = None
         var_name = None
@@ -187,6 +217,7 @@ configurations.all {
         is_fixed = current_version and GradleMutator.is_already_fixed(current_version, version)
 
         if not is_fixed:
+            safe_v = str(version).split(',')[0].strip()
             if not definer_file:
                 build_gradles = [f for f in project_files if f.endswith("build.gradle")]
                 if not build_gradles: return False
@@ -199,10 +230,11 @@ configurations.all {
                 
                 with open(definer_file, 'r') as f:
                     content = f.read()
+                # v2.0: Normalización de versión (solo la primera si hay comas)
                 if "ext {" in content:
-                    new_content = content.replace("ext {", f"ext {{\n        {var_name} = '{version}'")
+                    new_content = content.replace("ext {", f"ext {{\n        {var_name} = '{safe_v}'")
                 else:
-                    new_content = f"ext {{\n        {var_name} = '{version}'\n}}\n" + content
+                    new_content = f"ext {{\n        {var_name} = '{safe_v}'\n}}\n" + content
                 with open(definer_file, 'w') as f:
                     f.write(new_content)
             else:
@@ -210,16 +242,27 @@ configurations.all {
                 if not changed:
                     # Si la variable sugerida por la IA no existe, la creamos en el bloque ext
                     if "ext {" in new_content:
-                        new_content = new_content.replace("ext {", f"ext {{\n        {var_name} = '{version}'")
+                        new_content = new_content.replace("ext {", f"ext {{\n        {var_name} = '{safe_v}'")
                     else:
-                        new_content = f"ext {{\n        {var_name} = '{version}'\n}}\n" + new_content
+                        new_content = f"ext {{\n        {var_name} = '{safe_v}'\n}}\n" + new_content
                 
                 with open(definer_file, 'w') as f:
                     f.write(new_content)
         
+        # v2.0: Auto-Refactoring. Siempre intentamos purgar si usamos una familia,
+        # incluso si la versión ya era correcta (para limpiar residuos de ejecuciones anteriores).
+        if definer_file and var_name:
+            with open(definer_file, 'r') as f:
+                content_to_purge = f.read()
+            clean_content = GradleMutator._purge_redundant_variables(content_to_purge, var_name)
+            if clean_content != content_to_purge:
+                with open(definer_file, 'w') as f:
+                    f.write(clean_content)
+                has_changes = True
+
         # 2. ACTIVE SUBSTITUTION in all build files
         # We run this even if is_fixed, to ensure hardcoded literals are replaced by the variable
-        has_changes = not is_fixed
+        has_changes = has_changes or not is_fixed
         for file_path in project_files:
             if file_path.endswith("build.gradle"):
                 with open(file_path, 'r') as f:

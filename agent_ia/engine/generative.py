@@ -72,9 +72,10 @@ class GenerativeAgentV2:
             """
         else:
             library_name = cve_data.get('library', '')
-            # v2.0: Lógica de simulación dinámica por familia
-            target_var = "nettyCodecVersion"
-            if "jackson" in library_name:
+            # v2.0: Lógica de simulación dinámica por familia (Priorizando consolidación manual pero permitiendo autonomía)
+            if "netty" in library_name:
+                target_var = "nettyCodecVersion"
+            elif "jackson" in library_name:
                 target_var = "jacksonCoreVersion"
             elif "spring" in library_name:
                 target_var = "springWebfluxVersion"
@@ -83,8 +84,7 @@ class GenerativeAgentV2:
             else:
                 # Simulación de RAZONAMIENTO AUTÓNOMO para librerías desconocidas
                 # Extrae el nombre del artefacto y lo convierte a camelCase
-                artifact = library_name.split(':')[-1] if ":" in library_name else library_name
-                parts = artifact.split('-')
+                parts = library_name.split(':')[-1].split('-')
                 target_var = parts[0] + "".join(p.capitalize() for p in parts[1:]) + "Version"
             
             return f"""
