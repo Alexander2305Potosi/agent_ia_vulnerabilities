@@ -1,0 +1,8 @@
+# Agente IA v2.0 - Requisitos de Ejecución Generativa
+
+# Motor de Inferencia (Soporte GGUF)
+llama-cpp-python
+
+# Utilidades Core
+numpy
+# (Eliminados: pandas, scikit-learn, joblib por obsolescencia en v2.0)

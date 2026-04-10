@@ -90,17 +90,23 @@ class GradleMutator:
         Injects or updates a rule into dependencyMgmt.gradle.
         Supports both artifact name and group-level pinning.
         """
-        # Detect if this is a group (e.g., io.netty) or a name (e.g., netty-codec)
-        is_group = ":" not in package_or_name and "." in package_or_name
+        # 0. Lógica de FAMILIAS (v2.0): Priorizar agrupación por grupo para Netty, Spring, Jackson
+        families = ["io.netty", "org.springframework", "com.fasterxml.jackson"]
+        is_group = False
+        
+        # Si recibimos un paquete completo, intentamos extraer el grupo
+        if ":" in package_or_name:
+            group_candidate = package_or_name.split(':')[0]
+            if group_candidate in families:
+                package_or_name = group_candidate
+                is_group = True
+        
+        # Detect si es un grupo (ej. io.netty) o nombre
+        if not is_group:
+            is_group = any(f in package_or_name.lower() or package_or_name in f for f in families)
+        
         match_field = "group" if is_group else "name"
         
-        # If it's an artifact name, check if a group rule already exists for common families (Netty, etc)
-        if not is_group:
-            # Hardcoded heuristic for Netty as per user requirement, could be expanded
-            if "netty" in package_or_name.lower():
-                if "details.requested.group == 'io.netty'" in content:
-                    return content, True # Already covered by group rule
-
         new_rule_full = "if (details.requested." + match_field + " == '" + package_or_name + "') {\n" + \
                         "        details.useVersion \"${" + var_name + "}\"\n" + \
                         "        details.because \"" + reason + "\"\n" + \
@@ -213,8 +219,9 @@ configurations.all {
         if strategy == "TRANSITIVE" and dep_mgmt_gradle:
             with open(dep_mgmt_gradle, 'r') as f:
                 dmg_content = f.read()
+            # v2.0: Pasamos el 'package' completo para permitir detección de familias (groups)
             dmg_content, success = GradleMutator.inject_resolution_strategy_rule(
-                dmg_content, artifact_name, var_name, reason
+                dmg_content, package, var_name, reason
             )
             if success:
                 # Compare content to avoid false 'mutated' signal

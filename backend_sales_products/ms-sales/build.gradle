@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        nettyCodecVersion = '4.2.11.Final'
+        nettyCodecVersion = '4.1.132.Final'
         springWebfluxVersion = '6.2.17'
         jacksonCoreVersion = '2.18.6'
         commonsCompressVersion = '1.21'
