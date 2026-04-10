@@ -1,44 +1,28 @@
-# Manual del Operador: Agente IA v2.0 (Generativo)
+# Manual del Operador: Agente de Remediación v2.0
 
-Este manual detalla las operaciones para el Agente de Remediación Generativo Versión 2.0.
+Este manual describe el funcionamiento del Agente de Remediación SCA en su versión Generativa v2.0.
 
-## 1. Flujo de Operación v2.0
-El agente ha pasado de un enfoque de "Tablas de Decisión" a un **Cerebro Autónomo**. El flujo operativo es el siguiente:
+## 1. Flujo de Ejecución Profundo
+El agente opera en un ciclo de 4 fases basado en el marco ReAct:
 
-1.  **Escaneo de Snyk**: El agente lee el reporte `snyk_monorepo.json`.
+1.  **Descubrimiento**: Escanea el monorepo y detecta el microservicio afectado.
 2.  **Inferencia ReAct**: El modelo GGUF razona:
     - *Pensamiento*: "¿Qué tan crítico es? ¿Hay conflictos?"
     - *Acción*: "Actualizar versión X a Y".
 3.  **Remediación Física**: El agente invoca al `GradleMutator` y **escribe físicamente** el cambio.
-    - **Restricción v2.0**: Solo tiene permitido modificar `build.gradle`, `main.gradle` y `dependencyMgmt.gradle` del microservicio. Cualquier otro archivo será ignorado por seguridad.
+    - **Recursividad Selectiva v2.0**: El agente explora todas las subcarpetas del microservicio buscando el "Trinomio Autorizado" (`build.gradle`, `main.gradle`, `dependencyMgmt.gradle`). Ignora cualquier otro tipo de archivo por seguridad.
 4.  **Validación & Aprendizaje**:
     - Se ejecuta `gradle clean test`.
     - Si falla, el error se re-inyecta al modelo para una nueva propuesta (Ciclo de Conciencia).
 
-## 2. Configuración de Modelos
-El agente busca el cerebro generativo en:
-`agent_ia/models/remediation_v2_3bits.gguf`
+## 2. Configuración de Seguridad (Privacidad)
+El agente ha sido diseñado para entornos de alta seguridad:
+- **No requiere Internet**: El motor de IA (v2.0_3bits.gguf) se ejecuta localmente.
+- **Sin Exfiltración**: No se envían logs, reportes ni código fuente a servidores externos.
 
-- **Soporte**: Modelos GGUF (cuantizados IQ3_M para mayor velocidad en hardware local).
-- **RAM**: Se recomiendan 4.5 GB libres.
-
-## 3. Comandos Útiles
-Para iniciar una sesión de remediación generativa completa:
-```bash
-python3 remediation_agent.py
-```
-
-Para realizar una limpieza de archivos temporales:
-```bash
-python3 agent_ia/cleanup_repo.py
-```
+## 3. Resolución de Problemas
+- **Gradle no encontrado**: El agente saltará la validación física pero aplicará el parche. Verifica que tengas el `gradlew` en la raíz.
+- **Conflicto de Familias**: Si dos librerías de la misma familia requieren versiones distintas, la IA elegirá la versión más reciente y compatible automáticamente.
 
 ---
-*Manual V2.0 - Seguridad Autónoma por Diseño.*
-
-## 4. Garantía de Seguridad: 100% Local y Privado
-Para operar con total tranquilidad en entornos corporativos:
-
-- **Nada sale de casa**: El agente lee tus archivos solo para repararlos. NUNCA envía información, código o reportes a internet.
-- **Funciona sin conexión**: No necesitas internet para que la IA tome decisiones. El "cerebro" reside en tu propio disco duro.
-- **Privacidad Total**: No usamos servicios externos (nube). Todo el procesamiento ocurre dentro de los límites de tu propia computadora.
+*Manual de Operación Local v2.0.*
