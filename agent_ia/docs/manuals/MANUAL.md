@@ -9,7 +9,8 @@ El agente ha pasado de un enfoque de "Tablas de Decisión" a un **Cerebro Autón
 2.  **Inferencia ReAct**: El modelo GGUF razona:
     - *Pensamiento*: "¿Qué tan crítico es? ¿Hay conflictos?"
     - *Acción*: "Actualizar versión X a Y".
-3.  **Remediación Física**: El agente invoca al `GradleMutator` y **escribe físicamente** el cambio en el `build.gradle`, `main.gradle` o `dependencyMgmt.gradle` del microservicio detectado.
+3.  **Remediación Física**: El agente invoca al `GradleMutator` y **escribe físicamente** el cambio.
+    - **Restricción v2.0**: Solo tiene permitido modificar `build.gradle`, `main.gradle` y `dependencyMgmt.gradle` del microservicio. Cualquier otro archivo será ignorado por seguridad.
 4.  **Validación & Aprendizaje**:
     - Se ejecuta `gradle clean test`.
     - Si falla, el error se re-inyecta al modelo para una nueva propuesta (Ciclo de Conciencia).

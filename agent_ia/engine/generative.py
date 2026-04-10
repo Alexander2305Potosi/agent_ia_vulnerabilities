@@ -16,11 +16,10 @@ class GenerativeAgentV2:
     2. ACCIÓN: Generar cambio exacto.
     3. EXPLICACIÓN: Justificar técnicamente.
     
-    [RESTRICCIONES]:
-    - Precisión absoluta en versiones.
-    - Concisión técnica.
-    - Inferencia 100% Local (llama-cpp).
-    
+    [ESTÁNDARES DE ARQUITECTURA]:
+    1. TRINOMIO: Definición en 'ext' + Lógica en 'dependencyMgmt'.
+    2. FAMILIAS: Agrupar por grupo (io.netty, etc).
+
     FORMATO OBLIGATORIO:
     [PENSAMIENTO]: ...
     [ACCIÓN]: ...
@@ -72,14 +71,10 @@ class GenerativeAgentV2:
             [EXPLICACIÓN]: Al actualizar el Framework Parent, se resuelven las dependencias transitivas de Netty de forma nativa sin conflictos.
             """
         else:
+            library_name = cve_data.get('library', '')
             return f"""
-            [ESTÁNDAR DE ARQUITECTURA: TRINOMIO - v2.0]
-    1. DEFINICIÓN: Declara siempre la versión en el bloque 'ext' de 'build.gradle'.
-    2. LÓGICA: Aplica la remediación física en 'dependencyMgmt.gradle' usando 'resolutionStrategy'.
-    3. AGRUPACIÓN POR FAMILIAS: Si hay varias librerías del mismo grupo (ej. io.netty), propón una única REGLA DE FAMILIA usando `details.requested.group` en lugar de reglas individuales por nombre.
-
-    [PENSAMIENTO]: Analiza el CVE. Si es una librería transitiva, aplica el 'Estándar de Trinomio'. Si pertenece a un grupo común (ej. Netty, Spring, Jackson), razona la agrupación por familia.
-    Analizando {cve_data.get('cve')}. La librería afectada es {cve_data.get('library')}. Requiere versión segura {cve_data.get('safe_version')}.
+            [PENSAMIENTO]: Analiza el CVE. Si es una librería transitiva, aplica el 'Estándar de Trinomio'. Si pertenece a un grupo común (ej. Netty, Spring, Jackson), razona la agrupación por familia.
+            Analizando {cve_data.get('cve')}. La librería afectada es {library_name}. Requiere versión segura {cve_data.get('safe_version')}.
             [ACCIÓN]: nettyCodecVersion = '4.1.132.Final'
             [EXPLICACIÓN]: Se aplica el parche directo en el bloque ext del microservicio para mitigar el riesgo de RCE.
             """

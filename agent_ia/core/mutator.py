@@ -97,7 +97,8 @@ class GradleMutator:
         # Si recibimos un paquete completo, intentamos extraer el grupo
         if ":" in package_or_name:
             group_candidate = package_or_name.split(':')[0]
-            if group_candidate in families:
+            # v2.0: Detección inteligente por inicio de grupo (startswith)
+            if any(group_candidate.startswith(f) for f in families):
                 package_or_name = group_candidate
                 is_group = True
         
@@ -155,7 +156,7 @@ configurations.all {
         return wrapper.strip(), True
 
     @staticmethod
-    def apply_coordinated_remediation(project_files, strategy, package, version, reason=None):
+    def apply_coordinated_remediation(project_files, strategy, package, version, reason=None, override_var_name=None):
         artifact_name = package.split(':')[-1]
         
         definer_file = None
@@ -169,9 +170,15 @@ configurations.all {
                 with open(file_path, 'r') as f:
                     content = f.read()
                 found_var = GradleMutator.find_variable_name_in_ext(content, artifact_name)
-                if found_var:
+                # v2.0: El estándar dictado por la IA (override) manda sobre lo existente
+                if override_var_name:
+                    var_name = override_var_name
+                    definer_file = file_path
+                elif found_var:
                     var_name = found_var
                     definer_file = file_path
+                
+                if var_name:
                     pattern = rf"{var_name}\s*=\s*['\"]([^'\"]+)['\"]"
                     match = re.search(pattern, content)
                     if match: current_version = match.group(1)
@@ -184,8 +191,11 @@ configurations.all {
                 build_gradles = [f for f in project_files if f.endswith("build.gradle")]
                 if not build_gradles: return False
                 definer_file = min(build_gradles, key=len)
-                parts = artifact_name.split('-')
-                var_name = parts[0] + "".join(p.capitalize() for p in parts[1:]) + "Version"
+                if override_var_name:
+                    var_name = override_var_name
+                else:
+                    parts = artifact_name.split('-')
+                    var_name = parts[0] + "".join(p.capitalize() for p in parts[1:]) + "Version"
                 
                 with open(definer_file, 'r') as f:
                     content = f.read()
@@ -196,9 +206,14 @@ configurations.all {
                 with open(definer_file, 'w') as f:
                     f.write(new_content)
             else:
-                with open(definer_file, 'r') as f:
-                    content = f.read()
-                new_content, _ = GradleMutator.update_ext_variable(content, var_name, version)
+                new_content, changed = GradleMutator.update_ext_variable(content, var_name, version)
+                if not changed:
+                    # Si la variable sugerida por la IA no existe, la creamos en el bloque ext
+                    if "ext {" in new_content:
+                        new_content = new_content.replace("ext {", f"ext {{\n        {var_name} = '{version}'")
+                    else:
+                        new_content = f"ext {{\n        {var_name} = '{version}'\n}}\n" + new_content
+                
                 with open(definer_file, 'w') as f:
                     f.write(new_content)
         

@@ -45,13 +45,19 @@ class RemediationAgent:
         
         print(f"    [MUTACIÓN] Aplicando {package} -> {safe_ver} en {ms_name}...")
         
+        # Intentar extraer el nombre de variable sugerido por la IA en la Acción
+        suggested_var = None
+        if "=" in action:
+            suggested_var = action.split('=')[0].strip()
+            
         # El motor de mutación realiza el cambio en disco
         GradleMutator.apply_coordinated_remediation(
             ms_files,
-            "TRANSITIVE", # Estrategia sugerida por defecto en v2 si no hay otra
+            "TRANSITIVE",
             package,
             safe_ver,
-            reason=f"v2.0 Generative Fix: {cve_data.get('cve')}"
+            reason=f"v2.0 Generative Fix: {cve_data.get('cve')}",
+            override_var_name=suggested_var
         )
         
         # 2. Ejecutar validación clásica de Gradle
@@ -72,14 +78,20 @@ class RemediationAgent:
         return None
 
     def get_ms_files(self, ms_name):
-        """ Lista archivos .gradle del microservicio. """
+        """ 
+        Lista ÚNICAMENTE los archivos .gradle autorizados (El Trinomio). 
+        Permite búsqueda recursiva en subcarpetas del microservicio.
+        """
+        authorized_names = ["build.gradle", "dependencyMgmt.gradle", "main.gradle"]
         ms_files = []
         ms_path = self._get_ms_path(ms_name)
         if not ms_path: return []
+        
         for root, dirs, files in os.walk(ms_path):
             for t in files:
-                if t.endswith(".gradle"):
+                if t in authorized_names:
                     ms_files.append(os.path.join(root, t))
+                    
         return ms_files
 
     def _validate_ms(self, ms_name):
