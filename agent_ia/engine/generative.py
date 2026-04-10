@@ -72,11 +72,26 @@ class GenerativeAgentV2:
             """
         else:
             library_name = cve_data.get('library', '')
+            # v2.0: Lógica de simulación dinámica por familia
+            target_var = "nettyCodecVersion"
+            if "jackson" in library_name:
+                target_var = "jacksonCoreVersion"
+            elif "spring" in library_name:
+                target_var = "springWebfluxVersion"
+            elif "snakeyaml" in library_name:
+                target_var = "snakeyamlVersion"
+            else:
+                # Simulación de RAZONAMIENTO AUTÓNOMO para librerías desconocidas
+                # Extrae el nombre del artefacto y lo convierte a camelCase
+                artifact = library_name.split(':')[-1] if ":" in library_name else library_name
+                parts = artifact.split('-')
+                target_var = parts[0] + "".join(p.capitalize() for p in parts[1:]) + "Version"
+            
             return f"""
             [PENSAMIENTO]: Analiza el CVE. Si es una librería transitiva, aplica el 'Estándar de Trinomio'. Si pertenece a un grupo común (ej. Netty, Spring, Jackson), razona la agrupación por familia.
             Analizando {cve_data.get('cve')}. La librería afectada es {library_name}. Requiere versión segura {cve_data.get('safe_version')}.
-            [ACCIÓN]: nettyCodecVersion = '4.1.132.Final'
-            [EXPLICACIÓN]: Se aplica el parche directo en el bloque ext del microservicio para mitigar el riesgo de RCE.
+            [ACCIÓN]: {target_var} = '{cve_data.get('safe_version')}'
+            [EXPLICACIÓN]: Se aplica el parche directo en el bloque ext del microservicio para mitigar el riesgo de seguridad centralizando la versión.
             """
 
 if __name__ == "__main__":
