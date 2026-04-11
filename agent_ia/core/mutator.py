@@ -76,15 +76,13 @@ class GradleMutator:
         if ":" not in package:
             return content, False
 
-        # Match pattern: "group:artifact:anything"
-        # We capture anything between the quotes to allow fixing bad interpolation syntax
-        pattern = rf"['\"]({re.escape(package)}:)([^'\"]+)['\"]"
+        # Match pattern: Any line containing implementation/runtimeOnly etc + group:artifact
+        # We make the version segment optional (:...) to match even already cleaned lines
+        pattern = rf"^\s*(?:implementation|runtimeOnly|compileOnly|api|testImplementation)\s*['\"]{re.escape(package)}(?::[^'\"]+)?['\"]\s*\n?"
         
-        def replace_fn(match):
-            # We FORCED double-quoted interpolation for variables to be functional in Gradle
-            return f"\"{match.group(1)}${{{var_name}}}\""
-            
-        new_content, count = re.subn(pattern, replace_fn, content)
+        # GESTIÓN PURA: Eliminamos la línea completa. 
+        # Gradle usará la regla de resolutionStrategy y el starter correspondiente.
+        new_content, count = re.subn(pattern, "", content, flags=re.MULTILINE)
         
         # Also handle map style if needed: (group: '...', name: '...', version: '...')
         group, artifact = package.split(':')
