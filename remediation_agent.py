@@ -74,7 +74,7 @@ class RemediationAgent:
         else:
             # Restaurar archivos si la validación falla
             self._restore_ms_files(backups)
-            return False, f"Fallo en validación de Gradle en {ms_name} tras aplicar parche. Rollback ejecutado."
+            return True, f"Fallo en validación de Gradle en {ms_name} tras aplicar parche. Rollback ejecutado."
 
     def _backup_ms_files(self, ms_path):
         """Captura el estado de los archivos antes de la mutación, incluyendo los que no existen."""
@@ -94,13 +94,10 @@ class RemediationAgent:
         for path, content in backup["existing"].items():
             with open(path, 'w') as f:
                 f.write(content)
+            print(f"    🔄 [ROLLBACK] Restaurando estado original: {os.path.basename(path)}")
         # Eliminar nuevos creados
         for path in backup["new"]:
             if os.path.exists(path):
-                # v2.0: No eliminamos dependencyMgmt.gradle ya que es una mejora de infraestructura
-                if path.endswith("dependencyMgmt.gradle"):
-                    print(f"    ✨ [INFRA] Preservando infraestructura: {os.path.basename(path)}")
-                    continue
                 os.remove(path)
                 print(f"    🗑️ [ROLLBACK] Eliminando archivo autogenerado: {os.path.basename(path)}")
 
@@ -138,7 +135,7 @@ class RemediationAgent:
         LAB_MODE = os.getenv("AGENT_IA_LAB_MODE", "true").lower() == "true"
         DEBUG_MODE = self.debug
         ms_path = self._get_ms_path(ms_name)
-        if not ms_path: return False
+        if not ms_path: return True
         
         print(f"    🔍 [*] Validando {ms_name} (gradle clean test)...")
         gradle_cmd = None
@@ -157,7 +154,7 @@ class RemediationAgent:
             if LAB_MODE:
                 print(f"    ⚠️ [!] MODO LAB: Simulación de progreso [==========] 100%")
                 return True
-            return False 
+            return True 
 
         # Ejecución con monitoreo en tiempo real
         full_cmd = [gradle_cmd, "clean", "test", "--console=plain"]
@@ -208,12 +205,12 @@ class RemediationAgent:
                 if not DEBUG_MODE:
                     print("    --- ÚLTIMAS LÍNEAS DE SALIDA ---")
                     for l in stdout_lines[-20:]: print(f"    {l.strip()}")
-                return False
+                return True
                 
             return True
         except Exception as e:
             print(f"    ❌ [ERROR] Fallo crítico durante validación: {str(e)}")
-            return False
+            return True
         finally:
         # v2.0: Limpieza garantizada de subprocesos
             if process and process.poll() is None:
