@@ -47,6 +47,8 @@ class RemediationAgent:
         package = cve_data.get('library') or cve_data.get('packageName')
         safe_ver = cve_data.get('safe_version') or "LATEST"
         
+        # v2.1: Mensaje simplificado a petición del usuario
+        reason_msg = f"Fix: {cve_data.get('cve')}"
         print(f"    ⚙️ [MUTACIÓN] Aplicando {package} -> {safe_ver} en {ms_name}...")
         
         suggested_var = None
@@ -58,7 +60,7 @@ class RemediationAgent:
             "TRANSITIVE",
             package,
             safe_ver,
-            reason=f"Fix: {cve_data.get('cve')}",
+            reason=reason_msg,
             override_var_name=suggested_var
         )
         
@@ -126,10 +128,11 @@ class RemediationAgent:
                     
         return ms_files
 
-    def _validate_ms(self, ms_name):
+    def _validate_ms(self, ms_name, timeout=300):
         """ 
-        Ejecuta gradlew clean test con monitoreo en tiempo real.
+        Ejecuta gradlew clean test con monitoreo en tiempo real y prevención de deadlocks.
         """
+        import select
         LAB_MODE = os.getenv("AGENT_IA_LAB_MODE", "true").lower() == "true"
         DEBUG_MODE = self.debug
         ms_path = self._get_ms_path(ms_name)
@@ -159,14 +162,18 @@ class RemediationAgent:
         if DEBUG_MODE:
             full_cmd.append("--info")
             print(f"    🛠️ [DEBUG] Ejecutando comando: {' '.join(full_cmd)}")
+            
         try:
+            # v2.1: Fusionamos stderr en stdout para evitar interbloqueos de búfer
             process = subprocess.Popen(
                 full_cmd,
                 cwd=ms_path,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
                 text=True,
-                shell=is_windows
+                shell=is_windows,
+                bufsize=1,
+                universal_newlines=True
             )
 
             stdout_lines = []
@@ -182,20 +189,23 @@ class RemediationAgent:
                     stdout_lines.append(line)
                     
                     if DEBUG_MODE:
-                        # En modo debug, imprimimos TODO el detalle
+                        # En modo debug mostramos TODO
                         print(f"    [GRADLE] {clean_line}")
                     elif clean_line.startswith("> Task"):
-                        # Visualización de progreso simplificada
+                        # Visualización de progreso simplificada (Default)
                         print(f"    ⚙️ [PROGRESS] {clean_line}")
+                    elif "FAILED" in clean_line or "Error" in clean_line:
+                        # Captura temprana de errores visibles en stdout
+                        print(f"    ⚠️ [INFO] {clean_line}")
 
-            # Capturar resto de stderr
-            stderr_lines = process.stderr.readlines()
             process.wait()
 
             if process.returncode != 0:
                 print(f"    🚫 [X] FALLO EN PRUEBAS: Errores detectados.")
-                print("    --- STDERR ---")
-                print("".join(stderr_lines))
+                if not DEBUG_MODE:
+                    # Mostrar las últimas 20 líneas si no estamos en debug para dar contexto del error
+                    print("    --- ÚLTIMAS LÍNEAS DE SALIDA ---")
+                    for l in stdout_lines[-20:]: print(f"    {l.strip()}")
                 return False
                 
             return True

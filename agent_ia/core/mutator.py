@@ -77,12 +77,14 @@ class GradleMutator:
             return content, False
 
         # Match pattern: Any line containing implementation/runtimeOnly etc + group:artifact
-        # We make the version segment optional (:...) to match even already cleaned lines
-        pattern = rf"^\s*(?:implementation|runtimeOnly|compileOnly|api|testImplementation)\s*['\"]{re.escape(package)}(?::[^'\"]+)?['\"]\s*\n?"
+        # v2.1: Ahora preservamos la línea y sustituimos la versión por una variable
+        verbs = "implementation|runtimeOnly|runtime|compileOnly|compile|api|testImplementation|testRuntimeOnly|testCompileOnly"
+        pattern = rf"^(\s*)({verbs})(\s*)['\"]{re.escape(package)}(?::[^'\"]+)?['\"]"
         
-        # GESTIÓN PURA: Eliminamos la línea completa. 
-        # Gradle usará la regla de resolutionStrategy y el starter correspondiente.
-        new_content, count = re.subn(pattern, "", content, flags=re.MULTILINE)
+        def replace_literal_fn(match):
+            return f"{match.group(1)}{match.group(2)}{match.group(3)}\"{package}:${{{var_name}}}\""
+            
+        new_content, count = re.subn(pattern, replace_literal_fn, content, flags=re.MULTILINE)
         
         # Also handle map style if needed: (group: '...', name: '...', version: '...')
         group, artifact = package.split(':')
