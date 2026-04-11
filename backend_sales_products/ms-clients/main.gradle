@@ -1,17 +1,8 @@
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+// Global configuration orchestrator
+allprojects {
+    apply from: "${rootDir}/dependencyMgmt.gradle"
+    repositories {
+        mavenCentral()
     }
-}
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
-}
-
-test {
-    useJUnitPlatform()
+    // Some custom property
 }

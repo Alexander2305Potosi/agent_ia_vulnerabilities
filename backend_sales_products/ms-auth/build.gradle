@@ -1,20 +1,24 @@
 plugins {
-    id 'org.springframework.boot' version '3.5.6'
+    id 'org.springframework.boot' version '3.3.3'
     id 'io.spring.dependency-management' version '1.1.4'
     id 'java'
 }
 
 ext {
-    nettyCodecVersion = '4.2.11.Final'
-    springWebfluxVersion = '6.2.17'
-    jacksonCoreVersion = '2.18.6'
-    springBootVersion = '3.5.6'
-    lombokVersion = '1.18.34'
-    assertjCoreVersion = '3.25.3'
+    log4jCoreVersion = '2.24.1'
+    nettyCodecVersion = '4.1.132.Final'
+    springBootVersion = '3.3.4'
+    jacksonCoreVersion = '2.18.1'
+    lombokVersion = '1.18.36'
 }
 
 group = 'com.repaso.lab'
 version = '0.0.1-SNAPSHOT'
+
+java {
+    sourceCompatibility = '21'
+    targetCompatibility = '21'
+}
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
@@ -22,8 +26,13 @@ dependencies {
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     // Vulnerable carrier
     implementation 'io.netty:netty-handler'
+}
+
+test {
+    useJUnitPlatform()
 }
 
 apply from: 'main.gradle'
