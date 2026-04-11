@@ -405,18 +405,30 @@ configurations.all {{
                     block_content = content[start:end]
                     needs_update = False
                     
-                    # Verificar Link (Robusto a espacios/comillas)
-                    has_link = re.search(r"apply\s+from:\s*['\"]\$?\{?rootDir\}?/dependencyMgmt\.gradle['\"]", block_content)
-                    # Verificar Repo (Robusto a nuevos formatos)
-                    has_repo = re.search(r"repositories\s*\{[\s\n]*mavenCentral\(\)[\s\n]*\}", block_content)
+                    # v2.2: Regex más permisiva para detectar el link sin importar formatos de variables
+                    has_link = re.search(r"apply\s+from:.*dependencyMgmt\.gradle", block_content)
                     
-                    if not has_link or not has_repo:
-                        print(f"    🔗 [SYNC] Actualizando bloque allprojects en {os.path.basename(orchestrator)}...")
-                        new_block = block_content
-                        if not has_link:
-                            new_block = new_block[:1] + f"\n    {new_link_line}" + new_block[1:]
-                        if not has_repo:
-                            new_block = new_block[:1] + f"\n    {repo_block}" + new_block[1:]
+                    if not has_link:
+                        print(f"    🔗 [SYNC] Asegurando vínculo de infraestructura en {os.path.basename(orchestrator)}...")
+                        
+                        # Limpiar el cuerpo del bloque y asegurar multi-línea
+                        lines = [line.strip() for line in block_content[1:-1].splitlines() if line.strip()]
+                        
+                        # Inyectar Link al inicio (Mandatorio)
+                        lines.insert(0, new_link_line)
+                        
+                        # Ensamblaje final con indentación jerárquica exacta
+                        final_lines = []
+                        for line in lines:
+                            # Estimación de indentación: si es parte de un bloque interno, darle 8
+                            if "repositories" in line or "maven {" in line or "url " in line or (line == "}"):
+                                # Si NO es la cabecera del bloque, indentar extra
+                                if "repositories" not in line and "apply from" not in line:
+                                    final_lines.append(f"        {line}")
+                                    continue
+                            final_lines.append(f"    {line}")
+                        
+                        new_block = " {\n" + "\n".join(final_lines) + "\n}"
                         
                         new_content = content[:start] + new_block + content[end:]
                         with open(orchestrator, 'w') as f:

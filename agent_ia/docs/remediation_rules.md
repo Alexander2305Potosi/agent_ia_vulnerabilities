@@ -49,25 +49,22 @@ Para evitar la corrupción de archivos que plagó versiones anteriores (v1.x), c
 ---
 
 ### 5. Patrón de Inyección estructural (Gradle)
-El agente utiliza el **Balanced Brace Parser** para inyectar o actualizar el bloque de infraestructura global en el orquestador (`main.gradle` o `build.gradle`). Este bloque consolida el acceso a repositorios y la aplicación de reglas de seguridad para todo el monorepo:
+El agente utiliza el **Balanced Brace Parser** para inyectar o actualizar el bloque de infraestructura global en el orquestador (`main.gradle` o `build.gradle`).
 
 ```gradle
 allprojects {
     apply from: "${rootDir}/dependencyMgmt.gradle"
-    
-    repositories {
-        mavenCentral()
-    }
 }
 ```
 
-- **Idempotencia Garantizada**: Cualquier inyección de este bloque debe ser consciente del contexto (Block-Aware). Antes de inyectar, el agente debe verificar si los componentes ya existen dentro del bloque `allprojects` para evitar duplicaciones innecesarias del código.
+- **Gestión de Repositorios**: La configuración de `repositories { ... }` es responsabilidad del usuario. El agente NO forzará la inyección de `mavenCentral()` para permitir configuraciones privadas o personalizadas.
+- **Idempotencia Garantizada**: Antes de inyectar, el agente debe verificar si el vínculo ya existe para evitar duplicaciones innecesarias del código.
 
 ---
 
 ### 6. Procedimiento de Auto-Healing (Recuperación)
 Si la infraestructura se corrompe o se pierden funcionalidades:
-1. **Validación de Infraestructura Global**: Asegurarse de que el orquestador contenga el bloque `allprojects` con el vínculo `apply from: "${rootDir}/dependencyMgmt.gradle"` **Y** la definición de repositorios `mavenCentral()`. Sin estos dos componentes, los microservicios podrían fallar al resolver dependencias seguras.
+1. **Validación de Infraestructura Global**: Asegurarse de que el orquestador contenga el bloque `allprojects` con el vínculo `apply from: "${rootDir}/dependencyMgmt.gradle"`. La resolución de dependencias dependerá de los repositorios configurados manualmente por el usuario.
 2. **Re-Sincronización de Variables**: Si una regla en `dependencyMgmt.gradle` referencia una variable inexistente en `ext`, el agente debe identificar la carpeta del microservicio y re-crear la variable en el `build.gradle` más cercano.
 3. **Consistencia de Rama**: En caso de re-sincronización manual, verificar que la versión elegida coincida con la rama del proyecto (4.1.x vs 4.2.x).
 4. **Rollback de Emergencia**: Ante cualquier `BUILD FAILED`, se debe restaurar el estado de los archivos binarios (respaldo de texto plano) previo a la mutación.
