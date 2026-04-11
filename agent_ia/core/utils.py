@@ -9,6 +9,7 @@ root_dir = os.path.join(PROJECT_ROOT, "backend_sales_products")
 RESET_CONTENT = """// Standardized Dependency Management - Centralized AI Security Rules
 configurations.all {
     resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+        // Inject rules here
     }
 }
 """

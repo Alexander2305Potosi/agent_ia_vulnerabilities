@@ -60,7 +60,20 @@ python3 remediation_agent.py --debug
 AGENT_IA_DEBUG=true python3 remediation_agent.py
 ```
 
-En este modo, el agente agrega el flag `--info` a Gradle e imprime cada línea de la consola para un seguimiento exhaustivo del progreso.
+En este modo, el agente agrega el flag `--info` a Gradle e imprime cada línea de la consola para un seguimiento exhaustivo del progreso. Se ha implementado una técnica de fusión de flujos (`merged streams`) para evitar bloqueos por búfer lleno.
+
+## ✨ Últimas Innovaciones (Agosto 2026)
+
+### 🧩 Almacenamiento de Dependencias Híbrido
+A diferencia de la v1.0 que delegaba todo a la centralización, la **v2.1+** utiliza un enfoque híbrido:
+- **Centralización Directa**: Mantiene las reglas de resolución en `dependencyMgmt.gradle`.
+- **Preservación Local**: Las líneas `implementation` en cada `build.gradle` se mantienen, pero se sustituyen automáticamente por variables (ej. `implementation "group:artifact:${varName}"`), garantizando que el microservicio siga siendo autodocumentado.
+
+### 🏗️ Inyección de Configuración v2.2
+El motor de mutación ha sido robustecido para garantizar scripts Gradle válidos y limpios:
+- **Indentación Estricta**: Cada bloque inyectado sigue un estándar de 8 espacios, eliminando el desorden visual.
+- **Header dinámico**: Cada script de remediación comienza con metadatos claros para evitar errores de compilación (`Unexpected input`).
+- **Seguridad de Parseo**: Evita la mezcla de bloques `if` en la misma línea, asegurando una estructura legible para humanos y máquinas.
 
 ---
 *Protección Generativa para Microservices. Inteligencia v2.0 Local y Privada.*

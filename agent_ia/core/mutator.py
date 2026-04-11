@@ -148,9 +148,11 @@ class GradleMutator:
                    f"{i8}}}"
         
         # 1. Update existing rule if it exists (check both name and group patterns)
-        pattern_existing = rf"if\s*\(\s*details\.requested\.({match_field})\s*==\s*['\"]{re.escape(package_or_name)}['\"]\s*\)\s*\{{.*?\n\s*\}}"
+        # v2.2: Regex más robusta para capturar el bloque completo y sus saltos de línea
+        pattern_existing = rf"\n?\s*if\s*\(\s*details\.requested\.({match_field})\s*==\s*['\"]{re.escape(package_or_name)}['\"]\s*\)\s*\{{.*?\n\s*\}}\n?"
         if re.search(pattern_existing, content, re.DOTALL):
-            return re.sub(pattern_existing, lambda m: new_rule, content, flags=re.DOTALL), True
+            # Reemplazo limpio con saltos de línea garantizados
+            return re.sub(pattern_existing, f"\n{new_rule}\n", content, count=1, flags=re.DOTALL), True
 
         # 2. Inject into existing eachDependency block
         if "resolutionStrategy.eachDependency" in content:
@@ -171,8 +173,13 @@ class GradleMutator:
                 if end_index != -1:
                     # Inyección limpia: eliminar espacios en blanco previos y asegurar un solo salto
                     prefix = content[:end_index].rstrip()
-                    suffix = content[end_index:]
-                    return f"{prefix}\n{new_rule}\n{i4}{suffix}", True
+                    suffix = content[end_index:].strip()
+                    
+                    # Limpiamos el marcador temporal si existe
+                    if "// Inject rules here" in prefix:
+                        prefix = prefix.replace("// Inject rules here", "").rstrip()
+                    
+                    return f"{prefix}\n{new_rule}\n    {suffix}\n", True
 
         # 3. Create from scratch
         wrapper = f"""// Standardized Dependency Management - Centralized AI Security Rules
@@ -221,13 +228,15 @@ configurations.all {{
         build_gradles = [f for f in project_files if f.endswith("build.gradle")]
         
         if not constraint_files and build_gradles:
-            root_folder = os.path.dirname(build_gradles[0])
+            root_folder = os.path.dirname(os.path.abspath(build_gradles[0]))
             new_path = os.path.join(root_folder, "dependencyMgmt.gradle")
             print(f"    🛠️ [AUTO-HEAL] Reconstruyendo infraestructura en {os.path.basename(root_folder)}...")
             with open(new_path, 'w') as f:
                 f.write(GradleMutator.INFRA_TEMPLATE)
-            project_files.append(new_path)
+            
+            # Asegurar que el nuevo archivo sea el objetivo de la remediación
             constraint_files = [new_path]
+            project_files.append(new_path)
             GradleMutator._link_infrastructure(project_files, root_folder)
 
         has_changes = False
