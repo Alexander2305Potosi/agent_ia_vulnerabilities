@@ -234,9 +234,10 @@ configurations.all {{
             with open(new_path, 'w') as f:
                 f.write(GradleMutator.INFRA_TEMPLATE)
             
-            # Asegurar que el nuevo archivo sea el objetivo de la remediación
+            # Asegurar que el nuevo archivo sea el objetivo de la remediación inmediatamente
             constraint_files = [new_path]
-            project_files.append(new_path)
+            if new_path not in project_files:
+                project_files.append(new_path)
             GradleMutator._link_infrastructure(project_files, root_folder)
 
         has_changes = False

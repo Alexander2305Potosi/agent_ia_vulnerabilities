@@ -41,10 +41,23 @@ El agente opera como una colmena coordinada de componentes locales:
 - `pip install -r agent_ia/requirements.txt`
 - Modelo GGUF en `agent_ia/models/` (Recomendado: 4-6GB RAM libres).
 
-## 🖱️ Ejecución
-Ejecuta el agente principal:
+## 🖱️ Ejecución y Filtrado
+El agente permite una ejecución flexible mediante banderas de línea de comandos:
+
+### Ejecución Total (Por defecto)
+Procesa todas las vulnerabilidades detectadas en todos los microservicios:
 ```bash
 python3 remediation_agent.py
+```
+
+### 🎯 Filtrado Selectivo (`--folders`)
+Puedes especificar uno o varios microservicios para enfocar la remediación:
+```bash
+# Un solo servicio
+python3 remediation_agent.py --folders ms-clients
+
+# Múltiples servicios
+python3 remediation_agent.py -f ms-auth ms-sales
 ```
 
 ## 🔍 Monitoreo y Depuración (Modo Debug)
@@ -55,12 +68,10 @@ Si el proceso de validación (`gradle clean test`) toma mucho tiempo y deseas ve
 python3 remediation_agent.py --debug
 ```
 
-### Via Variable de Entorno:
+### Combinando Flags:
 ```bash
-AGENT_IA_DEBUG=true python3 remediation_agent.py
+python3 remediation_agent.py -f ms-clients --debug
 ```
-
-En este modo, el agente agrega el flag `--info` a Gradle e imprime cada línea de la consola para un seguimiento exhaustivo del progreso. Se ha implementado una técnica de fusión de flujos (`merged streams`) para evitar bloqueos por búfer lleno.
 
 ## ✨ Últimas Innovaciones v2.0
 

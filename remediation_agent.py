@@ -4,6 +4,7 @@ import sys
 import time
 import shutil
 import subprocess
+import argparse
 from datetime import datetime
 
 # Carga de Módulos Modulares v2.0
@@ -16,9 +17,10 @@ class RemediationAgent:
     MODEL_PATH = os.path.join(os.path.dirname(__file__), "agent_ia", "models", "remediation_v2_3bits.gguf")
     GIT_COMMIT_ENABLED = False
 
-    def __init__(self, root_path, report_path=None, debug=False):
+    def __init__(self, root_path, report_path=None, debug=False, target_folders=None):
         self.root_path = root_path
         self.debug = debug or os.getenv("AGENT_IA_DEBUG", "false").lower() == "true"
+        self.target_folders = target_folders or []
         
         # Lógica de rutas de datos v2.0
         default_report = os.path.join(os.path.dirname(__file__), "agent_ia", "data", "cve", "snyk_monorepo.json")
@@ -243,6 +245,14 @@ class RemediationAgent:
             if not isinstance(vulnerabilities, list):
                 vulnerabilities = vulnerabilities.get("vulnerabilities", [])
 
+        if self.target_folders:
+            print(f"🎯 [*] Filtrando ejecución para: {', '.join(self.target_folders)}")
+            vulnerabilities = [v for v in vulnerabilities if v.get("microservice") in self.target_folders]
+            
+            if not vulnerabilities:
+                print(f"⚠️  [!] No se encontraron vulnerabilidades para los microservicios especificados.")
+                return
+
         for vuln in vulnerabilities:
             self._process_generative_vuln(vuln)
 
@@ -284,8 +294,17 @@ class RemediationAgent:
         print("="*40)
 
 if __name__ == "__main__":
-    import sys
-    # Soporte para flag --debug via CLI
-    debug_flag = "--debug" in sys.argv
-    agent = RemediationAgent(os.getcwd(), debug=debug_flag)
+    parser = argparse.ArgumentParser(description="🛡️ Agente de Remediación Generativa v2.0")
+    parser.add_argument("--debug", action="store_true", help="Habilitar logs detallados de Gradle")
+    parser.add_argument("--folders", "-f", nargs="+", help="Lista de microservicios a procesar")
+    parser.add_argument("--report", help="Ruta al reporte de vulnerabilidades JSON")
+    
+    args = parser.parse_args()
+    
+    agent = RemediationAgent(
+        os.getcwd(), 
+        report_path=args.report, 
+        debug=args.debug, 
+        target_folders=args.folders
+    )
     agent.run()
