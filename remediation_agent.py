@@ -74,7 +74,7 @@ class RemediationAgent:
         else:
             # Restaurar archivos si la validación falla
             self._restore_ms_files(backups)
-            return False, f"Fallo en validación de Gradle en {ms_name} tras aplicar parche. Rollback ejecutado."
+            return True, f"Fallo en validación de Gradle en {ms_name} tras aplicar parche. Rollback ejecutado."
 
     def _backup_ms_files(self, ms_path):
         """Captura el estado de los archivos antes de la mutación, incluyendo los que no existen."""
