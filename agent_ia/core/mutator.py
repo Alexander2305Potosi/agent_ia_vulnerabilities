@@ -452,29 +452,29 @@ configurations.all {{
         Orquestador v2.0: Auto-Sanación + Remediación + Purga
         """
         # --- PASO 0: Normalización y Auto-Sanación ---
-        # v2.0: Normalizar a rutas absolutas para evitar fallos por ./ o rutas relativas
         project_files = [os.path.abspath(f) for f in project_files]
         has_changes = False
         
         constraint_files = [f for f in project_files if f.endswith("dependencyMgmt.gradle")]
-        build_gradles = [f for f in project_files if f.endswith("build.gradle")]
+        gradle_files = [f for f in project_files if f.endswith(".gradle")]
+        build_gradles = sorted([f for f in project_files if f.endswith("build.gradle")], key=len)
+        root_build_gradle = build_gradles[0] if build_gradles else None
         
         if not constraint_files and build_gradles:
-            root_folder = os.path.dirname(build_gradles[0])
+            root_folder = os.path.dirname(root_build_gradle)
             new_path = os.path.join(root_folder, "dependencyMgmt.gradle")
             print(f"    🛠️ [AUTO-HEAL] Reconstruyendo infraestructura en {os.path.basename(root_folder)}...")
             with open(new_path, 'w') as f:
                 f.write(GradleMutator.INFRA_TEMPLATE)
             
-            # Asegurar que el nuevo archivo sea el objetivo de la remediación inmediatamente
             constraint_files = [new_path]
             if new_path not in project_files:
                 project_files.append(new_path)
             has_changes = True
 
-        # v2.0: Asegurar VÍNCULO siempre que existan archivos de restricción
+        # v2.0: Asegurar VÍNCULO siempre
         if constraint_files and build_gradles:
-            root_folder = os.path.dirname(build_gradles[0])
+            root_folder = os.path.dirname(root_build_gradle)
             if GradleMutator._link_infrastructure(project_files, root_folder):
                 has_changes = True
 
@@ -483,43 +483,50 @@ configurations.all {{
         current_version = None
 
         # --- PASO 1: Identificar Variable y Versión Actual ---
-        for file_path in project_files:
-            if file_path.endswith("build.gradle"):
+        # v2.5: Prioridad RAÍZ para detección
+        for file_path in build_gradles:
+            with open(file_path, 'r') as f:
+                content = f.read()
+            
+            found_var = GradleMutator.find_variable_name_in_ext(content, artifact_name)
+            is_root = (file_path == root_build_gradle)
+            
+            if override_var_name:
+                var_name = override_var_name
+                # Si es override, siempre preferimos definir en raíz
+                definer_file = root_build_gradle
+            elif found_var:
+                var_name = found_var
+                # Si se encuentra en raíz, perfecto. Si no, marcaremos para MIGRACIÓN a raíz.
+                definer_file = root_build_gradle # v2.5: Forzamos que la definición final sea siempre en raíz
+            
+            if var_name:
+                pattern = rf"{var_name}\s*=\s*['\"]([^'\"]+)['\"]"
+                match = re.search(pattern, content)
+                if match: 
+                    current_version = match.group(1)
+                    if is_root: break # Si encontramos en raíz, ya tenemos todo
+                    
+        # v2.0 NEW: Si no hay variable o no se encontró versión, buscar literal
+        if not current_version:
+            for file_path in build_gradles:
                 with open(file_path, 'r') as f:
                     content = f.read()
-                found_var = GradleMutator.find_variable_name_in_ext(content, artifact_name)
-                if override_var_name:
-                    var_name, definer_file = override_var_name, file_path
-                elif found_var:
-                    var_name, definer_file = found_var, file_path
-                
-                if var_name:
-                    pattern = rf"{var_name}\s*=\s*['\"]([^'\"]+)['\"]"
-                    match = re.search(pattern, content)
-                    if match: 
-                        current_version = match.group(1)
-                    
-                # v2.0 NEW: Si no hay variable o no se encontró versión, buscar literal
-                if not current_version:
-                    # Buscar literal implementation 'group:artifact:version'
-                    literal_pattern = rf"['\"]{re.escape(artifact_name)}:([\d\.\-\w]+)['\"]"
-                    l_match = re.search(literal_pattern, content)
-                    if l_match:
-                        current_version = l_match.group(1)
-                        print(f"    🔍 [INTELIGENCIA] Versión actual detectada desde literal: {current_version}")
-                
-                if current_version: break
+                literal_pattern = rf"['\"]{re.escape(artifact_name)}:([\d\.\-\w]+)['\"]"
+                l_match = re.search(literal_pattern, content)
+                if l_match:
+                    current_version = l_match.group(1)
+                    print(f"    🔍 [INTELIGENCIA] Versión actual detectada desde literal: {current_version}")
+                    break
         
         is_fixed = current_version and GradleMutator.is_already_fixed(current_version, version)
-        
-        # v2.0: Elegir la mejor versión de la lista (rama coincidente)
         safe_v = GradleMutator._pick_best_safe_version(current_version, version)
 
-        # --- PASO 2: Definir/Actualizar Variable ---
+        # --- PASO 2: Definir/Actualizar Variable (SOLO EN RAÍZ) ---
         if not is_fixed:
             if not definer_file:
-                if not build_gradles: return False
-                definer_file = min(build_gradles, key=len)
+                if not root_build_gradle: return False
+                definer_file = root_build_gradle
                 if not override_var_name:
                     parts = artifact_name.split(':')[-1].split('-')
                     var_name = parts[0] + "".join(p.capitalize() for p in parts[1:]) + "Version"
@@ -559,26 +566,54 @@ configurations.all {{
                     f.write(new_c_content)
                 has_changes = True
 
-        # --- PASO 4: Sustitución Activa de Literales en todos los build.gradle ---
-        for file_path in project_files:
-            if file_path.endswith("build.gradle"):
-                with open(file_path, 'r') as f:
-                    content = f.read()
-                content, changed = GradleMutator.substitute_literal_with_variable(content, artifact_name, var_name)
-                if changed:
-                    with open(file_path, 'w') as f:
-                        f.write(content)
-                    has_changes = True
-
-        # --- PASO 5: Purga de Variables Redundantes ---
-        if definer_file and var_name:
-            with open(definer_file, 'r') as f:
-                purge_content = f.read()
-            clean_content = GradleMutator._purge_redundant_variables(purge_content, var_name)
-            if clean_content != purge_content:
-                with open(definer_file, 'w') as f:
-                    f.write(clean_content)
+        # --- PASO 4: Sustitución Activa de Literales en todos los archivos ---
+        for file_path in gradle_files:
+            with open(file_path, 'r') as f:
+                content = f.read()
+            # v2.0/2.5 logic: Reemplazar literales de la familia por la variable
+            new_content, changed = GradleMutator.substitute_literal_with_variable(content, artifact_name, var_name)
+            if changed:
+                with open(file_path, 'w') as f:
+                    f.write(new_content)
                 has_changes = True
+
+        # --- PASO 5: Purga Global de Subcarpetas (Centralización v2.5) ---
+        if var_name:
+            for file_path in build_gradles:
+                is_root = (file_path == root_build_gradle)
+                with open(file_path, 'r') as f:
+                    p_content = f.read()
+                
+                # A. Si es raíz, hacer la purga normal de redundancia
+                if is_root:
+                    clean_content = GradleMutator._purge_redundant_variables(p_content, var_name)
+                    if clean_content != p_content:
+                        with open(file_path, 'w') as f:
+                            f.write(clean_content)
+                        has_changes = True
+                else:
+                    # B. Si NO es raíz, eliminar la variable de ESTA familia si existe en ext local
+                    if f"{var_name} =" in p_content:
+                        ext_pos = p_content.find("ext {")
+                        if ext_pos != -1:
+                            ext_start, ext_end = GradleMutator._find_balanced_block(p_content, ext_pos)
+                            if ext_start and ext_end:
+                                ext_block = p_content[ext_start:ext_end]
+                                new_ext = re.sub(rf"^\s*{var_name}\s*=.*$\n?", "", ext_block, flags=re.MULTILINE)
+                                
+                                # Si el bloque queda vacío de asignaciones (=), eliminarlo COMPLETAMENTE (incluyendo 'ext')
+                                if not re.search(r"=\s*", new_ext):
+                                    actual_start = p_content.rfind("ext", 0, ext_start)
+                                    if actual_start == -1: actual_start = ext_start
+                                    final_p = p_content[:actual_start].rstrip() + "\n" + p_content[ext_end:].lstrip()
+                                else:
+                                    final_p = p_content[:ext_start] + new_ext + p_content[ext_end:]
+                                
+                                if final_p != p_content:
+                                    with open(file_path, 'w') as f:
+                                        f.write(final_p)
+                                    print(f"    🧹 [PURGA] Limpiando definición redundante en {os.path.basename(os.path.dirname(file_path))}/build.gradle")
+                                    has_changes = True
 
         if has_changes: return True
         return "ALREADY_FIXED" if is_fixed else False
