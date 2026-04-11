@@ -115,27 +115,63 @@ class GradleMutator:
 
     @staticmethod
     def _accumulate_reason(existing_reason, new_reason):
-        """ Combina razones sin duplicar, separando por comas. """
-        if not existing_reason or existing_reason == 'Security Fix':
-            return new_reason
+        """ 
+        Combina razones con CRITERIO ESTRICTO (Whitelist). 
+        Solo permite IDs que cumplan con patrones de vulnerabilidad oficiales.
+        """
+        prefix = "Fix: "
         
-        # v2.0: Manejo limpio de lista de CVEs/Razones
-        existing_parts = [r.strip() for r in existing_reason.replace("v2.0 Generative Fix:", "").split(',')]
-        new_part = new_reason.replace("v2.0 Generative Fix:", "").strip()
+        # Patrones de IDs de seguridad válidos (CVE y GHSA)
+        security_patterns = [
+            r"CVE-\d{4}-\d+",
+            r"GHSA-[a-z0-9-]+"
+        ]
         
-        if new_part in existing_parts:
-            return existing_reason
+        def extract_valid_ids(text):
+            if not text: return set()
+            findings = set()
+            for pattern in security_patterns:
+                # Búsqueda global de IDs en el texto (insensible a mayúsculas)
+                matches = re.findall(pattern, text, re.IGNORECASE)
+                findings.update([m.upper() for m in matches])
+            return findings
+
+        # Extraer IDs de la razón existente y de la nueva
+        ids = extract_valid_ids(existing_reason)
+        ids.update(extract_valid_ids(new_reason))
+        
+        if not ids:
+            return f"{prefix}Security Fix"
             
-        existing_parts.append(new_part)
-        return f"v2.0 Generative Fix: {', '.join(existing_parts)}"
+        # Ordenar alfabéticamente para consistencia
+        sorted_ids = sorted(list(ids))
+        return f"{prefix}{', '.join(sorted_ids)}"
+
+    @staticmethod
+    def _find_balanced_block(content, start_index):
+        """ 
+        Encuentra el rango [start, end] de un bloque que empieza en { tras el start_index. 
+        Retorna (start, end) o (None, None).
+        """
+        brace_start = content.find("{", start_index)
+        if brace_start == -1: return None, None
+        
+        stack = 0
+        for i in range(brace_start, len(content)):
+            if content[i] == '{':
+                stack += 1
+            elif content[i] == '}':
+                stack -= 1
+                if stack == 0:
+                    return brace_start, i + 1
+        return None, None
 
     @staticmethod
     def inject_resolution_strategy_rule(content, package_or_name, var_name, reason):
         """
-        Injects or updates a rule into dependencyMgmt.gradle with consolidation and accumulation.
-        v2.0: Manejo inteligente de Familias y acumulación de CVEs.
+        Injects or updates a rule into dependencyMgmt.gradle with structural parsing.
         """
-        # 0. Lógica de FAMILIAS (v2.0)
+        # 0. Lógica de FAMILIAS
         families = ["io.netty", "org.springframework", "com.fasterxml.jackson", "org.apache.logging.log4j"]
         is_group = False
         group_id = None
@@ -152,41 +188,79 @@ class GradleMutator:
         
         match_field = "group" if is_group else "name"
         
-        # 1. Búsqueda de Regla Existente
-        # Regex robusta para capturar el bloque 'if (...) { ... }' completo
-        pattern_rule = rf"\s*if\s*\(\s*details\.requested\.(group|name)\s*==\s*['\"]{re.escape(package_or_name)}['\"]\s*\)\s*\{{.*?\}}"
-        match = re.search(pattern_rule, content, re.DOTALL)
+        # 1. Buscar si ya existe la regla específica
+        search_pattern = f"details.requested.{match_field} == '{package_or_name}'"
+        pos = content.find(search_pattern)
         
+        existing_rule_range = (None, None)
         existing_reason = ""
-        if match:
-            rule_block = match.group(0)
-            because_match = re.search(r"details\.because\s*['\"](.*?)['\"]", rule_block)
-            if because_match:
-                existing_reason = because_match.group(1)
         
+        if pos != -1:
+            # Buscar el inicio del 'if' retrocediendo
+            if_start = content.rfind("if", 0, pos)
+            if if_start != -1:
+                block_start, block_end = GradleMutator._find_balanced_block(content, if_start)
+                if block_start and block_end:
+                    existing_rule_range = (if_start, block_end)
+                    rule_text = content[if_start:block_end]
+                    # Extraer reason
+                    because_match = re.search(r"details\.because\s*['\"](.*?)['\"]", rule_text)
+                    if because_match:
+                        existing_reason = because_match.group(1)
+
         final_reason = GradleMutator._accumulate_reason(existing_reason, reason)
         
-        # v2.1: Estándar de indentación
+        # v2.1: Indentación estándar
         i4 = "    "
         i8 = "        "
         i12 = "            "
         
-        new_rule = f"{i8}if (details.requested.{match_field} == '{package_or_name}') {{\n" + \
-                   f"{i12}details.useVersion \"${{{var_name}}}\"\n" + \
-                   f"{i12}details.because \"{final_reason}\"\n" + \
-                   f"{i8}}}"
+        new_rule_code = f"if (details.requested.{match_field} == '{package_or_name}') {{\n" + \
+                         f"{i12}details.useVersion \"${{{var_name}}}\"\n" + \
+                         f"{i12}details.because \"{final_reason}\"\n" + \
+                         f"{i8}}}"
 
-        # Si encontramos una regla exacta, la reemplazamos usando re.sub para mayor precisión
-        if match:
-            # v2.0: Reemplazamos el bloque exacto capturado
-            return content.replace(match.group(0), f"\n{new_rule}\n"), True
+        # 2. Reemplazar o Inyectar
+        if existing_rule_range[0] is not None:
+            # Reemplazo atómico del bloque detectado
+            start, end = existing_rule_range
+            return content[:start] + new_rule_code + content[end:], True
 
-        # 2. Consolidación (Búsqueda de reglas por nombre si ahora aplicamos grupo)
+        # 3. Consolidación: Borrar reglas por nombre si estamos inyectando un grupo
         if is_group and artifact_id:
-            pattern_orphan = rf"\s*if\s*\(\s*details\.requested\.name\s*==\s*['\"]{re.escape(artifact_id)}['\"]\s*\)\s*\{{.*?\}}"
-            if re.search(pattern_orphan, content, re.DOTALL):
-                print(f"    [CONSOLIDACIÓN] Migrando regla de nombre '{artifact_id}' a grupo '{package_or_name}'...")
-                content = re.sub(pattern_orphan, "", content, flags=re.DOTALL)
+            orphan_pattern = f"details.requested.name == '{artifact_id}'"
+            o_pos = content.find(orphan_pattern)
+            if o_pos != -1:
+                o_if_start = content.rfind("if", 0, o_pos)
+                if o_if_start != -1:
+                    o_start, o_end = GradleMutator._find_balanced_block(content, o_if_start)
+                    if o_start and o_end:
+                        print(f"    [CONSOLIDACIÓN] Eliminando regla obsoleta '{artifact_id}'...")
+                        content = content[:o_if_start] + content[o_end:]
+
+        # 4. Inyectar en el bloque cadaDependency
+        target_str = "resolutionStrategy.eachDependency"
+        if target_str in content:
+            # Encontrar el bloque del eachDependency
+            ed_start = content.find(target_str)
+            b_start, b_end = GradleMutator._find_balanced_block(content, ed_start)
+            if b_start and b_end:
+                # Insertar al final del bloque, antes de la última llave
+                prefix = content[:b_end - 1].rstrip()
+                suffix = content[b_end - 1:]
+                if "// Inject rules here" in prefix:
+                    prefix = prefix.replace("// Inject rules here", "").rstrip()
+                return f"{prefix}\n{i8}{new_rule_code}\n{i4}{suffix}", True
+
+        # 5. Crear desde cero si no existe el bloque
+        wrapper = f"""// Standardized Dependency Management - Centralized AI Security Rules
+configurations.all {{
+    resolutionStrategy.eachDependency {{ DependencyResolveDetails details ->
+        {new_rule_code}
+    }}
+}}
+"""
+        return wrapper.strip(), True
 
         # 3. Inyectar en bloque cadaDependency existente
         if "resolutionStrategy.eachDependency" in content:

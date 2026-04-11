@@ -47,7 +47,7 @@ class RemediationAgent:
         # 1. APLICACIÓN FÍSICA
         package = cve_data.get('library') or cve_data.get('packageName')
         safe_ver = cve_data.get('safe_version') or "LATEST"
-        reason_msg = f"v2.0 Generative Fix: {cve_data.get('cve')}"
+        reason_msg = f"Fix: {cve_data.get('cve')}"
         
         print(f"    ⚙️ [MUTACIÓN] Aplicando {package} -> {safe_ver} en {ms_name}...")
         
@@ -72,7 +72,7 @@ class RemediationAgent:
         else:
             # Restaurar archivos si la validación falla
             self._restore_ms_files(backups)
-            return True, f"Fallo en validación de Gradle en {ms_name} tras aplicar parche. Rollback ejecutado."
+            return False, f"Fallo en validación de Gradle en {ms_name} tras aplicar parche. Rollback ejecutado."
 
     def _backup_ms_files(self, ms_path):
         backup = {"existing": {}, "new": []}
@@ -116,7 +116,7 @@ class RemediationAgent:
         return ms_files
 
     def _validate_ms(self, ms_name, timeout=300):
-        LAB_MODE = os.getenv("AGENT_IA_LAB_MODE", "true").lower() == "true"
+        LAB_MODE = os.getenv("AGENT_IA_LAB_MODE", "false").lower() == "true"
         DEBUG_MODE = self.debug
         ms_path = self._get_ms_path(ms_name)
         if not ms_path: return True
@@ -138,7 +138,7 @@ class RemediationAgent:
             if LAB_MODE:
                 print(f"    ⚠️ [!] MODO LAB: Simulación de progreso [==========] 100%")
                 return True
-            return True 
+            return False 
 
         full_cmd = [gradle_cmd, "clean", "test", "--console=plain"]
         if DEBUG_MODE:
@@ -178,11 +178,11 @@ class RemediationAgent:
                 if not DEBUG_MODE:
                     print("    --- ÚLTIMAS LÍNEAS DE SALIDA ---")
                     for l in stdout_lines[-20:]: print(f"    {l.strip()}")
-                return True
+                return False
             return True
         except Exception as e:
             print(f"    ❌ [ERROR] Fallo crítico durante validación: {str(e)}")
-            return True
+            return False
         finally:
             if process and process.poll() is None:
                 try:
