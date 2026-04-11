@@ -247,11 +247,6 @@ class RemediationAgent:
 
         if self.target_folders:
             print(f"🎯 [*] Filtrando ejecución para: {', '.join(self.target_folders)}")
-            vulnerabilities = [v for v in vulnerabilities if v.get("microservice") in self.target_folders]
-            
-            if not vulnerabilities:
-                print(f"⚠️  [!] No se encontraron vulnerabilidades para los microservicios especificados.")
-                return
 
         for vuln in vulnerabilities:
             self._process_generative_vuln(vuln)
@@ -266,10 +261,16 @@ class RemediationAgent:
         ms_name = entry.get("microservice")
         
         if not ms_name:
-            print(f"📡 [*] Auto-descubriendo servicios para {package}...")
+            # v2.3: Descubrimiento autodeterminado
             target_mss = self._get_all_ms_names()
         else:
             target_mss = [ms_name]
+
+        # Filtrado post-descubrimiento (v2.3)
+        if self.target_folders:
+            target_mss = [m for m in target_mss if m in self.target_folders]
+            if not target_mss:
+                return # Saltamos esta vulnerabilidad para esta configuración de carpetas
 
         for ms in target_mss:
             self.current_ms = ms
