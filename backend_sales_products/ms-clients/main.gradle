@@ -1,0 +1,13 @@
+// Orquestador para microservicio de Clientes (ms-clients)
+// Vinculación de Infraestructura de Seguridad v2.0
+apply from: 'dependencyMgmt.gradle'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}

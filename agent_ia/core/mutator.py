@@ -76,13 +76,13 @@ class GradleMutator:
         if ":" not in package:
             return content, False
 
-        # Match pattern: "group:artifact:version"
-        # We look for the exact group:artifact followed by a version string
-        pattern = rf"(['\"]{re.escape(package)}:)([\d\.\-\w]+)(['\"])"
+        # Match pattern: "group:artifact:anything"
+        # We capture anything between the quotes to allow fixing bad interpolation syntax
+        pattern = rf"['\"]({re.escape(package)}:)([^'\"]+)['\"]"
         
         def replace_fn(match):
-            # We enforce double-quoted interpolation for variables to be safe in Gradle
-            return f"{match.group(1)}${{{var_name}}}{match.group(3)}"
+            # We FORCED double-quoted interpolation for variables to be functional in Gradle
+            return f"\"{match.group(1)}${{{var_name}}}\""
             
         new_content, count = re.subn(pattern, replace_fn, content)
         
@@ -184,29 +184,67 @@ configurations.all {
 """
         return wrapper.strip(), True
 
+    INFRA_TEMPLATE = """// Standardized Dependency Management - Centralized AI Security Rules
+configurations.all {
+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+    }
+}
+"""
+
     @staticmethod
-    def apply_coordinated_remediation(project_files, strategy, package, version, reason=None, override_var_name=None):
-        artifact_name = package.split(':')[-1]
-        has_changes = False
+    def _link_infrastructure(project_files, target_folder):
+        """
+        Asegura que el archivo orquestador (main o build) tenga el vínculo a dependencyMgmt.gradle
+        """
+        main_gradle = os.path.join(target_folder, "main.gradle")
+        build_gradle = os.path.join(target_folder, "build.gradle")
+        orchestrator = main_gradle if os.path.exists(main_gradle) else build_gradle
+
+        if os.path.exists(orchestrator):
+            with open(orchestrator, 'r') as f:
+                content = f.read()
+            
+            link_line = "apply from: 'dependencyMgmt.gradle'"
+            if link_line not in content:
+                print(f"    🔗 [LINK] Vinculando infraestructura en {os.path.basename(orchestrator)}...")
+                with open(orchestrator, 'a') as f:
+                    if not content.endswith('\n'): f.write('\n')
+                    f.write(link_line + '\n')
+
+    @staticmethod
+    def apply_coordinated_remediation(project_files, mode, artifact_name, version, reason, override_var_name=None):
+        """
+        Orquestador v2.0: Auto-Sanación + Remediación + Purga
+        """
+        # --- PASO 0: Auto-Sanación de Infraestructura ---
+        constraint_files = [f for f in project_files if f.endswith("dependencyMgmt.gradle")]
+        build_gradles = [f for f in project_files if f.endswith("build.gradle")]
         
+        if not constraint_files and build_gradles:
+            root_folder = os.path.dirname(build_gradles[0])
+            new_path = os.path.join(root_folder, "dependencyMgmt.gradle")
+            print(f"    🛠️ [AUTO-HEAL] Reconstruyendo infraestructura en {os.path.basename(root_folder)}...")
+            with open(new_path, 'w') as f:
+                f.write(GradleMutator.INFRA_TEMPLATE)
+            project_files.append(new_path)
+            constraint_files = [new_path]
+            GradleMutator._link_infrastructure(project_files, root_folder)
+
+        has_changes = False
         definer_file = None
         var_name = None
         current_version = None
-        dep_mgmt_gradle = next((f for f in project_files if f.endswith("dependencyMgmt.gradle")), None)
-        
-        # 1. Identify/Update variable
+
+        # --- PASO 1: Identificar Variable y Versión Actual ---
         for file_path in project_files:
             if file_path.endswith("build.gradle"):
                 with open(file_path, 'r') as f:
                     content = f.read()
                 found_var = GradleMutator.find_variable_name_in_ext(content, artifact_name)
-                # v2.0: El estándar dictado por la IA (override) manda sobre lo existente
                 if override_var_name:
-                    var_name = override_var_name
-                    definer_file = file_path
+                    var_name, definer_file = override_var_name, file_path
                 elif found_var:
-                    var_name = found_var
-                    definer_file = file_path
+                    var_name, definer_file = found_var, file_path
                 
                 if var_name:
                     pattern = rf"{var_name}\s*=\s*['\"]([^'\"]+)['\"]"
@@ -215,83 +253,72 @@ configurations.all {
                     break
         
         is_fixed = current_version and GradleMutator.is_already_fixed(current_version, version)
+        safe_v = str(version).split(',')[0].strip()
 
+        # --- PASO 2: Definir/Actualizar Variable ---
         if not is_fixed:
-            safe_v = str(version).split(',')[0].strip()
             if not definer_file:
-                build_gradles = [f for f in project_files if f.endswith("build.gradle")]
                 if not build_gradles: return False
                 definer_file = min(build_gradles, key=len)
-                if override_var_name:
-                    var_name = override_var_name
-                else:
-                    parts = artifact_name.split('-')
+                if not override_var_name:
+                    parts = artifact_name.split(':')[-1].split('-')
                     var_name = parts[0] + "".join(p.capitalize() for p in parts[1:]) + "Version"
                 
                 with open(definer_file, 'r') as f:
                     content = f.read()
-                # v2.0: Normalización de versión (solo la primera si hay comas)
+                
                 if "ext {" in content:
                     new_content = content.replace("ext {", f"ext {{\n        {var_name} = '{safe_v}'")
                 else:
                     new_content = f"ext {{\n        {var_name} = '{safe_v}'\n}}\n" + content
                 with open(definer_file, 'w') as f:
                     f.write(new_content)
+                has_changes = True
             else:
+                with open(definer_file, 'r') as f:
+                    content = f.read()
                 new_content, changed = GradleMutator.update_ext_variable(content, var_name, version)
                 if not changed:
-                    # Si la variable sugerida por la IA no existe, la creamos en el bloque ext
                     if "ext {" in new_content:
                         new_content = new_content.replace("ext {", f"ext {{\n        {var_name} = '{safe_v}'")
                     else:
                         new_content = f"ext {{\n        {var_name} = '{safe_v}'\n}}\n" + new_content
-                
                 with open(definer_file, 'w') as f:
                     f.write(new_content)
-        
-        # v2.0: Auto-Refactoring. Siempre intentamos purgar si usamos una familia,
-        # incluso si la versión ya era correcta (para limpiar residuos de ejecuciones anteriores).
-        if definer_file and var_name:
-            with open(definer_file, 'r') as f:
-                content_to_purge = f.read()
-            clean_content = GradleMutator._purge_redundant_variables(content_to_purge, var_name)
-            if clean_content != content_to_purge:
-                with open(definer_file, 'w') as f:
-                    f.write(clean_content)
                 has_changes = True
 
-        # 2. ACTIVE SUBSTITUTION in all build files
-        # We run this even if is_fixed, to ensure hardcoded literals are replaced by the variable
-        has_changes = has_changes or not is_fixed
+        # --- PASO 3: Inyectar Regla de Restricción (si es Transitiva) ---
+        if mode == "TRANSITIVE" and constraint_files:
+            target_constraint = constraint_files[0]
+            with open(target_constraint, 'r') as f:
+                c_content = f.read()
+            
+            new_c_content, c_changed = GradleMutator.inject_resolution_strategy_rule(c_content, artifact_name, var_name, reason)
+            if c_changed:
+                with open(target_constraint, 'w') as f:
+                    f.write(new_c_content)
+                has_changes = True
+
+        # --- PASO 4: Sustitución Activa de Literales en todos los build.gradle ---
         for file_path in project_files:
             if file_path.endswith("build.gradle"):
                 with open(file_path, 'r') as f:
                     content = f.read()
-                content, changed = GradleMutator.substitute_literal_with_variable(content, package, var_name)
+                content, changed = GradleMutator.substitute_literal_with_variable(content, artifact_name, var_name)
                 if changed:
                     with open(file_path, 'w') as f:
                         f.write(content)
-                        has_changes = True
-
-        # 3. Transitive strategy 
-        if strategy == "TRANSITIVE" and dep_mgmt_gradle:
-            with open(dep_mgmt_gradle, 'r') as f:
-                dmg_content = f.read()
-            # v2.0: Pasamos el 'package' completo para permitir detección de familias (groups)
-            dmg_content, success = GradleMutator.inject_resolution_strategy_rule(
-                dmg_content, package, var_name, reason
-            )
-            if success:
-                # Compare content to avoid false 'mutated' signal
-                with open(dep_mgmt_gradle, 'r') as f:
-                    old_dmg = f.read()
-                if dmg_content != old_dmg:
-                    with open(dep_mgmt_gradle, 'w') as f:
-                        f.write(dmg_content)
                     has_changes = True
 
-        if has_changes:
-            return True
-        if is_fixed:
-            return "ALREADY_FIXED"
-        return False
+        # --- PASO 5: Purga de Variables Redundantes ---
+        if definer_file and var_name:
+            with open(definer_file, 'r') as f:
+                purge_content = f.read()
+            clean_content = GradleMutator._purge_redundant_variables(purge_content, var_name)
+            if clean_content != purge_content:
+                with open(definer_file, 'w') as f:
+                    f.write(clean_content)
+                has_changes = True
+
+        if has_changes: return True
+        return "ALREADY_FIXED" if is_fixed else False

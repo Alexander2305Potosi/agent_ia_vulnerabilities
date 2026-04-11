@@ -1,37 +1,45 @@
 # 🛡️ Agente de Seguridad SCA: v2.0 (Edición Generativa)
 
-Bienvenido a la Versión 2.0 del Agente de Remediación para el proyecto `agent_ia_vulnerabilities`. Este sistema ha evolucionado de un modelo predictivo tradicional a un ecosistema de **Inteligencia Artificial Generativa Autónoma**.
+Bienvenido a la **Versión 2.0** del Agente de Remediación. Este sistema ha evolucionado de un modelo predictivo tradicional a un ecosistema de **Inteligencia Artificial Generativa Autónoma**.
 
 ## 🚀 ¿Qué hay de nuevo en la v2.0?
 
-A diferencia de las versiones anteriores, la v2.0 utiliza un **Cerebro Generativo (LLM)** de 3 bits que permite al agente razonar antes de actuar.
+A diferencia de las versiones anteriores, la v2.0 utiliza un **Cerebro Generativo (LLM)** que permite al agente razonar antes de actuar.
+
+*   **Razonamiento Autónomo**: El agente sigue un ciclo lógico de pensamiento crítico (ReAct).
+*   **Auto-Sanación Estructural**: Capacidad de reconstruir la infraestructura de seguridad de un proyecto desde cero.
+*   **Orquestación Automática**: Vinculación dinámica de infraestructura en archivos maestros (`main.gradle`).
 
 ### 🧠 El Marco ReAct (Reason + Act)
-El agente sigue un ciclo lógico de pensamiento crítico:
-1.  **PENSAMIENTO**: Analiza la vulnerabilidad (CVE) y el contexto del microservicio.
-2.  **ACCIÓN**: Define el cambio exacto de código necesario.
-3.  **EXPLICACIÓN**: Justifica técnicamente por qué la remediación es segura.
+El agente sigue un ciclo lógico:
+1.  **PENSAMIENTO**: Analiza la vulnerabilidad (CVE) y determina agrupaciones por familias.
+2.  **ACCIÓN**: Define el cambio de código y la creación de infraestructura necesaria.
+3.  **EXPLICACIÓN**: Justifica técnicamente la remediación siguiendo el **Estándar de Trinomio**.
+
+![Ciclo de Entrenamiento y Conciencia](agent_ia/docs/assets/ciclo_entrenamiento.png)
+*Visualización del Ciclo de Conciencia v2.0: Desde la detección hasta la auto-corrección.*
 
 ## 🛡️ Garantía de Privacidad: Tu código NO sale de tu equipo
 > [!IMPORTANT]
 > **Es un sistema 100% privado y desconectado.** 
-> Para tu tranquilidad absoluta:
-> - **Sin Internet**: El agente no necesita conexión para funcionar. Puedes usarlo en modo avión.
-> - **Tu código se queda en casa**: Ni una sola línea de tu código fuente o configuración se envía a la nube o a servidores externos.
-> - **Cerebro Local**: La Inteligencia Artificial vive en un archivo dentro de tu computadora, no en internet.
-
-### 🔄 Ciclo de Conciencia (Self-Healing)
-El agente posee una capacidad de **autocuración**. Si una remediación física falla en la validación de Gradle, el agente captura el error, lo analiza y genera una nueva propuesta corregida automáticamente.
+> - **Sin Internet**: Operación local absoluta.
+> - **Tu código se queda en casa**: Ningún dato sale de tu entorno.
+> - **Cerebro Local**: Inferencia mediante modelos GGUF optimizados.
 
 ## 🛠️ Arquitectura Técnica
-- **Motor de Inferencia**: `llama-cpp-python` (Optimizado para modelos GGUF de 3 bits).
-- **Inferencia 100% Local**: Privacidad absoluta, sin envío de datos a la nube.
-- **Mutación Quirúrgica**: Integración directa con `GradleMutator` para modificar archivos `.gradle` de forma segura.
+El agente opera como una colmena coordinada de componentes locales:
+
+![Arquitectura Técnica del Agente](agent_ia/docs/assets/arquitectura_tecnica.png)
+*Arquitectura Transparente: Privacidad por diseño e integración nativa con Gradle.*
+
+- **Motor de Inferencia**: `llama-cpp-python` (Optimizado para modelos GGUF).
+- **Mutación Estructural**: `GradleMutator` con capacidades de inyección y vinculación dinámica.
+- **Auto-Purge**: Limpieza automática de variables redundantes.
 
 ## 📋 Requisitos Rápidos
 - Python 3.10+
 - `pip install -r agent_ia/requirements.txt`
-- Modelo GGUF en `agent_ia/models/` (Recomendado: 3.5GB RAM).
+- Modelo GGUF en `agent_ia/models/` (Recomendado: 4-6GB RAM libres).
 
 ## 🖱️ Ejecución
 Ejecuta el agente principal con un solo comando:
@@ -40,4 +48,4 @@ python3 remediation_agent.py
 ```
 
 ---
-*Protección Generativa para Microservicios. Inteligencia v2.0 Local y Privada.*
+*Protección Generativa para Microservices. Inteligencia v2.0 Local y Privada.*

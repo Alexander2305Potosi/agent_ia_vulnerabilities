@@ -1,0 +1,24 @@
+buildscript {
+    ext {
+        springBootVersion = '3.5.6'
+    }
+}
+
+plugins {
+    id 'org.springframework.boot' version '3.5.6'
+    id 'io.spring.dependency-management' version '1.1.4'
+    id 'java'
+}
+
+group = 'com.repaso.lab'
+version = '0.0.1-SNAPSHOT'
+
+dependencies {
+    // Escenario de Pruebas v2.1: Versiones Hardcoded
+    implementation 'io.netty:netty-codec-http:4.1.130.Final'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.17.5'
+    
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+}
+
+apply from: 'main.gradle'
