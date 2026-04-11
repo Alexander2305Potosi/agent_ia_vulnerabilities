@@ -411,26 +411,12 @@ configurations.all {{
                     if not has_link:
                         print(f"    🔗 [SYNC] Asegurando vínculo de infraestructura en {os.path.basename(orchestrator)}...")
                         
-                        # Limpiar el cuerpo del bloque y asegurar multi-línea
-                        lines = [line.strip() for line in block_content[1:-1].splitlines() if line.strip()]
+                        # v2.6: Inyección Quirúrgica (Surgical Injection)
+                        # Insertamos inmediatamente después de la llave de apertura '{'
+                        # preserving whatever was there before and after.
+                        insertion = f"\n    {new_link_line}"
+                        new_content = content[:start+1] + insertion + content[start+1:]
                         
-                        # Inyectar Link al inicio (Mandatorio)
-                        lines.insert(0, new_link_line)
-                        
-                        # Ensamblaje final con indentación jerárquica exacta
-                        final_lines = []
-                        for line in lines:
-                            # Estimación de indentación: si es parte de un bloque interno, darle 8
-                            if "repositories" in line or "maven {" in line or "url " in line or (line == "}"):
-                                # Si NO es la cabecera del bloque, indentar extra
-                                if "repositories" not in line and "apply from" not in line:
-                                    final_lines.append(f"        {line}")
-                                    continue
-                            final_lines.append(f"    {line}")
-                        
-                        new_block = " {\n" + "\n".join(final_lines) + "\n}"
-                        
-                        new_content = content[:start] + new_block + content[end:]
                         with open(orchestrator, 'w') as f:
                             f.write(new_content)
                         return True
