@@ -46,17 +46,14 @@ Para evitar la corrupción de archivos que plagó versiones anteriores (v1.x), c
 ---
 
 ### 5. Patrón de Inyección estructural (Gradle)
-El agente utiliza el **Balanced Brace Parser** para inyectar o actualizar el siguiente bloque en `dependencyMgmt.gradle`:
+El agente utiliza el **Balanced Brace Parser** para inyectar o actualizar el bloque de infraestructura global en el orquestador (`main.gradle` o `build.gradle`). Este bloque consolida el acceso a repositorios y la aplicación de reglas de seguridad para todo el monorepo:
 
 ```gradle
-configurations.all {
-    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-        // Inyección de Regla de Familia
-        if (details.requested.group == 'io.netty') {
-            details.useVersion "${nettyCodecVersion}"
-            details.because "Fix: CVE-XXXX-XXXX"
-        }
-        // Inject rules here
+allprojects {
+    apply from: "${rootDir}/dependencyMgmt.gradle"
+    
+    repositories {
+        mavenCentral()
     }
 }
 ```
@@ -65,7 +62,7 @@ configurations.all {
 
 ### 6. Procedimiento de Auto-Healing (Recuperación)
 Si la infraestructura se corrompe o se pierden funcionalidades:
-1. **Validación de Enlace**: Asegurarse de que `main.gradle` o `build.gradle` contengan la línea `apply from: 'dependencyMgmt.gradle'`. Si no existe, re-vincularla al final del bloque de dependencias.
+1. **Validación de Infraestructura Global**: Asegurarse de que el orquestador contenga el bloque `allprojects` con el vínculo `apply from: "${rootDir}/dependencyMgmt.gradle"` **Y** la definición de repositorios `mavenCentral()`. Sin estos dos componentes, los microservicios podrían fallar al resolver dependencias seguras.
 2. **Re-Sincronización de Variables**: Si una regla en `dependencyMgmt.gradle` referencia una variable inexistente en `ext`, el agente debe identificar la carpeta del microservicio y re-crear la variable en el `build.gradle` más cercano.
 3. **Consistencia de Rama**: En caso de re-sincronización manual, verificar que la versión elegida coincida con la rama del proyecto (4.1.x vs 4.2.x).
 4. **Rollback de Emergencia**: Ante cualquier `BUILD FAILED`, se debe restaurar el estado de los archivos binarios (respaldo de texto plano) previo a la mutación.

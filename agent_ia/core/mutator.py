@@ -346,6 +346,7 @@ configurations.all {{
     def _link_infrastructure(project_files, target_folder):
         """
         Asegura que el archivo orquestador (main o build) tenga el vínculo a dependencyMgmt.gradle
+        v2.0: Usa ${rootDir} y bloque allprojects.
         """
         main_gradle = os.path.join(target_folder, "main.gradle")
         build_gradle = os.path.join(target_folder, "build.gradle")
@@ -355,14 +356,31 @@ configurations.all {{
             with open(orchestrator, 'r') as f:
                 content = f.read()
             
-            # v2.0: Búsqueda robusta con regex para evitar duplicados por comillas o espacios
-            link_pattern = r"apply\s+from:\s*['\"]dependencyMgmt\.gradle['\"]"
-            if not re.search(link_pattern, content):
-                print(f"    🔗 [LINK] Vinculando infraestructura en {os.path.basename(orchestrator)}...")
-                with open(orchestrator, 'a') as f:
-                    if not content.endswith('\n'): f.write('\n')
-                    f.write("apply from: 'dependencyMgmt.gradle'\n")
-                return True
+            # 1. Detectar si el vínculo YA existe (con rootDir)
+            link_pattern = r"apply\s+from:\s*['\"].*?rootDir.*?dependencyMgmt\.gradle['\"]"
+            if re.search(link_pattern, content):
+                return False
+
+            # 2. Si existe el vínculo ANTIGUO (relativo), lo limpiamos para evitar duplicidad conflictiva
+            old_link_pattern = r"apply\s+from:\s*['\"]dependencyMgmt\.gradle['\"]"
+            content = re.sub(old_link_pattern, "", content).strip()
+
+            print(f"    🔗 [LINK] Modernizando infraestructura en {os.path.basename(orchestrator)}...")
+            
+            new_link_line = 'apply from: "${rootDir}/dependencyMgmt.gradle"'
+            
+            # 3. Insertar en allprojects
+            if "allprojects {" in content:
+                # Insertar justo después de la apertura de allprojects
+                pattern = r"(allprojects\s*\{)"
+                new_content = re.sub(pattern, rf"\1\n    {new_link_line}", content, count=1)
+            else:
+                # Crear el bloque al final
+                new_content = content.rstrip() + f"\n\nallprojects {{\n    {new_link_line}\n}}\n"
+            
+            with open(orchestrator, 'w') as f:
+                f.write(new_content)
+            return True
         return False
 
     @staticmethod
