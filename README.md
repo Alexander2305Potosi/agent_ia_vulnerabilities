@@ -83,9 +83,11 @@ A diferencia de versiones anteriores que delegaban todo a la centralización, la
 - **Centralización Directa**: Mantiene las reglas de resolución en `dependencyMgmt.gradle`.
 - **Preservación Local**: Las líneas `implementation` en cada `build.gradle` se mantienen, pero se sustituyen automáticamente por variables (ej. `implementation "group:artifact:${varName}"`), garantizando que el microservicio siga siendo autodocumentado.
 
-## 📚 Gobernanza y Estándares
-Para una comprensión profunda de las leyes arquitectónicas, métricas de seguridad y protocolos de Git que rigen a este Agente, consulta el documento maestro:
-👉 **[Master Remediation Rulebook v2.0](agent_ia/docs/remediation_rules.md)**
+## 📚 Gobernanza y Documentación
+Para profundizar en la arquitectura y operación del Agente, consulta los manuales maestros:
+
+1.  👉 **[Master Remediation Rulebook v2.0](agent_ia/docs/remediation_rules.md)**: Estándares técnicos, leyes de inyección y protocolos de Git.
+2.  👉 **[Technical & Operator Manual](agent_ia/docs/manuals/TECHNICAL_MANUAL.md)**: Teoría de la IA Autónoma, facultades del Agente, flujos de ejecución y resolución de problemas.
 
 ### 🏗️ Inyección de Configuración Robusta
 El motor de mutación ha sido robustecido en esta versión para garantizar scripts Gradle válidos y limpios:
