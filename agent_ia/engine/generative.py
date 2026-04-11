@@ -102,10 +102,14 @@ class GenerativeAgentV2:
             else:
                 reasoning += f" No pertenece a un grupo común conocido. Genero variable específica '{target_var}'."
 
+            # v2.0: Asegurar VERSION ÚNICA (Respecting Master Rulebook)
+            safe_ver_list = str(cve_data.get('safe_version', 'LATEST')).split(',')
+            final_safe_v = safe_ver_list[0].strip()
+
             return f"""
             [PENSAMIENTO]: {reasoning}
-            [ACCIÓN]: {target_var} = '{cve_data.get('safe_version')}'
-            [EXPLICACIÓN]: Se aplica el parche directo en el bloque ext del microservicio para mitigar el riesgo de seguridad centralizando la versión mediante el Estándar de Trinomio.
+            [ACCIÓN]: {target_var} = '{final_safe_v}'
+            [EXPLICACIÓN]: Se aplica el parche de versión única para mitigar la vulnerabilidad, centralizando la definición en la variable de familia '{target_var}' para mantener la integridad del monorepo.
             """
 
 if __name__ == "__main__":

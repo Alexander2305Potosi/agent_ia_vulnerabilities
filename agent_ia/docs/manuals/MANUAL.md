@@ -14,6 +14,9 @@ El agente opera en un ciclo de 4 fases basado en el marco ReAct:
 4.  **Validación & Aprendizaje**:
     - Se ejecuta `gradle clean test`.
     - Si falla, el error se re-inyecta al modelo para una nueva propuesta (Ciclo de Conciencia).
+5.  **Persistencia & Trazabilidad (v2.0)**:
+    *   Si hay éxitos: Crea rama de seguridad y realiza commit consolidado.
+    *   Si no hay cambios validados: Finaliza sin alterar el historial de Git.
 
 ## 2. Configuración de Seguridad (Privacidad)
 El agente ha sido diseñado para entornos de alta seguridad:
@@ -21,8 +24,12 @@ El agente ha sido diseñado para entornos de alta seguridad:
 - **Sin Exfiltración**: No se envían logs, reportes ni código fuente a servidores externos.
 
 ## 3. Resolución de Problemas
-- **Gradle no encontrado**: El agente saltará la validación física pero aplicará el parche. Verifica que tengas el `gradlew` en la raíz.
-- **Conflicto de Familias**: Si dos librerías de la misma familia requieren versiones distintas, la IA elegirá la versión más reciente y compatible automáticamente.
+- **Gradle no encontrado**: El agente buscará en rutas comunes (`/usr/local/bin`, `/opt/homebrew`, etc.). Si falla, usa `--gradle-path`.
+- **Fallo en Test**: Verifica logs. Asegúrate de que el puerto no esté ocupado y de que la base de datos de pruebas (si aplica) sea accesible.
+- **Conflicto de Familias**: Si dos librerías de la misma familia requieren versiones distintas, la IA elegirá la versión única más reciente que sea compatible con la rama del proyecto (v2.0 Rulebook).
 
----
+## 4. Estándar de Infraestructura Obligatorio
+Para que la validación sea exitosa, el entorno debe cumplir con:
+- **JDK 21 LTS**: Indispensable para estabilidad en Gradle 9 / Spring Boot 3.
+- **JUnit Platform Launcher**: Requerido en todos los microservicios.
 *Manual de Operación Local v2.0.*

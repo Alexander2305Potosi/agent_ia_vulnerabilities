@@ -1,8 +1,8 @@
-// Global configuration orchestrator
 allprojects {
     apply from: "${rootDir}/dependencyMgmt.gradle"
     repositories {
+
+        
         mavenCentral()
     }
-    // Some custom property
 }

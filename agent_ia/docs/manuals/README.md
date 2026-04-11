@@ -1,6 +1,15 @@
-# Documentación Técnica: Agente IA v2.0 (Generativo)
+#Bienvenido al repositorio de documentación técnica del Agente v2.0. Estos manuales detallan la arquitectura, operación y estándares del sistema de remediación autónoma.
 
-Este directorio contiene los recursos técnicos y manuales del Agente de Remediación v2.0.
+## 📚 Índice de Documentación
+1.  **[Remediation Rules (Maestro)](../remediation_rules.md)**: El Rulebook definitivo (v2.0) con estándares de Java 21 y Git.
+2.  **[Manual del Operador](MANUAL.md)**: Guía de ejecución, flujos ReAct y resolución de problemas de validación.
+3.  **[IA Model Theory](IA_MODEL_DOC.md)**: Documentación sobre el Cerebro Generativo de 3 bits, ICL y la política de versión única.
+
+## 🚀 Versión 2.0: Estabilización & Autodescubrimiento
+Esta versión introduce:
+- **Validación Robusta**: Integración nativa con Gradle 9 y Java 21 LTS.
+- **Git Success Intelligence**: Automatización total de ramas y commits profesionales.
+- **Detección Portable**: Lógica avanzada para encontrar herramientas de construcción en cualquier entorno.
 
 ## 📁 Estructura del Módulo `agent_ia`
 

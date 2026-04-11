@@ -35,18 +35,18 @@ class CycleOfConsciousness:
             
             # 3. VALIDACIÓN (Gradle / Pip / etc)
             # PASAMOS cve_data para que el validador pueda aplicar el parche físico
-            success, error_log = self.validate(parsed['action'], attempts, cve_data)
+            success, result_data = self.validate(parsed['action'], attempts, cve_data)
             
             if success:
                 print(f"    [OK] Ciclo completado exitosamente en el intento {attempts}.")
-                return True, parsed['explanation']
+                return True, parsed['explanation'], result_data
             else:
                 # 4. APRENDIZAJE (Ciclo de Conciencia)
                 print(f"    [!] Error detectado. Re-inyectando contexto de fallo al modelo...")
-                previous_error = error_log
+                previous_error = result_data # Aquí result_data es el error_log
                 
         print("    [ERROR] No se pudo solventar la vulnerabilidad tras los intentos permitidos.")
-        return False, "Se agotaron los intentos de autocuración."
+        return False, "Se agotaron los intentos de autocuración.", None
 
 if __name__ == "__main__":
     # Prueba rápida del ciclo

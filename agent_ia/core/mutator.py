@@ -405,13 +405,13 @@ configurations.all {{
                     block_content = content[start:end]
                     needs_update = False
                     
-                    # v2.2: Regex más permisiva para detectar el link sin importar formatos de variables
+                    # v2.0: Regex más permisiva para detectar el link sin importar formatos de variables
                     has_link = re.search(r"apply\s+from:.*dependencyMgmt\.gradle", block_content)
                     
                     if not has_link:
                         print(f"    🔗 [SYNC] Asegurando vínculo de infraestructura en {os.path.basename(orchestrator)}...")
                         
-                        # v2.6: Inyección Quirúrgica (Surgical Injection)
+                        # v2.0: Inyección Quirúrgica (Surgical Injection)
                         # Insertamos inmediatamente después de la llave de apertura '{'
                         # preserving whatever was there before and after.
                         insertion = f"\n    {new_link_line}"
@@ -469,7 +469,7 @@ configurations.all {{
         current_version = None
 
         # --- PASO 1: Identificar Variable y Versión Actual ---
-        # v2.5: Prioridad RAÍZ para detección
+        # v2.0: Prioridad RAÍZ para detección
         for file_path in build_gradles:
             with open(file_path, 'r') as f:
                 content = f.read()
@@ -484,7 +484,7 @@ configurations.all {{
             elif found_var:
                 var_name = found_var
                 # Si se encuentra en raíz, perfecto. Si no, marcaremos para MIGRACIÓN a raíz.
-                definer_file = root_build_gradle # v2.5: Forzamos que la definición final sea siempre en raíz
+                definer_file = root_build_gradle # v2.0: Forzamos que la definición final sea siempre en raíz
             
             if var_name:
                 pattern = rf"{var_name}\s*=\s*['\"]([^'\"]+)['\"]"
@@ -556,14 +556,14 @@ configurations.all {{
         for file_path in gradle_files:
             with open(file_path, 'r') as f:
                 content = f.read()
-            # v2.0/2.5 logic: Reemplazar literales de la familia por la variable
+            # v2.0/2.0 logic: Reemplazar literales de la familia por la variable
             new_content, changed = GradleMutator.substitute_literal_with_variable(content, artifact_name, var_name)
             if changed:
                 with open(file_path, 'w') as f:
                     f.write(new_content)
                 has_changes = True
 
-        # --- PASO 5: Purga Global de Subcarpetas (Centralización v2.5) ---
+        # --- PASO 5: Purga Global de Subcarpetas (Centralización v2.0) ---
         if var_name:
             for file_path in build_gradles:
                 is_root = (file_path == root_build_gradle)

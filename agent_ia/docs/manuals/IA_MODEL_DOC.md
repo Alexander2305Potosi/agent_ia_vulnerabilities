@@ -18,10 +18,14 @@ El agente implementa un bucle de retroalimentación:
 - **Error como Contexto**: Si una remediación falla, el log de error de Gradle se convierte en la nueva "lección" para el modelo.
 - **Evolución Recursiva**: El modelo ajusta su propuesta basándose en el fallo anterior hasta alcanzar el éxito o agotar los intentos.
 
-## 3. Soberanía de Nomenclatura
-En la v2.0, el Cerebro Generativo tiene prioridad sobre la automatización. Si la IA detecta que debe usarse un estándar específico (ej. `awsSdkVersion`), el sistema sobrescribirá los nombres de variables tradicionales para alinearse con la política arquitectónica dictada por la IA.
+### Soberanía de Nomenclatura & Precisión (v2.0)
+- **Nomenclatura**: Si la IA detecta que debe usarse un estándar específico (ej. `awsSdkVersion`), el sistema sobrescribirá los nombres de variables tradicionales.
+- **Single Version Policy**: El Cerebro Generativo tiene prohibido emitir listas o rangos. Debe elegir **una única versión final** compatible con la rama del proyecto para garantizar la integridad estructural de Gradle.
 
-## 4. El Prompt Maestro de Sistema (Nucleo de v2.0)
+## 4. Trazabilidad & Auditoría (v2.0)
+Cada decisión tomada por la IA se traduce en un rastro de auditoría profesional:
+- **Metadatos en Configuración**: Inyección de `details.because "Fix: CVE-XXXX"`.
+- **Git Intelligence**: Generación automática de resúmenes de impacto (`fix: global remediation...`) agrupando éxitos por servicio.
 Este es el conjunto de instrucciones que rigen el comportamiento del modelo de 3 bits:
 
 > **Rol:** Eres el Arquitecto de Seguridad Autónomo Senior (v2.0). 

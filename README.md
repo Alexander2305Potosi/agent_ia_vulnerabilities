@@ -8,7 +8,8 @@ A diferencia de las versiones anteriores, la v2.0 utiliza un **Cerebro Generativ
 
 *   **Razonamiento Autónomo**: El agente sigue un ciclo lógico de pensamiento crítico (ReAct).
 *   **Auto-Sanación Estructural**: Capacidad de reconstruir la infraestructura de seguridad de un proyecto desde cero.
-*   **Orquestación Automática**: Vinculación dinámica de infraestructura en archivos maestros (`main.gradle`).
+*   **Integración Git Profesional (v2.0)**: Creación de ramas y commits automáticos de alta calidad basados en el éxito de la remediación.
+*   **Portabilidad Robusta**: Autodescubrimiento de Gradle y soporte para entornos restringidos.
 
 ### 🧠 El Marco ReAct (Reason + Act)
 El agente sigue un ciclo lógico:
@@ -36,8 +37,10 @@ El agente opera como una colmena coordinada de componentes locales:
 - **Mutación Estructural**: `GradleMutator` con capacidades de inyección y vinculación dinámica.
 - **Auto-Purge**: Limpieza automática de variables redundantes.
 
-## 📋 Requisitos Rápidos
-- Python 3.10+
+## 📋 Requisitos de Entorno
+- **Python 3.10+** (Recomendado 3.11+)
+- **Java 21 (LTS)**: El Agente requiere JDK 21 para validaciones de Gradle. Se prohíbe JDK 25 por incompatibilidades con Lombok.
+- **Git**: Instalado y configurado en el PATH.
 - `pip install -r agent_ia/requirements.txt`
 - Modelo GGUF en `agent_ia/models/` (Recomendado: 4-6GB RAM libres).
 
@@ -58,6 +61,18 @@ python3 remediation_agent.py --folders ms-clients
 
 # Múltiples servicios
 python3 remediation_agent.py -f ms-auth ms-sales
+```
+
+### 📦 Integración con Git (`--commit`)
+Habilita la creación automática de una rama de seguridad y un commit consolidado solo si hubo éxitos:
+```bash
+python3 remediation_agent.py -c --folders ms-clients
+```
+
+### ⚙️ Ruta Gradle Personalizada (`--gradle-path`)
+Si el Agente no encuentra Gradle, indícale una ruta absoluta:
+```bash
+python3 remediation_agent.py --gradle-path /usr/local/bin/gradle
 ```
 
 ## 🔍 Monitoreo y Depuración (Modo Debug)
