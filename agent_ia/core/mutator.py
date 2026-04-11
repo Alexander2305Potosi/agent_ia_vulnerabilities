@@ -217,18 +217,24 @@ configurations.all {{
                 with open(orchestrator, 'a') as f:
                     if not content.endswith('\n'): f.write('\n')
                     f.write("apply from: 'dependencyMgmt.gradle'\n")
+                return True
+        return False
 
     @staticmethod
     def apply_coordinated_remediation(project_files, mode, artifact_name, version, reason, override_var_name=None):
         """
         Orquestador v2.0: Auto-Sanación + Remediación + Purga
         """
-        # --- PASO 0: Auto-Sanación de Infraestructura ---
+        # --- PASO 0: Normalización y Auto-Sanación ---
+        # v2.0: Normalizar a rutas absolutas para evitar fallos por ./ o rutas relativas
+        project_files = [os.path.abspath(f) for f in project_files]
+        has_changes = False
+        
         constraint_files = [f for f in project_files if f.endswith("dependencyMgmt.gradle")]
         build_gradles = [f for f in project_files if f.endswith("build.gradle")]
         
         if not constraint_files and build_gradles:
-            root_folder = os.path.dirname(os.path.abspath(build_gradles[0]))
+            root_folder = os.path.dirname(build_gradles[0])
             new_path = os.path.join(root_folder, "dependencyMgmt.gradle")
             print(f"    🛠️ [AUTO-HEAL] Reconstruyendo infraestructura en {os.path.basename(root_folder)}...")
             with open(new_path, 'w') as f:
@@ -238,13 +244,14 @@ configurations.all {{
             constraint_files = [new_path]
             if new_path not in project_files:
                 project_files.append(new_path)
+            has_changes = True
 
-        # v2.3: Asegurar VÍNCULO siempre que existan archivos de restricción
+        # v2.0: Asegurar VÍNCULO siempre que existan archivos de restricción
         if constraint_files and build_gradles:
-            root_folder = os.path.dirname(os.path.abspath(build_gradles[0]))
-            GradleMutator._link_infrastructure(project_files, root_folder)
+            root_folder = os.path.dirname(build_gradles[0])
+            if GradleMutator._link_infrastructure(project_files, root_folder):
+                has_changes = True
 
-        has_changes = False
         definer_file = None
         var_name = None
         current_version = None

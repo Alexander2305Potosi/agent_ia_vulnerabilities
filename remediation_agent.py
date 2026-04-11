@@ -50,7 +50,7 @@ class RemediationAgent:
         safe_ver = cve_data.get('safe_version') or "LATEST"
         
         # v2.1: Mensaje simplificado a petición del usuario
-        reason_msg = f"Fix: {cve_data.get('cve')}"
+        reason_msg = f"v2.0 Generative Fix: {cve_data.get('cve')}"
         print(f"    ⚙️ [MUTACIÓN] Aplicando {package} -> {safe_ver} en {ms_name}...")
         
         suggested_var = None
@@ -110,7 +110,7 @@ class RemediationAgent:
             if ms_name in dirs:
                 candidate = os.path.join(root, ms_name)
                 if os.path.exists(os.path.join(candidate, "build.gradle")):
-                    return candidate
+                    return os.path.abspath(candidate)
         return None
 
     def get_ms_files(self, ms_name):
@@ -133,8 +133,8 @@ class RemediationAgent:
     def _validate_ms(self, ms_name, timeout=300):
         """ 
         Ejecuta gradlew clean test con monitoreo en tiempo real y prevención de deadlocks.
+        v2.0: Incluye limpieza de procesos en caso de interrupción.
         """
-        import select
         LAB_MODE = os.getenv("AGENT_IA_LAB_MODE", "true").lower() == "true"
         DEBUG_MODE = self.debug
         ms_path = self._get_ms_path(ms_name)
@@ -165,21 +165,25 @@ class RemediationAgent:
             full_cmd.append("--info")
             print(f"    🛠️ [DEBUG] Ejecutando comando: {' '.join(full_cmd)}")
             
+        process = None
         try:
-            # v2.1: Fusionamos stderr en stdout para evitar interbloqueos de búfer
-            process = subprocess.Popen(
-                full_cmd,
-                cwd=ms_path,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                text=True,
-                shell=is_windows,
-                bufsize=1,
-                universal_newlines=True
-            )
+            # v2.0: Usamos os.setsid para poder matar todo el grupo de procesos en caso de interrupción (Unix)
+            popen_kwargs = {
+                "cwd": ms_path,
+                "stdout": subprocess.PIPE,
+                "stderr": subprocess.STDOUT,
+                "text": True,
+                "shell": is_windows,
+                "bufsize": 1,
+                "universal_newlines": True
+            }
+            if not is_windows:
+                # Preexec_fn solo disponible en Unix
+                if hasattr(os, "setsid"):
+                    popen_kwargs["preexec_fn"] = os.setsid
 
+            process = subprocess.Popen(full_cmd, **popen_kwargs)
             stdout_lines = []
-            stderr_lines = []
 
             # Leer stdout en tiempo real
             while True:
@@ -191,13 +195,10 @@ class RemediationAgent:
                     stdout_lines.append(line)
                     
                     if DEBUG_MODE:
-                        # En modo debug mostramos TODO
                         print(f"    [GRADLE] {clean_line}")
                     elif clean_line.startswith("> Task"):
-                        # Visualización de progreso simplificada (Default)
                         print(f"    ⚙️ [PROGRESS] {clean_line}")
                     elif "FAILED" in clean_line or "Error" in clean_line:
-                        # Captura temprana de errores visibles en stdout
                         print(f"    ⚠️ [INFO] {clean_line}")
 
             process.wait()
@@ -205,15 +206,27 @@ class RemediationAgent:
             if process.returncode != 0:
                 print(f"    🚫 [X] FALLO EN PRUEBAS: Errores detectados.")
                 if not DEBUG_MODE:
-                    # Mostrar las últimas 20 líneas si no estamos en debug para dar contexto del error
                     print("    --- ÚLTIMAS LÍNEAS DE SALIDA ---")
                     for l in stdout_lines[-20:]: print(f"    {l.strip()}")
                 return False
                 
             return True
         except Exception as e:
-            print(f"    [!] Error técnico en validación: {str(e)}")
+            print(f"    ❌ [ERROR] Fallo crítico durante validación: {str(e)}")
             return False
+        finally:
+        # v2.0: Limpieza garantizada de subprocesos
+            if process and process.poll() is None:
+                try:
+                    import signal
+                    if is_windows:
+                        process.terminate()
+                    else:
+                        # Matar todo el grupo de procesos
+                        os.killpg(os.getpgid(process.pid), signal.SIGTERM)
+                except:
+                    try: process.kill()
+                    except: pass
 
     def _get_all_ms_names(self):
         """ Descubrimiento automático de microservicios. """
@@ -222,7 +235,6 @@ class RemediationAgent:
             if os.path.isdir(os.path.join(self.root_path, d)):
                 if os.path.exists(os.path.join(self.root_path, d, "build.gradle")):
                     ms_names.append(d)
-                # Explorar un nivel más profundo
                 else:
                     sub_dir = os.path.join(self.root_path, d)
                     for sd in os.listdir(sub_dir):
@@ -231,52 +243,52 @@ class RemediationAgent:
         return list(set(ms_names))
 
     def run(self):
-        start_time = time.time()
-        print("\n" + "="*60)
-        print("🛡️ AGENTE DE REMEDIACIÓN GENERATIVA v2.0")
-        print("="*60)
-        
-        if not os.path.exists(self.report_path):
-            print(f"[!] Error: Reporte {self.report_path} no encontrado.")
-            return
+        try:
+            print("\n" + "="*60)
+            print("🛡️ AGENTE DE REMEDIACIÓN GENERATIVA v2.0")
+            print("="*60)
+            
+            if not os.path.exists(self.report_path):
+                print(f"[!] Error: Reporte {self.report_path} no encontrado.")
+                return
 
-        with open(self.report_path, 'r') as f:
-            vulnerabilities = json.load(f)
-            if not isinstance(vulnerabilities, list):
-                vulnerabilities = vulnerabilities.get("vulnerabilities", [])
+            start_time = time.time()
+            with open(self.report_path, 'r') as f:
+                vulnerabilities = json.load(f)
+                if not isinstance(vulnerabilities, list):
+                    vulnerabilities = vulnerabilities.get("vulnerabilities", [])
 
-        if self.target_folders:
-            print(f"🎯 [*] Filtrando ejecución para: {', '.join(self.target_folders)}")
+            if self.target_folders:
+                print(f"🎯 [*] Filtrando ejecución para: {', '.join(self.target_folders)}")
 
-        for vuln in vulnerabilities:
-            self._process_generative_vuln(vuln)
+            for vuln in vulnerabilities:
+                self._process_generative_vuln(vuln)
 
-        end_time = time.time()
-        duration_min = (end_time - start_time) / 60
-        self._print_summary(duration_min)
+            end_time = time.time()
+            duration_min = (end_time - start_time) / 60
+            self._print_summary(duration_min)
+        except KeyboardInterrupt:
+            print("\n\n🛑 [!] INTERRUPCIÓN MANUAL DETECTADA. Limpiando procesos y saliendo...")
+            sys.exit(0)
 
     def _process_generative_vuln(self, entry):
         vuln_id = entry.get('cve') or entry.get('id')
-        package = entry.get('library') or entry.get('packageName')
         ms_name = entry.get("microservice")
         
         if not ms_name:
-            # v2.3: Descubrimiento autodeterminado
             target_mss = self._get_all_ms_names()
         else:
             target_mss = [ms_name]
 
-        # Filtrado post-descubrimiento (v2.3)
         if self.target_folders:
             target_mss = [m for m in target_mss if m in self.target_folders]
             if not target_mss:
-                return # Saltamos esta vulnerabilidad para esta configuración de carpetas
+                return 
 
         for ms in target_mss:
             self.current_ms = ms
             print(f"\n📦 [*] Procesando {ms} | CVE: {vuln_id}")
             
-            # Iniciar Ciclo de Conciencia v2.0
             context = f"MS: {ms} | Files: {self.get_ms_files(ms)}"
             success, explanation = self.cycle_controller.run_remediation_cycle(entry, context)
             
