@@ -41,6 +41,7 @@ Para evitar la corrupción de archivos que plagó versiones anteriores (v1.x), c
 - **Balanced Brace Tracking**: No se permiten expresiones regulares simples para modificar bloques de configuración (como `ext { ... }` o `resolutionStrategy { ... }`). Se debe usar un rastreador de llaves balanceadas `{}` para identificar el inicio y fin exacto de cada bloque, garantizando cierres limpios.
 - **Sustitución Activa de Literales**: Cuando se inyecta una variable de familia, el agente debe escanear todos los archivos `build.gradle` y reemplazar dependencias directas en formato literal (`"group:artifact:version"`) por el formato dinámico (`"group:artifact:${variableVersion}"`).
 - **Purga de Redundancia**: Si se inyecta una variable "paraguas" (ej: `nettyCodecVersion`), se deben eliminar variables específicas y redundantes del bloque `ext` (ej: `nettyHandlerVersion`) para mantener el código limpio.
+- **Inteligencia de Rama (Multi-Branch Support)**: El agente de mutación **NO DEBE** asumir que la primera versión de una lista de seguridad es la correcta. Debe realizar una coincidencia de rama basada en `Major.Minor` (ej: si el proyecto usa 4.2.9, debe buscar el parche en la línea 4.2.x y no saltar a la 4.1.x o 5.x automáticamente).
 
 ---
 
@@ -66,7 +67,8 @@ configurations.all {
 Si la infraestructura se corrompe o se pierden funcionalidades:
 1. **Validación de Enlace**: Asegurarse de que `main.gradle` o `build.gradle` contengan la línea `apply from: 'dependencyMgmt.gradle'`. Si no existe, re-vincularla al final del bloque de dependencias.
 2. **Re-Sincronización de Variables**: Si una regla en `dependencyMgmt.gradle` referencia una variable inexistente en `ext`, el agente debe identificar la carpeta del microservicio y re-crear la variable en el `build.gradle` más cercano.
-3. **Rollback de Emergencia**: Ante cualquier `BUILD FAILED`, se debe restaurar el estado de los archivos binarios (respaldo de texto plano) previo a la mutación.
+3. **Consistencia de Rama**: En caso de re-sincronización manual, verificar que la versión elegida coincida con la rama del proyecto (4.1.x vs 4.2.x).
+4. **Rollback de Emergencia**: Ante cualquier `BUILD FAILED`, se debe restaurar el estado de los archivos binarios (respaldo de texto plano) previo a la mutación.
 
 ---
 

@@ -4,9 +4,8 @@ import os
 class GradleMutator:
     @staticmethod
     def _version_to_tuple(v):
-        """ Converts a version string to (1, 2, 3) for comparison. Handles dirty strings with commas. """
+        """ Converts a version string to (1, 2, 3) for comparison. Handles dirty strings with commas by picking first item. """
         if not v: return (0,)
-        # Remove anything after a comma if exists (we compare single versions)
         clean_v = str(v).split(',')[0].strip()
         parts = []
         for p in re.split(r'[\.\-]', clean_v):
@@ -15,9 +14,51 @@ class GradleMutator:
         return tuple(parts)
 
     @staticmethod
-    def is_already_fixed(current_version, safe_version):
-        """ Returns True if current_version >= safe_version. """
-        return GradleMutator._version_to_tuple(current_version) >= GradleMutator._version_to_tuple(safe_version)
+    def is_already_fixed(current_version, safe_version_str):
+        """ 
+        DETERMINA si la versión actual cumple con los requisitos de seguridad.
+        v2.0: Soporta MÚLTIPLES ramas seguras (ej: '4.1.132, 4.2.10').
+        """
+        curr_tup = GradleMutator._version_to_tuple(current_version)
+        safe_versions = [s.strip() for s in str(safe_version_str).split(',')]
+        
+        # 1. Intentar encontrar una versión segura en la MISMA RAMA (Mismo Major.Minor)
+        for sv in safe_versions:
+            s_tup = GradleMutator._version_to_tuple(sv)
+            # Si coinciden en Major y Minor (primeros 2 elementos)
+            if len(curr_tup) >= 2 and len(s_tup) >= 2:
+                if curr_tup[0] == s_tup[0] and curr_tup[1] == s_tup[1]:
+                    return curr_tup >= s_tup
+            elif len(curr_tup) >= 1 and len(s_tup) >= 1:
+                # Solo Major coincidencia
+                if curr_tup[0] == s_tup[0]:
+                    return curr_tup >= s_tup
+
+        # 2. Si no hay coincidencia de rama, comparar con la versión MÁS BAJA de la lista segura
+        # para asegurar un mínimo de cumplimiento.
+        min_safe = sorted(safe_versions, key=lambda x: GradleMutator._version_to_tuple(x))[0]
+        return curr_tup >= GradleMutator._version_to_tuple(min_safe)
+
+    @staticmethod
+    def _pick_best_safe_version(current_version, safe_version_str):
+        """
+        ELIGE la mejor versión de la lista 'safe_version_str' para la rama actual.
+        """
+        curr_tup = GradleMutator._version_to_tuple(current_version)
+        safe_versions = [s.strip() for s in str(safe_version_str).split(',')]
+        
+        # Buscar coincidencia exacta de rama
+        for sv in safe_versions:
+            s_tup = GradleMutator._version_to_tuple(sv)
+            if len(curr_tup) >= 2 and len(s_tup) >= 2:
+                if curr_tup[0] == s_tup[0] and curr_tup[1] == s_tup[1]:
+                    return sv
+            elif len(curr_tup) >= 1 and len(s_tup) >= 1:
+                if curr_tup[0] == s_tup[0]:
+                    return sv
+        
+        # Retornar la más alta por defecto si no hay rama coincidente
+        return sorted(safe_versions, key=lambda x: GradleMutator._version_to_tuple(x))[-1]
 
     @staticmethod
     def _purge_redundant_variables(content, family_var_name):
@@ -49,14 +90,12 @@ class GradleMutator:
         return "\n".join(new_lines)
 
     @staticmethod
-    def update_ext_variable(content, var_name, new_version):
+    def update_ext_variable(content, var_name, actual_version):
         """
         Updates a variable definition in any ext block.
-        Ensures the entire value is replaced to avoid version accumulation.
-        Uses lambda to avoid special character interpretation.
+        Ensures the entire value is replaced.
         """
-        # Pick the first version if list provided
-        actual_version = str(new_version).split(',')[0].strip()
+        actual_version = str(actual_version).strip()
         pattern = rf"({var_name}\s*=\s*['\"])([^'\"]+)(['\"])"
         
         def replace_fn(match):
@@ -77,7 +116,7 @@ class GradleMutator:
             return content, False
 
         # Match pattern: Any line containing implementation/runtimeOnly etc + group:artifact
-        # v2.1: Ahora preservamos la línea y sustituimos la versión por una variable
+        # v2.0: Ahora preservamos la línea y sustituimos la versión por una variable
         verbs = "implementation|runtimeOnly|runtime|compileOnly|compile|api|testImplementation|testRuntimeOnly|testCompileOnly"
         pattern = rf"^(\s*)({verbs})(\s*)['\"]{re.escape(package)}(?::[^'\"]+)?['\"]"
         
@@ -210,7 +249,7 @@ class GradleMutator:
 
         final_reason = GradleMutator._accumulate_reason(existing_reason, reason)
         
-        # v2.1: Indentación estándar
+        # v2.0: Indentación estándar
         i4 = "    "
         i8 = "        "
         i12 = "            "
@@ -380,7 +419,9 @@ configurations.all {{
                     break
         
         is_fixed = current_version and GradleMutator.is_already_fixed(current_version, version)
-        safe_v = str(version).split(',')[0].strip()
+        
+        # v2.0: Elegir la mejor versión de la lista (rama coincidente)
+        safe_v = GradleMutator._pick_best_safe_version(current_version, version)
 
         # --- PASO 2: Definir/Actualizar Variable ---
         if not is_fixed:
@@ -404,7 +445,7 @@ configurations.all {{
             else:
                 with open(definer_file, 'r') as f:
                     content = f.read()
-                new_content, changed = GradleMutator.update_ext_variable(content, var_name, version)
+                new_content, changed = GradleMutator.update_ext_variable(content, var_name, safe_v)
                 if not changed:
                     if "ext {" in new_content:
                         new_content = new_content.replace("ext {", f"ext {{\n        {var_name} = '{safe_v}'")
