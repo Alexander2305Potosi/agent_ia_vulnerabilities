@@ -484,8 +484,19 @@ configurations.all {{
                 if var_name:
                     pattern = rf"{var_name}\s*=\s*['\"]([^'\"]+)['\"]"
                     match = re.search(pattern, content)
-                    if match: current_version = match.group(1)
-                    break
+                    if match: 
+                        current_version = match.group(1)
+                    
+                # v2.0 NEW: Si no hay variable o no se encontró versión, buscar literal
+                if not current_version:
+                    # Buscar literal implementation 'group:artifact:version'
+                    literal_pattern = rf"['\"]{re.escape(artifact_name)}:([\d\.\-\w]+)['\"]"
+                    l_match = re.search(literal_pattern, content)
+                    if l_match:
+                        current_version = l_match.group(1)
+                        print(f"    🔍 [INTELIGENCIA] Versión actual detectada desde literal: {current_version}")
+                
+                if current_version: break
         
         is_fixed = current_version and GradleMutator.is_already_fixed(current_version, version)
         

@@ -78,26 +78,29 @@ class GenerativeAgentV2:
                 target_var = "nettyCodecVersion"
             elif "jackson" in library_name:
                 target_var = "jacksonCoreVersion"
-            elif "spring" in library_name:
-                target_var = "springWebfluxVersion"
+            elif "org.springframework" in library_name:
+                target_var = "springBootVersion"
             elif "snakeyaml" in library_name:
                 target_var = "snakeyamlVersion"
+            elif "log4j" in library_name:
+                target_var = "log4jCoreVersion"
             else:
                 # Simulación de RAZONAMIENTO AUTÓNOMO para librerías desconocidas
-                # Extrae el nombre del artefacto y lo convierte a camelCase
                 parts = library_name.split(':')[-1].split('-')
                 target_var = parts[0] + "".join(p.capitalize() for p in parts[1:]) + "Version"
             
             # v2.0: Generar un razonamiento dinámico basado en la decisión tomada
             reasoning = f"Analizando {vuln_id}. La librería detectada es {library_name}."
             if "netty" in library_name:
-                reasoning += " Al pertenecer al ecosistema Netty, razono que lo más seguro y limpio es agruparla en la familia 'nettyCodecVersion' para mantener la coherencia de versiones en el monorepo."
+                reasoning += " Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'."
             elif "jackson" in library_name:
-                reasoning += " Detecto que es un artefacto de Jackson. Aplico la política de familia 'jacksonCoreVersion' para evitar conflictos entre módulos de serialización."
+                reasoning += " Como artefacto de Jackson, aplico la política de familia 'jacksonCoreVersion'."
             elif "spring" in library_name:
-                reasoning += " Es un componente de Spring. Centralizo la versión en 'springWebfluxVersion' siguiendo el estándar de arquitectura del proyecto."
+                reasoning += " Es un componente de Spring. Centralizo la versión en 'springBootVersion' siguiendo el estándar de arquitectura."
+            elif "log4j" in library_name:
+                reasoning += " Crítico de Log4j detectado. Aplico remediación en la familia 'log4jCoreVersion'."
             else:
-                reasoning += f" No pertenece a un grupo común conocido. Aplico el Estándar de Trinomio generando una variable ultra-específica '{target_var}' para mitigar el riesgo sin afectar otras dependencias."
+                reasoning += f" No pertenece a un grupo común conocido. Genero variable específica '{target_var}'."
 
             return f"""
             [PENSAMIENTO]: {reasoning}

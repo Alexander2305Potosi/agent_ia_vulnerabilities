@@ -1,0 +1,34 @@
+[
+    {
+        "priority": "high",
+        "cve": "CVE-2026-1001",
+        "library": "org.springframework.boot:spring-boot",
+        "vulnerable_version": "3.3.3",
+        "safe_version": "3.2.10, 3.3.4",
+        "description": "Critical Spring Boot vulnerability. Using real versions (3.3.4) for stability."
+    },
+    {
+        "priority": "medium",
+        "cve": "CVE-2026-2002",
+        "library": "com.fasterxml.jackson.core:jackson-databind",
+        "vulnerable_version": "2.18.0",
+        "safe_version": "2.18.1",
+        "description": "Standard Jackson Core vulnerability update."
+    },
+    {
+        "priority": "high",
+        "cve": "CVE-2026-3003",
+        "library": "org.apache.logging.log4j:log4j-core",
+        "vulnerable_version": "2.23.1",
+        "safe_version": "2.24.1",
+        "description": "Critical logging vulnerability triggering family-wide version variables."
+    },
+    {
+        "priority": "low",
+        "cve": "CVE-2024-4444",
+        "library": "io.netty:netty-common",
+        "vulnerable_version": "4.1.113.Final",
+        "safe_version": "4.1.114.Final, 4.2.0.Final",
+        "description": "Netty branch check using real stable version 4.1.114."
+    }
+]
