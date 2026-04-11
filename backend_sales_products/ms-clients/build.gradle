@@ -14,7 +14,6 @@ group = 'com.repaso.lab'
 version = '0.0.1-SNAPSHOT'
 
 dependencies {
-    // Escenario de Pruebas v2.1: Versiones Hardcoded
     implementation 'io.netty:netty-codec-http:4.1.130.Final'
     implementation 'com.fasterxml.jackson.core:jackson-core:2.17.5'
     

@@ -139,7 +139,6 @@ class GradleMutator:
         
         new_rule_full = "if (details.requested." + match_field + " == '" + package_or_name + "') {\n" + \
                         "        details.useVersion \"${" + var_name + "}\"\n" + \
-                        "        details.because \"" + reason + "\"\n" + \
                         "    }"
         
         # 1. Update existing rule if it exists (check both name and group patterns)
@@ -184,8 +183,7 @@ configurations.all {
 """
         return wrapper.strip(), True
 
-    INFRA_TEMPLATE = """// Standardized Dependency Management - Centralized AI Security Rules
-configurations.all {
+    INFRA_TEMPLATE = """configurations.all {
     resolutionStrategy.eachDependency { DependencyResolveDetails details ->
     }
 }
