@@ -72,6 +72,7 @@ class GenerativeAgentV2:
             """
         else:
             library_name = cve_data.get('library', '')
+            vuln_id = cve_data.get('cve') or cve_data.get('id', 'N/A')
             # v2.0: Lógica de simulación dinámica por familia (Priorizando consolidación manual pero permitiendo autonomía)
             if "netty" in library_name:
                 target_var = "nettyCodecVersion"
@@ -87,11 +88,21 @@ class GenerativeAgentV2:
                 parts = library_name.split(':')[-1].split('-')
                 target_var = parts[0] + "".join(p.capitalize() for p in parts[1:]) + "Version"
             
+            # v2.0: Generar un razonamiento dinámico basado en la decisión tomada
+            reasoning = f"Analizando {vuln_id}. La librería detectada es {library_name}."
+            if "netty" in library_name:
+                reasoning += " Al pertenecer al ecosistema Netty, razono que lo más seguro y limpio es agruparla en la familia 'nettyCodecVersion' para mantener la coherencia de versiones en el monorepo."
+            elif "jackson" in library_name:
+                reasoning += " Detecto que es un artefacto de Jackson. Aplico la política de familia 'jacksonCoreVersion' para evitar conflictos entre módulos de serialización."
+            elif "spring" in library_name:
+                reasoning += " Es un componente de Spring. Centralizo la versión en 'springWebfluxVersion' siguiendo el estándar de arquitectura del proyecto."
+            else:
+                reasoning += f" No pertenece a un grupo común conocido. Aplico el Estándar de Trinomio generando una variable ultra-específica '{target_var}' para mitigar el riesgo sin afectar otras dependencias."
+
             return f"""
-            [PENSAMIENTO]: Analiza el CVE. Si es una librería transitiva, aplica el 'Estándar de Trinomio'. Si pertenece a un grupo común (ej. Netty, Spring, Jackson), razona la agrupación por familia.
-            Analizando {cve_data.get('cve')}. La librería afectada es {library_name}. Requiere versión segura {cve_data.get('safe_version')}.
+            [PENSAMIENTO]: {reasoning}
             [ACCIÓN]: {target_var} = '{cve_data.get('safe_version')}'
-            [EXPLICACIÓN]: Se aplica el parche directo en el bloque ext del microservicio para mitigar el riesgo de seguridad centralizando la versión.
+            [EXPLICACIÓN]: Se aplica el parche directo en el bloque ext del microservicio para mitigar el riesgo de seguridad centralizando la versión mediante el Estándar de Trinomio.
             """
 
 if __name__ == "__main__":
