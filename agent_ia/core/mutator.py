@@ -238,6 +238,10 @@ configurations.all {{
             constraint_files = [new_path]
             if new_path not in project_files:
                 project_files.append(new_path)
+
+        # v2.3: Asegurar VÍNCULO siempre que existan archivos de restricción
+        if constraint_files and build_gradles:
+            root_folder = os.path.dirname(os.path.abspath(build_gradles[0]))
             GradleMutator._link_infrastructure(project_files, root_folder)
 
         has_changes = False
