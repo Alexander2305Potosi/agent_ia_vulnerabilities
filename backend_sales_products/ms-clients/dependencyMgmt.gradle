@@ -1,0 +1,8 @@
+// Standardized Dependency Management - Centralized AI Security Rules
+configurations.all {
+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+    if (details.requested.group == 'io.netty') {
+        details.useVersion "${nettyCodecVersion}"
+    }
+}
+}

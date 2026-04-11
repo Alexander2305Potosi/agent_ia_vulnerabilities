@@ -7,3 +7,13 @@ java {
 repositories {
     mavenCentral()
 }
+
+dependencies {
+    implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+}
+
+apply from: 'dependencyMgmt.gradle'
+
+test {
+    useJUnitPlatform()
+}

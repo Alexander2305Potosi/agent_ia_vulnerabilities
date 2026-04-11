@@ -1,6 +1,19 @@
-allprojects {
-    apply from: "dependencyMgmt.gradle"
-    dependencies {
-        implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
     }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+}
+
+apply from: 'dependencyMgmt.gradle'
+
+test {
+    useJUnitPlatform()
 }

@@ -66,9 +66,9 @@ class GenerativeAgentV2:
         """ Simula la respuesta experta del modelo v2.0. """
         if previous_error:
             return """
-            [PENSAMIENTO]: El error indica que la versión 4.1.132 no es compatible con el plugin de Spring Boot actual en este MS. Debo bajar a la 4.1.120 o actualizar el plugin.
-            [ACCIÓN]: springBootVersion = '3.5.7'
-            [EXPLICACIÓN]: Al actualizar el Framework Parent, se resuelven las dependencias transitivas de Netty de forma nativa sin conflictos.
+            [PENSAMIENTO]: El error indica un conflicto con la versión de Netty. Debo ajustar la versión de la familia nettyCodecVersion a una más estable compatible con el entorno actual.
+            [ACCIÓN]: nettyCodecVersion = '4.1.125.Final'
+            [EXPLICACIÓN]: Se ajusta la versión de Netty a una versión de parche anterior para resolver el conflicto de ejecución detectado en los tests.
             """
         else:
             library_name = cve_data.get('library', '')

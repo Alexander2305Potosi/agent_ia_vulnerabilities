@@ -37,20 +37,21 @@ class RemediationAgent:
         """
         ms_name = self.current_ms 
         ms_files = self.get_ms_files(ms_name)
+        ms_path = self._get_ms_path(ms_name)
+        
+        # Respaldar estado actual antes de la mutación
+        backups = self._backup_ms_files(ms_path)
         
         # 1. APLICACIÓN FÍSICA (Mutación de archivos)
-        # Extraemos specs de la vulnerabilidad para el motor de mutación
         package = cve_data.get('library') or cve_data.get('packageName')
         safe_ver = cve_data.get('safe_version') or "LATEST"
         
         print(f"    ⚙️ [MUTACIÓN] Aplicando {package} -> {safe_ver} en {ms_name}...")
         
-        # Intentar extraer el nombre de variable sugerido por la IA en la Acción
         suggested_var = None
         if "=" in action:
             suggested_var = action.split('=')[0].strip()
             
-        # El motor de mutación realiza el cambio en disco
         GradleMutator.apply_coordinated_remediation(
             ms_files,
             "TRANSITIVE",
@@ -66,7 +67,33 @@ class RemediationAgent:
         if success:
             return True, None
         else:
-            return False, f"Fallo en validación de Gradle en {ms_name} tras aplicar parche."
+            # Restaurar archivos si la validación falla
+            self._restore_ms_files(backups)
+            return False, f"Fallo en validación de Gradle en {ms_name} tras aplicar parche. Rollback ejecutado."
+
+    def _backup_ms_files(self, ms_path):
+        """Captura el estado de los archivos antes de la mutación, incluyendo los que no existen."""
+        backup = {"existing": {}, "new": []}
+        for f in ["build.gradle", "dependencyMgmt.gradle", "main.gradle", "settings.gradle"]:
+            p = os.path.join(ms_path, f)
+            if os.path.exists(p):
+                with open(p, 'r') as file:
+                    backup["existing"][p] = file.read()
+            else:
+                backup["new"].append(p)
+        return backup
+
+    def _restore_ms_files(self, backup):
+        """Restaura archivos modificados y elimina los creados durante el intento."""
+        # Restaurar existentes
+        for path, content in backup["existing"].items():
+            with open(path, 'w') as f:
+                f.write(content)
+        # Eliminar nuevos creados
+        for path in backup["new"]:
+            if os.path.exists(path):
+                os.remove(path)
+                print(f"    🗑️ [ROLLBACK] Eliminando archivo autogenerado: {os.path.basename(path)}")
 
     def _get_ms_path(self, ms_name):
         """ Busca recursivamente la ruta del microservicio. """
@@ -139,6 +166,10 @@ class RemediationAgent:
             
             if result.returncode != 0:
                 print(f"    🚫 [X] FALLO EN PRUEBAS: Errores detectados en la compilación/test.")
+                print(f"    --- STDOUT ---")
+                print(result.stdout)
+                print(f"    --- STDERR ---")
+                print(result.stderr)
                 return False
                 
             return True
