@@ -73,8 +73,8 @@ class GradleMutator:
         # 1. Empiecen por el base_name
         # 2. Sean diferentes a la original
         # 3. Estén en el bloque ext
-        # Regex más flexible para capturar variables específicas
-        pattern = rf"\s*({base_name}\w+Version)\s*=\s*['\"].*?['\"]"
+        # Regex más flexible para capturar variables específicas con cualquier indentación
+        pattern = rf"^\s*({base_name}\w+Version)\s*=\s*['\"].*?['\"]"
         
         lines = content.splitlines()
         new_lines = []
@@ -108,26 +108,44 @@ class GradleMutator:
     def substitute_literal_with_variable(content, package, var_name):
         """
         Replaces literal versions 'group:artifact:version' with 'group:artifact:$variableName'.
-        Handles implementation, testImplementation, api, etc.
-        Uses lambda for safe replacement.
+        v2.0: Ahora es FAMILY-AWARE. Si el paquete pertenece a una familia, sustituye TODO el grupo.
         """
-        # If package is just a group (no colon), skip substitution as it requires full ID
-        if ":" not in package:
+        # Determinar si el paquete pertenece a una familia (solo el grupo)
+        families = ["io.netty", "org.springframework", "com.fasterxml.jackson", "org.apache.logging.log4j"]
+        group_to_match = package.split(':')[0] if ":" in package else package
+        
+        # Si el grupo NO está en las familias, usamos el string exacto si tiene dos puntos
+        is_family = any(group_to_match.startswith(f) for f in families)
+        match_regex = re.escape(group_to_match) + r":[^'\"]+" if is_family else re.escape(package)
+        
+        if ":" not in package and not is_family:
             return content, False
 
-        # Match pattern: Any line containing implementation/runtimeOnly etc + group:artifact
-        # v2.0: Ahora preservamos la línea y sustituimos la versión por una variable
         verbs = "implementation|runtimeOnly|runtime|compileOnly|compile|api|testImplementation|testRuntimeOnly|testCompileOnly"
-        pattern = rf"^(\s*)({verbs})(\s*)['\"]{re.escape(package)}(?::[^'\"]+)?['\"]"
+        
+        # 1. Formato estándar: implementation 'group:artifact:version'
+        pattern = rf"^(\s*)({verbs})(\s*)['\"]{match_regex}['\"]"
         
         def replace_literal_fn(match):
-            return f"{match.group(1)}{match.group(2)}{match.group(3)}\"{package}:${{{var_name}}}\""
-            
+            # Extraer el ID completo (group:artifact) sin la versión
+            full_line = match.group(0)
+            # Reemplazar la parte de la versión ( :version ) por :${var_name}
+            # Buscamos el segundo ':' que separa artifact de version
+            if is_family:
+                # En familias, buscamos la estructura 'group:artifact:version' -> 'group:artifact:${var_name}'
+                return re.sub(rf"(['\"]{re.escape(group_to_match)}:[^: \t'\"]+):[^: \t'\"]+(['\"])", 
+                              rf"\1:${{{var_name}}}\2", full_line)
+            else:
+                return re.sub(rf"(['\"]{re.escape(package)}):[^: \t'\"]+(['\"])", 
+                              rf"\1:${{{var_name}}}\2", full_line)
+
         new_content, count = re.subn(pattern, replace_literal_fn, content, flags=re.MULTILINE)
         
-        # Also handle map style if needed: (group: '...', name: '...', version: '...')
-        group, artifact = package.split(':')
-        pattern_map = rf"(group:\s*['\"]{re.escape(group)}['\"],?\s*name:\s*['\"]{re.escape(artifact)}['\"],?\s*version:\s*['\"])([\d\.\-\w]+)(['\"])"
+        # 2. Formato de mapa: (group: '...', name: '...', version: '...')
+        group = group_to_match
+        artifact_pattern = r"[^'\"]+" if is_family else re.escape(package.split(':')[1])
+        
+        pattern_map = rf"(group:\s*['\"]{re.escape(group)}['\"],?\s*name:\s*['\"]{artifact_pattern}['\"],?\s*version:\s*['\"])([\d\.\-\w]+)(['\"])"
         
         def replace_map_fn(match):
             return f"{match.group(1)}${{{var_name}}}{match.group(3)}"
@@ -138,25 +156,43 @@ class GradleMutator:
 
     @staticmethod
     def find_variable_name_in_ext(content, artifact_name):
-        """ Tries to find which variable in the ext block likely corresponds to an artifact. """
-        clean_name = artifact_name.replace("-", "").replace(".", "").lower()
-        # Also try a prefix match (e.g., 'nettycodec' for 'netty-codec-http')
-        prefix_name = artifact_name.split('-')[0].lower() + "codec" if "codec" in artifact_name else artifact_name.split('-')[0].lower()
+        """ 
+        Identifica qué variable en el bloque ext corresponde al artefacto usando PESOS.
+        v2.0: Evita colisiones de prefijos (ej: springBoot vs springWebflux).
+        """
+        # Tokenizar el nombre del artefacto para scoring (ej: 'netty-codec-http' -> ['netty', 'codec', 'http'])
+        art_tokens = set(re.split(r'[\.\-\:]', artifact_name.lower()))
+        
+        best_var = None
+        max_score = -1
         
         pattern = r"(\w+)\s*=\s*['\"]([^'\"]+)['\"]"
         matches = re.finditer(pattern, content)
         for match in matches:
             var_name = match.group(1)
-            var_name_lower = var_name.lower()
-            if clean_name in var_name_lower or var_name_lower.startswith(prefix_name):
-                return var_name
-        return None
+            # Tokenizar variable (ej: 'nettyCodecVersion' -> ['netty', 'codec', 'version'])
+            var_tokens = set(re.findall(r'[a-z]+|[A-Z][a-z]*', var_name))
+            var_tokens = {t.lower() for t in var_tokens}
+            
+            # Calcular intersección de tokens
+            common = art_tokens.intersection(var_tokens)
+            score = len(common)
+            
+            # Bonus por coincidencia exacta de tokens clave
+            if any(t in var_tokens for t in art_tokens if len(t) > 3):
+                score += 1
+
+            if score > max_score and score > 0:
+                max_score = score
+                best_var = var_name
+                
+        return best_var
 
     @staticmethod
     def _accumulate_reason(existing_reason, new_reason):
         """ 
-        Combina razones con CRITERIO ESTRICTO (Whitelist). 
-        Solo permite IDs que cumplan con patrones de vulnerabilidad oficiales.
+        PROCESA la razón de remediación (Whitelist). 
+        v2.0: Solo mantiene la razón NUEVA, sin concatenar las anteriores.
         """
         prefix = "Fix: "
         
@@ -170,19 +206,16 @@ class GradleMutator:
             if not text: return set()
             findings = set()
             for pattern in security_patterns:
-                # Búsqueda global de IDs en el texto (insensible a mayúsculas)
                 matches = re.findall(pattern, text, re.IGNORECASE)
                 findings.update([m.upper() for m in matches])
             return findings
 
-        # Extraer IDs de la razón existente y de la nueva
-        ids = extract_valid_ids(existing_reason)
-        ids.update(extract_valid_ids(new_reason))
+        # Ignorar la razón existente y procesar solo la nueva
+        ids = extract_valid_ids(new_reason)
         
         if not ids:
             return f"{prefix}Security Fix"
             
-        # Ordenar alfabéticamente para consistencia
         sorted_ids = sorted(list(ids))
         return f"{prefix}{', '.join(sorted_ids)}"
 
@@ -346,7 +379,8 @@ configurations.all {{
     def _link_infrastructure(project_files, target_folder):
         """
         Asegura que el archivo orquestador (main o build) tenga el vínculo a dependencyMgmt.gradle
-        v2.0: Usa ${rootDir} y bloque allprojects.
+        v2.0: Usa ${rootDir}, bloque allprojects y configuración de repositorios.
+        INYECCIÓN INTELIGENTE: Evita duplicados analizando el contenido interno del bloque.
         """
         main_gradle = os.path.join(target_folder, "main.gradle")
         build_gradle = os.path.join(target_folder, "build.gradle")
@@ -356,27 +390,44 @@ configurations.all {{
             with open(orchestrator, 'r') as f:
                 content = f.read()
             
-            # 1. Detectar si el vínculo YA existe (con rootDir)
-            link_pattern = r"apply\s+from:\s*['\"].*?rootDir.*?dependencyMgmt\.gradle['\"]"
-            if re.search(link_pattern, content):
-                return False
-
-            # 2. Si existe el vínculo ANTIGUO (relativo), lo limpiamos para evitar duplicidad conflictiva
+            # Limpieza de vínculos antiguos (fuera de bloque o relativos)
             old_link_pattern = r"apply\s+from:\s*['\"]dependencyMgmt\.gradle['\"]"
             content = re.sub(old_link_pattern, "", content).strip()
 
-            print(f"    🔗 [LINK] Modernizando infraestructura en {os.path.basename(orchestrator)}...")
-            
             new_link_line = 'apply from: "${rootDir}/dependencyMgmt.gradle"'
+            repo_block = "repositories { mavenCentral() }"
             
-            # 3. Insertar en allprojects
-            if "allprojects {" in content:
-                # Insertar justo después de la apertura de allprojects
-                pattern = r"(allprojects\s*\{)"
-                new_content = re.sub(pattern, rf"\1\n    {new_link_line}", content, count=1)
-            else:
-                # Crear el bloque al final
-                new_content = content.rstrip() + f"\n\nallprojects {{\n    {new_link_line}\n}}\n"
+            allprojects_pos = content.find("allprojects")
+            if allprojects_pos != -1:
+                # 1. Analizar el bloque existente
+                start, end = GradleMutator._find_balanced_block(content, allprojects_pos)
+                if start and end:
+                    block_content = content[start:end]
+                    needs_update = False
+                    
+                    # Verificar Link (Robusto a espacios/comillas)
+                    has_link = re.search(r"apply\s+from:\s*['\"]\$?\{?rootDir\}?/dependencyMgmt\.gradle['\"]", block_content)
+                    # Verificar Repo (Robusto a nuevos formatos)
+                    has_repo = re.search(r"repositories\s*\{[\s\n]*mavenCentral\(\)[\s\n]*\}", block_content)
+                    
+                    if not has_link or not has_repo:
+                        print(f"    🔗 [SYNC] Actualizando bloque allprojects en {os.path.basename(orchestrator)}...")
+                        new_block = block_content
+                        if not has_link:
+                            new_block = new_block[:1] + f"\n    {new_link_line}" + new_block[1:]
+                        if not has_repo:
+                            new_block = new_block[:1] + f"\n    {repo_block}" + new_block[1:]
+                        
+                        new_content = content[:start] + new_block + content[end:]
+                        with open(orchestrator, 'w') as f:
+                            f.write(new_content)
+                        return True
+                    return False
+
+            # 2. Crear bloque completo si no existe
+            print(f"    🔗 [LINK] Creando infraestructura global en {os.path.basename(orchestrator)}...")
+            new_allprojects = f"\n\nallprojects {{\n    {new_link_line}\n    {repo_block}\n}}\n"
+            new_content = content.rstrip() + new_allprojects
             
             with open(orchestrator, 'w') as f:
                 f.write(new_content)

@@ -32,6 +32,7 @@ El campo `because` en Gradle debe seguir estrictamente un formato legible por hu
 - **Formato de IDs**: Lista de identificadores únicos (CVE o GHSA) separados por comas.
 - **Whitelist Regex**: `CVE-\d{4}-\d+` \| `GHSA-[a-z0-9-]+`
 - **Ejemplo**: `details.because "Fix: CVE-2026-33870, CVE-2026-33871"`
+- **Política de Limpieza**: El agente mantiene un registro de auditoría enfocado únicamente en la **última solución aplicada**. No se debe concatenar información de vulnerabilidades anteriores para evitar archivos de configuración sobrecargados e ilegibles.
 
 ---
 
@@ -42,6 +43,8 @@ Para evitar la corrupción de archivos que plagó versiones anteriores (v1.x), c
 - **Sustitución Activa de Literales**: Cuando se inyecta una variable de familia, el agente debe escanear todos los archivos `build.gradle` y reemplazar dependencias directas en formato literal (`"group:artifact:version"`) por el formato dinámico (`"group:artifact:${variableVersion}"`).
 - **Purga de Redundancia**: Si se inyecta una variable "paraguas" (ej: `nettyCodecVersion`), se deben eliminar variables específicas y redundantes del bloque `ext` (ej: `nettyHandlerVersion`) para mantener el código limpio.
 - **Inteligencia de Rama (Multi-Branch Support)**: El agente de mutación **NO DEBE** asumir que la primera versión de una lista de seguridad es la correcta. Debe realizar una coincidencia de rama basada en `Major.Minor` (ej: si el proyecto usa 4.2.9, debe buscar el parche en la línea 4.2.x y no saltar a la 4.1.x o 5.x automáticamente).
+- **Weighted Token-Based Matching**: Para evitar colisiones en la detección de variables (ej: diferenciar entre `spring-boot` y `spring-web`), el mutador debe utilizar un motor de coincidencia ponderada basado en tokens. Se asignan pesos a las coincidencias exactas para garantizar que se elija la variable con mayor relevancia semántica.
+- **Compatibilidad de Runtime (JUnit 5)**: En proyectos Spring Boot 3 / Gradle 8+, el mutador debe asegurar la presencia de `testRuntimeOnly 'org.junit.platform:junit-platform-launcher'` en el bloque de dependencias. Sin este componente, el proceso de validación real podría fallar prematuramente.
 
 ---
 
@@ -57,6 +60,8 @@ allprojects {
     }
 }
 ```
+
+- **Idempotencia Garantizada**: Cualquier inyección de este bloque debe ser consciente del contexto (Block-Aware). Antes de inyectar, el agente debe verificar si los componentes ya existen dentro del bloque `allprojects` para evitar duplicaciones innecesarias del código.
 
 ---
 

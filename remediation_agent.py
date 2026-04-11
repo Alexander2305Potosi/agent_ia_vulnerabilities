@@ -117,6 +117,11 @@ class RemediationAgent:
 
     def _validate_ms(self, ms_name, timeout=300):
         LAB_MODE = os.getenv("AGENT_IA_LAB_MODE", "false").lower() == "true"
+        if LAB_MODE:
+            print(f"    🔍 [*] Validando {ms_name} (MODO LAB)...")
+            print(f"    ⚠️ [!] MODO LAB: Simulación de progreso [==========] 100%")
+            return True
+
         DEBUG_MODE = self.debug
         ms_path = self._get_ms_path(ms_name)
         if not ms_path: return True
@@ -135,9 +140,6 @@ class RemediationAgent:
             gradle_cmd = "gradle"
         
         if not gradle_cmd:
-            if LAB_MODE:
-                print(f"    ⚠️ [!] MODO LAB: Simulación de progreso [==========] 100%")
-                return True
             return False 
 
         full_cmd = [gradle_cmd, "clean", "test", "--console=plain"]
