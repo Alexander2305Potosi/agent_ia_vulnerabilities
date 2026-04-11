@@ -1,20 +1,20 @@
-// Standardized Dependency Management - Centralized AI Security Rules
 configurations.all {
     resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-    if (details.requested.name == 'jackson-core') {
-        details.useVersion "${jacksonCoreVersion}"
-        details.because "Fixes GHSA-72hv-8253-57qq"
+        if (details.requested.name == 'jackson-core') {
+            details.useVersion "${jacksonCoreVersion}"
+            details.because "Fixes GHSA-72hv-8253-57qq"
+        }
+        if (details.requested.group == 'io.netty') {
+            details.useVersion "${nettyCodecVersion}"
+            details.because "v2.0 Generative Fix: CVE-2026-33871"
+        }
+        if (details.requested.name == 'assertj-core') {
+            details.useVersion "${assertjCoreVersion}"
+            details.because "Fixes CVE-2026-24400"
+        }
+        if (details.requested.name == 'spring-webflux') {
+            details.useVersion "${springWebfluxVersion}"
+            details.because "Fixes CVE-2026-22735"
+        }
     }
-    if (details.requested.group == 'io.netty') {
-        details.useVersion "${nettyCodecVersion}"
-    }
-    if (details.requested.name == 'assertj-core') {
-        details.useVersion "${assertjCoreVersion}"
-        details.because "Fixes CVE-2026-24400"
-    }
-    if (details.requested.name == 'spring-webflux') {
-        details.useVersion "${springWebfluxVersion}"
-        details.because "Fixes CVE-2026-22735"
-    }
-}
 }

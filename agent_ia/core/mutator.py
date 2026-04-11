@@ -135,49 +135,50 @@ class GradleMutator:
         
         match_field = "group" if is_group else "name"
         
-        new_rule_full = "if (details.requested." + match_field + " == '" + package_or_name + "') {\n" + \
-                        "        details.useVersion \"${" + var_name + "}\"\n" + \
-                        "    }"
+        # v2.1: Estándar de indentación estricto (4 espacios por nivel)
+        i4 = "    "
+        i8 = "        "
+        i12 = "            "
         
-        # 1. Update existing rule if it exists (check both name and group patterns)
-        pattern_existing = rf"if\s*\(\s*details\.requested\.({match_field})\s*==\s*['\"]{re.escape(package_or_name)}['\"]\s*\)\s*\{{.*?\n\s*\}}"
-        if re.search(pattern_existing, content, re.DOTALL):
-            return re.sub(pattern_existing, lambda m: new_rule_full, content, flags=re.DOTALL), True
+        because_clause = f"\n{i12}details.because \"{reason}\"" if reason else ""
+        new_rule = (f"{i8}if (details.requested.{match_field} == '{package_or_name}') {{\n"
+                    f"{i12}details.useVersion \"${{{var_name}}}\"{because_clause}\n"
+                    f"{i8}}}")
+        
+        # 1. Update existing rule if it exists (robust match including indentation)
+        pattern_existing = rf"^[^\S\r\n]*if\s*\(\s*details\.requested\.({match_field})\s*==\s*['\"]{re.escape(package_or_name)}['\"]\s*\)\s*\{{.*?\n[^\S\r\n]*\}}"
+        if re.search(pattern_existing, content, re.DOTALL | re.MULTILINE):
+            return re.sub(pattern_existing, lambda m: new_rule, content, flags=re.DOTALL | re.MULTILINE), True
 
         # 2. Inject into existing eachDependency block
         if "resolutionStrategy.eachDependency" in content:
-            # Find the start of the eachDependency closure
             start_keyword = "resolutionStrategy.eachDependency"
             start_index = content.find(start_keyword)
             brace_index = content.find("{", start_index)
             
             if brace_index != -1:
-                # Find matching closing brace using stack
                 stack = 1
                 end_index = -1
                 for i in range(brace_index + 1, len(content)):
                     if content[i] == '{': stack += 1
                     elif content[i] == '}': stack -= 1
-                    
                     if stack == 0:
                         end_index = i
                         break
                 
                 if end_index != -1:
-                    # Inject BEFORE the closing brace
+                    # Inyección limpia: eliminar espacios en blanco previos y asegurar un solo salto
                     prefix = content[:end_index].rstrip()
                     suffix = content[end_index:]
-                    new_content = prefix + "\n    " + new_rule_full + "\n" + suffix
-                    return new_content, True
+                    return f"{prefix}\n{new_rule}\n{i4}{suffix}", True
 
-        # 3. Create block from scratch with proper configuration wrapper
-        wrapper = """
-// Standardized Dependency Management - Centralized AI Security Rules
-configurations.all {
-    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-        """ + new_rule_full + """
-    }
-}
+        # 3. Create from scratch
+        wrapper = f"""// Standardized Dependency Management - Centralized AI Security Rules
+configurations.all {{
+    resolutionStrategy.eachDependency {{ DependencyResolveDetails details ->
+{new_rule}
+    }}
+}}
 """
         return wrapper.strip(), True
 
@@ -200,12 +201,13 @@ configurations.all {
             with open(orchestrator, 'r') as f:
                 content = f.read()
             
-            link_line = "apply from: 'dependencyMgmt.gradle'"
-            if link_line not in content:
+            # v2.0: Búsqueda robusta con regex para evitar duplicados por comillas o espacios
+            link_pattern = r"apply\s+from:\s*['\"]dependencyMgmt\.gradle['\"]"
+            if not re.search(link_pattern, content):
                 print(f"    🔗 [LINK] Vinculando infraestructura en {os.path.basename(orchestrator)}...")
                 with open(orchestrator, 'a') as f:
                     if not content.endswith('\n'): f.write('\n')
-                    f.write(link_line + '\n')
+                    f.write("apply from: 'dependencyMgmt.gradle'\n")
 
     @staticmethod
     def apply_coordinated_remediation(project_files, mode, artifact_name, version, reason, override_var_name=None):
