@@ -45,14 +45,23 @@ El agente opera como una colmena coordinada de componentes locales:
 - Modelo GGUF en `agent_ia/models/` (Recomendado: 4-6GB RAM libres).
 
 ## 🖱️ Guía de Ejecución Rápida
-Para operar el Agente de forma eficiente y portable, utiliza los siguientes flags coordinados:
+El Agente es flexible y permite operar en modo "Solo Lectura/Escritura Local" o en modo "Persistencia Git". Selecciona la combinación que mejor se adapte a tu flujo de trabajo:
 
-| Operación | Comando Sugerido |
-| :--- | :--- |
-| **Remediación Total** | `python3 remediation_agent.py --commit` |
-| **Filtrado por Microservicios** | `python3 remediation_agent.py --folders ms-auth ms-sales --commit` |
-| **Ruta Gradle Personalizada** | `python3 remediation_agent.py --gradle-path /usr/local/bin/gradle --commit` |
-| **Modo Debug** | `python3 remediation_agent.py --debug --folders ms-clients` |
+### 🎮 Combinaciones de Comandos
+
+| Caso de Uso | Comando Sugerido | Descripción |
+| :--- | :--- | :--- |
+| **Fix Local (Dry-Run)** | `python3 remediation_agent.py` | Modifica los archivos físicamente pero **NO crea ramas ni commits**. Útil para inspección manual previa. |
+| **Remediación Total Segura** | `python3 remediation_agent.py -c` | El estándar de producción. Aplica cambios, valida y **crea rama/commit** solo si el build es exitoso. |
+| **Foco en Microservicio** | `python3 remediation_agent.py -f ms-auth -c` | Ejecuta la inteligencia solo en la carpeta especificada y persiste resultados validados en Git. |
+| **Diagnóstico & Debug** | `python3 remediation_agent.py --debug -f ms-clients` | Habilita la salida detallada de Gradle en tiempo real para entender por qué falla un test. |
+| **Entorno Personalizado** | `python3 remediation_agent.py --gradle-path /usr/bin/gradle -c` | Fuerza el uso de una instalación específica de Gradle en entornos donde no existe el `gradlew`. |
+| **Reporte Externo** | `python3 remediation_agent.py --report scanning_report.json` | Ejecuta el ciclo de remediación basándose en un archivo JSON específico de vulnerabilidades. |
+
+### 🛡️ Lógica de Persistencia `--commit`
+Es importante entender que el Agente prioriza la integridad del monorepo:
+1. **Sin el flag `--commit`**: El agente es destructivo localmente (modifica archivos) pero **conservador en Git**.
+2. **Con el flag `--commit`**: El agente garantiza que **CADA commit es un BUILD SUCCESSFUL**. Si la validación falla, se realiza un rollback automático y Git permanece limpio.
 
 ## 🔍 Monitoreo y Depuración (Modo Debug)
 Si el proceso de validación (`gradle clean test`) toma mucho tiempo y deseas ver qué está ocurriendo, puedes activar el **Modo Debug** para habilitar la salida detallada de Gradle en tiempo real.
