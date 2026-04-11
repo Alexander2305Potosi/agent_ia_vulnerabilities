@@ -140,15 +140,15 @@ class GradleMutator:
         i8 = "        "
         i12 = "            "
         
-        because_clause = f"\n{i12}details.because \"{reason}\"" if reason else ""
-        new_rule = (f"{i8}if (details.requested.{match_field} == '{package_or_name}') {{\n"
-                    f"{i12}details.useVersion \"${{{var_name}}}\"{because_clause}\n"
-                    f"{i8}}}")
+        new_rule = f"{i8}if (details.requested.{match_field} == '{package_or_name}') {{\n" + \
+                   f"{i12}details.useVersion \"${{{var_name}}}\"\n" + \
+                   f"{i12}details.because \"{reason or 'Security Fix'}\"\n" + \
+                   f"{i8}}}"
         
-        # 1. Update existing rule if it exists (robust match including indentation)
-        pattern_existing = rf"^[^\S\r\n]*if\s*\(\s*details\.requested\.({match_field})\s*==\s*['\"]{re.escape(package_or_name)}['\"]\s*\)\s*\{{.*?\n[^\S\r\n]*\}}"
-        if re.search(pattern_existing, content, re.DOTALL | re.MULTILINE):
-            return re.sub(pattern_existing, lambda m: new_rule, content, flags=re.DOTALL | re.MULTILINE), True
+        # 1. Update existing rule if it exists (check both name and group patterns)
+        pattern_existing = rf"if\s*\(\s*details\.requested\.({match_field})\s*==\s*['\"]{re.escape(package_or_name)}['\"]\s*\)\s*\{{.*?\n\s*\}}"
+        if re.search(pattern_existing, content, re.DOTALL):
+            return re.sub(pattern_existing, lambda m: new_rule, content, flags=re.DOTALL), True
 
         # 2. Inject into existing eachDependency block
         if "resolutionStrategy.eachDependency" in content:

@@ -42,10 +42,25 @@ El agente opera como una colmena coordinada de componentes locales:
 - Modelo GGUF en `agent_ia/models/` (Recomendado: 4-6GB RAM libres).
 
 ## 🖱️ Ejecución
-Ejecuta el agente principal con un solo comando:
+Ejecuta el agente principal:
 ```bash
 python3 remediation_agent.py
 ```
+
+## 🔍 Monitoreo y Depuración (Modo Debug)
+Si el proceso de validación (`gradle clean test`) toma mucho tiempo y deseas ver qué está ocurriendo, puedes activar el **Modo Debug** para habilitar la salida detallada de Gradle en tiempo real.
+
+### Via Flag CLI:
+```bash
+python3 remediation_agent.py --debug
+```
+
+### Via Variable de Entorno:
+```bash
+AGENT_IA_DEBUG=true python3 remediation_agent.py
+```
+
+En este modo, el agente agrega el flag `--info` a Gradle e imprime cada línea de la consola para un seguimiento exhaustivo del progreso.
 
 ---
 *Protección Generativa para Microservices. Inteligencia v2.0 Local y Privada.*

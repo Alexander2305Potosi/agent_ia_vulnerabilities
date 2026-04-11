@@ -16,8 +16,9 @@ class RemediationAgent:
     MODEL_PATH = os.path.join(os.path.dirname(__file__), "agent_ia", "models", "remediation_v2_3bits.gguf")
     GIT_COMMIT_ENABLED = False
 
-    def __init__(self, root_path, report_path=None):
+    def __init__(self, root_path, report_path=None, debug=False):
         self.root_path = root_path
+        self.debug = debug or os.getenv("AGENT_IA_DEBUG", "false").lower() == "true"
         
         # Lógica de rutas de datos v2.0
         default_report = os.path.join(os.path.dirname(__file__), "agent_ia", "data", "cve", "snyk_monorepo.json")
@@ -57,7 +58,7 @@ class RemediationAgent:
             "TRANSITIVE",
             package,
             safe_ver,
-            reason=f"v2.0 Generative Fix: {cve_data.get('cve')}",
+            reason=f"Fix: {cve_data.get('cve')}",
             override_var_name=suggested_var
         )
         
@@ -130,6 +131,7 @@ class RemediationAgent:
         Ejecuta gradlew clean test con monitoreo en tiempo real.
         """
         LAB_MODE = os.getenv("AGENT_IA_LAB_MODE", "true").lower() == "true"
+        DEBUG_MODE = self.debug
         ms_path = self._get_ms_path(ms_name)
         if not ms_path: return False
         
@@ -154,6 +156,9 @@ class RemediationAgent:
 
         # Ejecución con monitoreo en tiempo real
         full_cmd = [gradle_cmd, "clean", "test", "--console=plain"]
+        if DEBUG_MODE:
+            full_cmd.append("--info")
+            print(f"    🛠️ [DEBUG] Ejecutando comando: {' '.join(full_cmd)}")
         try:
             process = subprocess.Popen(
                 full_cmd,
@@ -175,7 +180,11 @@ class RemediationAgent:
                 if line:
                     clean_line = line.strip()
                     stdout_lines.append(line)
-                    if clean_line.startswith("> Task"):
+                    
+                    if DEBUG_MODE:
+                        # En modo debug, imprimimos TODO el detalle
+                        print(f"    [GRADLE] {clean_line}")
+                    elif clean_line.startswith("> Task"):
                         # Visualización de progreso simplificada
                         print(f"    ⚙️ [PROGRESS] {clean_line}")
 
@@ -265,5 +274,8 @@ class RemediationAgent:
         print("="*40)
 
 if __name__ == "__main__":
-    agent = RemediationAgent(os.getcwd())
+    import sys
+    # Soporte para flag --debug via CLI
+    debug_flag = "--debug" in sys.argv
+    agent = RemediationAgent(os.getcwd(), debug=debug_flag)
     agent.run()
