@@ -44,36 +44,15 @@ El agente opera como una colmena coordinada de componentes locales:
 - `pip install -r agent_ia/requirements.txt`
 - Modelo GGUF en `agent_ia/models/` (Recomendado: 4-6GB RAM libres).
 
-## 🖱️ Ejecución y Filtrado
-El agente permite una ejecución flexible mediante banderas de línea de comandos:
+## 🖱️ Guía de Ejecución Rápida
+Para operar el Agente de forma eficiente y portable, utiliza los siguientes flags coordinados:
 
-### Ejecución Total (Por defecto)
-Procesa todas las vulnerabilidades detectadas en todos los microservicios:
-```bash
-python3 remediation_agent.py
-```
-
-### 🎯 Filtrado Selectivo (`--folders`)
-Puedes especificar uno o varios microservicios para enfocar la remediación:
-```bash
-# Un solo servicio
-python3 remediation_agent.py --folders ms-clients
-
-# Múltiples servicios
-python3 remediation_agent.py -f ms-auth ms-sales
-```
-
-### 📦 Integración con Git (`--commit`)
-Habilita la creación automática de una rama de seguridad y un commit consolidado solo si hubo éxitos:
-```bash
-python3 remediation_agent.py -c --folders ms-clients
-```
-
-### ⚙️ Ruta Gradle Personalizada (`--gradle-path`)
-Si el Agente no encuentra Gradle, indícale una ruta absoluta:
-```bash
-python3 remediation_agent.py --gradle-path /usr/local/bin/gradle
-```
+| Operación | Comando Sugerido |
+| :--- | :--- |
+| **Remediación Total** | `python3 remediation_agent.py --commit` |
+| **Filtrado por Microservicios** | `python3 remediation_agent.py --folders ms-auth ms-sales --commit` |
+| **Ruta Gradle Personalizada** | `python3 remediation_agent.py --gradle-path /usr/local/bin/gradle --commit` |
+| **Modo Debug** | `python3 remediation_agent.py --debug --folders ms-clients` |
 
 ## 🔍 Monitoreo y Depuración (Modo Debug)
 Si el proceso de validación (`gradle clean test`) toma mucho tiempo y deseas ver qué está ocurriendo, puedes activar el **Modo Debug** para habilitar la salida detallada de Gradle en tiempo real.
