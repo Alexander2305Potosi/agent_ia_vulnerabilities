@@ -35,8 +35,17 @@ El campo `because` en Gradle debe seguir estrictamente un formato legible por hu
 
 ---
 
-### 4. Patrón de Inyección estructural (Gradle)
-El agente utiliza un **Parser de Llaves Balanceadas** para inyectar o actualizar el siguiente bloque en `dependencyMgmt.gradle`:
+### 4. Estándar de Implementación Técnica
+Para evitar la corrupción de archivos que plagó versiones anteriores (v1.x), cualquier mutador que actúe sobre Gradle **DEBE** seguir estos requisitos funcionales:
+
+- **Balanced Brace Tracking**: No se permiten expresiones regulares simples para modificar bloques de configuración (como `ext { ... }` o `resolutionStrategy { ... }`). Se debe usar un rastreador de llaves balanceadas `{}` para identificar el inicio y fin exacto de cada bloque, garantizando cierres limpios.
+- **Sustitución Activa de Literales**: Cuando se inyecta una variable de familia, el agente debe escanear todos los archivos `build.gradle` y reemplazar dependencias directas en formato literal (`"group:artifact:version"`) por el formato dinámico (`"group:artifact:${variableVersion}"`).
+- **Purga de Redundancia**: Si se inyecta una variable "paraguas" (ej: `nettyCodecVersion`), se deben eliminar variables específicas y redundantes del bloque `ext` (ej: `nettyHandlerVersion`) para mantener el código limpio.
+
+---
+
+### 5. Patrón de Inyección estructural (Gradle)
+El agente utiliza el **Balanced Brace Parser** para inyectar o actualizar el siguiente bloque en `dependencyMgmt.gradle`:
 
 ```gradle
 configurations.all {
@@ -53,18 +62,27 @@ configurations.all {
 
 ---
 
-### 5. Políticas de Validación y Resiliencia
-- **Atomicidad**: Antes de cada cambio, se respaldan los archivos `build.gradle`, `main.gradle` y `dependencyMgmt.gradle`.
-- **Detección de Fallos**: Si `gradle clean test` retorna un código de salida distinto de 0, se ejecuta un **Rollback Total** inmediato.
-- **Modo Estricto**: El agente no asume éxito si no puede verificar la construcción (Blindness Check).
+### 6. Procedimiento de Auto-Healing (Recuperación)
+Si la infraestructura se corrompe o se pierden funcionalidades:
+1. **Validación de Enlace**: Asegurarse de que `main.gradle` o `build.gradle` contengan la línea `apply from: 'dependencyMgmt.gradle'`. Si no existe, re-vincularla al final del bloque de dependencias.
+2. **Re-Sincronización de Variables**: Si una regla en `dependencyMgmt.gradle` referencia una variable inexistente en `ext`, el agente debe identificar la carpeta del microservicio y re-crear la variable en el `build.gradle` más cercano.
+3. **Rollback de Emergencia**: Ante cualquier `BUILD FAILED`, se debe restaurar el estado de los archivos binarios (respaldo de texto plano) previo a la mutación.
 
 ---
 
-### 6. Punto de Retorno (Recovery)
-Si las reglas en el código se pierden o se corrompen:
-1. Re-analizar este archivo para identificar las variables (`ext`) que deben existir.
-2. Re-inyectar los bloques `apply from: 'dependencyMgmt.gradle'` en los archivos `main.gradle`.
-3. Verificar la existencia de las variables de familia en el `ext` del `build.gradle` raíz o del microservicio.
+### 7. Resumen de Familias (Referencia Rápida)
+- `io.netty` -> `nettyCodecVersion`
+- `org.springframework` -> `springBootVersion`
+- `com.fasterxml.jackson` -> `jacksonCoreVersion`
+- `org.apache.logging.log4j` -> `log4jVersion`
 
-> [!IMPORTANT]
-> **Modificación Manual**: Si se ajustan estas reglas manualmente, el agente intentará respetarlas en el próximo ciclo mediante su lógica de **Acumulación de Razones** (v2.1+).
+---
+
+### 8. Guía para Ajustes Futuros (Prompting)
+Si en el futuro deseas que una IA (como Antigravity u otra) modifique estas reglas o añada nuevas funcionalidades, puedes usar este archivo como contexto base con el siguiente comando de prompt:
+
+> **PROMPT SUGERIDO**:
+> *"Analiza el archivo `remediation_rules.md` v2.0 adjunto. Basándote en sus estándares técnicos y familias actuales, por favor [AÑADE/MODIFICA] lo siguiente: [TU REQUERIMIENTO, ej: 'Añade una nueva familia para com.google.guava']. 
+> Asegúrate de mantener el estándar de metadatos 'Fix: CVE' y respeta el requisito del Balanced Brace Parser."*
+
+Esta sección garantiza que cualquier extensión futura del agente sea consistente con la arquitectura de "Cero Corrupción" establecida en esta versión.
