@@ -68,7 +68,7 @@ class GenerativeAgentV2:
         if previous_error:
             return """
             [PENSAMIENTO]: El error indica un conflicto con la versión de Netty. Debo ajustar la versión de la familia nettyCodecVersion a una más estable compatible con el entorno actual.
-            [ACCIÓN]: nettyCodecVersion = '4.1.125.Final'
+            [ACCIÓN]: nettyCodecVersion = '4.1.118.Final'
             [EXPLICACIÓN]: Se ajusta la versión de Netty a una versión de parche anterior para resolver el conflicto de ejecución detectado en los tests.
             """
         else:

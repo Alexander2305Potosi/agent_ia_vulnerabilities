@@ -27,26 +27,30 @@ class CycleOfConsciousness:
             response = self.engine.generate_remediation(cve_data, local_context, previous_error)
             parsed = self.engine.parse_react_response(response)
             
-            print(f"    [PENSAMIENTO]: {parsed['thought'][:100]}...")
+            print(f"    [PENSAMIENTO]: {parsed['thought']}")
             print(f"    [ACCIÓN]: {parsed['action']}")
             
             # 2. APLICACIÓN (Aquí iría el Mutator real, simulamos éxito para la prueba lógica)
             # self.apply(parsed['action'])
             
             # 3. VALIDACIÓN (Gradle / Pip / etc)
-            # PASAMOS cve_data para que el validador pueda aplicar el parche físico
             success, result_data = self.validate(parsed['action'], attempts, cve_data)
             
             if success:
                 print(f"    [OK] Ciclo completado exitosamente en el intento {attempts}.")
                 return True, parsed['explanation'], result_data
             else:
-                # 4. APRENDIZAJE (Ciclo de Conciencia)
+                # 4. ERROR FATAL (Abortar Ciclo)
+                if isinstance(result_data, dict) and result_data.get("fatal"):
+                    print(f"    [FATAL] {result_data.get('message', 'Error de infraestructura')}")
+                    return False, f"Abortado por error fatal: {result_data.get('message')}", result_data
+
+                # 5. APRENDIZAJE (Ciclo de Conciencia)
                 print(f"    [!] Error detectado. Re-inyectando contexto de fallo al modelo...")
                 previous_error = result_data # Aquí result_data es el error_log
                 
         print("    [ERROR] No se pudo solventar la vulnerabilidad tras los intentos permitidos.")
-        return False, "Se agotaron los intentos de autocuración.", None
+        return False, "Se agotaron los intentos de autocuración o error persistente.", None
 
 if __name__ == "__main__":
     # Prueba rápida del ciclo

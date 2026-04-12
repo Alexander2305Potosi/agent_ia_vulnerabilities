@@ -1,9 +1,18 @@
 [
     {
-        "priority": "critical",
-        "cve": "CVE-RETRY-LEARN",
-        "library": "io.netty:netty-handler",
-        "safe_version": "9.9.9.NONEXISTENT",
-        "microservice": "ms-auth"
+        "priority": "medium low",
+        "cve": "CVE-2026-33870",
+        "library": "io.netty:netty-codec-http",
+        "vulnerable_version": "4.1.130.Final",
+        "safe_version": "4.1.132.Final, 4.2.10.Final",
+        "description": "Netty is an asynchronous, event-driven network application framework. In versions prior to 4.1.132.Final and 4.2.10.Final, Netty incorrectly parses qu"
+    },
+    {
+        "priority": "medium low",
+        "cve": "CVE-2026-33871",
+        "library": "io.netty:netty-codec-http2",
+        "vulnerable_version": "4.1.130.Final",
+        "safe_version": "4.1.132.Final, 4.2.11.Final",
+        "description": "Netty is an asynchronous, event-driven network application framework. In versions prior to 4.1.132.Final and 4.2.10.Final, a remote user can trigger a"
     }
 ]

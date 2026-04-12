@@ -1,30 +1,40 @@
 import subprocess
 import re
 import os
+from agent_ia.core.providers import JDKManager
 
 class DependencyGraph:
     """
-    Analizador de Grafo de Dependencias v.30.
+    Analizador de Grafo de Dependencias v.30.13.
     Permite descubrir el linaje y origen de las vulnerabilidades transitivas.
+    Soporta Adaptación de Entorno (JDK-Aware).
     """
     
     def __init__(self, gradle_cmd):
         self.gradle_cmd = gradle_cmd
         self.graph = {} # {child: [parents]}
+        self.java_home = JDKManager.get_best_java_home()
         
     def build_for_project(self, project_path):
         """ Ejecuta gradle dependencies y construye el grafo en memoria. """
         try:
             # v.30: Usar configuración runtimeClasspath por ser la más certera para seguridad
             cmd = [self.gradle_cmd, "dependencies", "--configuration", "runtimeClasspath"]
-            result = subprocess.run(cmd, cwd=project_path, capture_output=True, text=True, check=True)
+            
+            # v.30.13: Inyectar JAVA_HOME si fue detectado para evitar fallos de inicialización
+            env = os.environ.copy()
+            if self.java_home:
+                env["JAVA_HOME"] = self.java_home
+                env["PATH"] = os.path.join(self.java_home, "bin") + os.pathsep + env.get("PATH", "")
+
+            result = subprocess.run(cmd, cwd=project_path, capture_output=True, text=True, check=True, env=env)
             self._parse_output(result.stdout)
             return True
         except Exception as e:
             # Fallback silencioso pero informativo
             print(f"    ⚠️ [GRAPH] Error construyendo grafo: {str(e)}")
             return False
-
+    
     def _parse_output(self, output):
         lines = output.splitlines()
         stack = [] # [(indent, artifact_id)]

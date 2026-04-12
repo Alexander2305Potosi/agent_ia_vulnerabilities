@@ -2,401 +2,175 @@ import json
 import os
 import sys
 import time
-import shutil
-import subprocess
 import argparse
 import re
 from datetime import datetime
+from typing import List, Dict, Optional
 
-is_windows = os.name == 'nt'
-
-# Carga de Módulos Modulares v.30
+# Orquestador Final v.30.13 (Intelligent Lifecycle)
 from agent_ia.core.mutator import GradleMutator
 from agent_ia.engine.generative import GenerativeAgentV2
 from agent_ia.core.consciousness import CycleOfConsciousness
 from agent_ia.core.graph import DependencyGraph
+from agent_ia.core.providers import FSProvider, GradleProvider, GitProvider
+from agent_ia.models.vulnerability import Vulnerability, RemediationResult
 
 class RemediationAgent:
-    # CONFIGURACIÓN v.30: Ruta al modelo GGUF en la nueva estructura modular
+    """Orquestador Principal v.30.13 (Adaptive Environment)."""
+    
     MODEL_PATH = os.path.join(os.path.dirname(__file__), "agent_ia", "models", "remediation_v2_3bits.gguf")
 
-    def __init__(self, root_path, report_path=None, debug=False, target_folders=None, commit_enabled=False, gradle_path=None):
+    def __init__(self, root_path: str, report_path: str = None, debug: bool = False, target_folders: List[str] = None, commit_enabled: bool = False, gradle_path: str = None):
         self.root_path = root_path
-        self.debug = debug or os.getenv("AGENT_IA_DEBUG", "false").lower() == "true"
+        self.debug = debug or os.getenv("AGENT_IA_DEBUG", "false").lower() == "true" or os.getenv("AGENT_IA_LAB_MODE", "false").lower() == "true"
         self.target_folders = target_folders or []
-        self.commit_enabled = commit_enabled
-        self.gradle_path = gradle_path
-        self.gradle_bin = None # Determinado dinámicamente
         
-        # Lógica de rutas de datos v.30
-        default_report = os.path.join(os.path.dirname(__file__), "agent_ia", "data", "cve", "snyk_monorepo.json")
-        self.report_path = report_path or default_report
+        self.fs = FSProvider(root_path)
+        self.gradle = GradleProvider(debug=self.debug, gradle_path=gradle_path)
+        self.git = GitProvider(enabled=commit_enabled)
         
+        self.report_path = report_path or os.path.join(os.path.dirname(__file__), "agent_ia", "data", "cve", "snyk_monorepo.json")
         self.history = []
         
-        # Inicialización de Inteligencia Generativa v.30
         print(f"🚀 [*] Inicializando Cerebro Generativo v.30...")
         self.engine = GenerativeAgentV2(model_path=self.MODEL_PATH if os.path.exists(self.MODEL_PATH) else None)
         self.cycle_controller = CycleOfConsciousness(self.engine, self._validate_and_learn)
-        self.graph_analyzer = None # Inicializado bajo demanda
+        self.current_ms = None
 
-    def _validate_and_learn(self, action, attempt, cve_data):
-        """
-        Punto de validación para el Ciclo de Conciencia.
-        """
-        ms_name = self.current_ms 
-        ms_files = self.get_ms_files(ms_name)
-        ms_path = self._get_ms_path(ms_name)
+    def _validate_and_learn(self, action: str, attempt: int, cve_data: Dict):
+        vuln = Vulnerability(cve_data)
+        ms_name = self.current_ms
+        ms_path = self.fs.get_ms_path(ms_name)
+        if not ms_path: return False, f"Ruta para {ms_name} no encontrada en validación."
+        ms_files = self.fs.get_ms_files(ms_path)
         
-        # Respaldar estado actual antes de la mutación
-        backups = self._backup_ms_files(ms_path)
+        backups = self.fs.backup_files(ms_files)
         
-        # 1. APLICACIÓN FÍSICA
-        package = cve_data.get('library') or cve_data.get('packageName')
-        raw_safe_ver = cve_data.get('safe_version') or "LATEST"
-        
-        # v.30: INTELIGENCIA ADAPTATIVA
-        # Intentamos extraer una versión sugerida por el CEREBRO en la cadena 'action'
-        # Formato esperado: variableName = '1.2.3'
+        safe_ver = vuln.safe_version.split(',')[0].strip()
         suggested_ver_match = re.search(r"=\s*['\"](.*?)['\"]", action)
         if suggested_ver_match:
             safe_ver = suggested_ver_match.group(1).strip()
             if self.debug: print(f"    🧠 [IA] Usando versión sugerida por el Cerebro: {safe_ver}")
-        else:
-            # v.30: Respaldo en la versión sanitizada del reporte
-            safe_ver = str(raw_safe_ver).split(',')[0].strip()
 
-        reason_msg = f"Fix: {cve_data.get('cve')}"
+        suggested_var = action.split('=')[0].strip() if "=" in action else None
         
-        print(f"    ⚙️ [MUTACIÓN] Aplicando {package} -> {safe_ver} en {ms_name}...")
+        print(f"    ⚙️ [MUTACIÓN] [{vuln.id}] Aplicando {vuln.library} -> {safe_ver} en {ms_name}...")
         
-        suggested_var = None
-        if "=" in action:
-            suggested_var = action.split('=')[0].strip()
-            
         did_modify = GradleMutator.apply_coordinated_remediation(
-            ms_files,
-            "TRANSITIVE",
-            package,
-            safe_ver,
-            reason=reason_msg,
-            override_var_name=suggested_var
+            ms_files, "TRANSITIVE", vuln.library, safe_ver, 
+            reason=f"Fix: {vuln.id}", override_var_name=suggested_var
         )
         
-        # 2. Ejecutar validación clásica de Gradle
-        success = self._validate_ms(ms_name)
+        gradle_bin = self.gradle.discover(ms_path, self.root_path)
+        if not gradle_bin:
+            return False, {"fatal": True, "message": "INFRA_ERROR: No se encontró el binario 'gradle' o 'gradlew'."}
+            
+        if self.debug: 
+            print(f"    🔍 [DEBUG] Usando comando Gradle: {gradle_bin}")
+
+        success, logs = self.gradle.validate(ms_path, gradle_bin)
         
         if success:
-            # Retornamos True si el proceso fue exitoso, y pasamos el flag de si hubo cambio real
-            metadata = {"changed": did_modify is True}
-            return True, metadata
+            return True, {"changed": did_modify is True}
         else:
-            # Restaurar archivos si la validación falla
-            self._restore_ms_files(backups)
-            return False, f"Fallo en validación de Gradle en {ms_name} tras aplicar parche. Rollback ejecutado."
-
-    def _backup_ms_files(self, ms_path):
-        backup = {"existing": {}, "new": []}
-        for f in ["build.gradle", "dependencyMgmt.gradle", "main.gradle", "settings.gradle"]:
-            p = os.path.join(ms_path, f)
-            if os.path.exists(p):
-                with open(p, 'r') as file:
-                    backup["existing"][p] = file.read()
-            else:
-                backup["new"].append(p)
-        return backup
-
-    def _restore_ms_files(self, backup):
-        """Restaura archivos modificados y elimina los creados durante el intento."""
-        for path, content in backup["existing"].items():
-            with open(path, 'w') as f:
-                f.write(content)
-            print(f"    🔄 [ROLLBACK] Restaurando estado original: {os.path.basename(path)}")
-        for path in backup["new"]:
-            if os.path.exists(path):
-                os.remove(path)
-                print(f"    🗑️ [ROLLBACK] Eliminando archivo autogenerado: {os.path.basename(path)}")
-
-    def _get_ms_path(self, ms_name):
-        for root, dirs, files in os.walk(self.root_path):
-            if ms_name in dirs:
-                candidate = os.path.join(root, ms_name)
-                if os.path.exists(os.path.join(candidate, "build.gradle")):
-                    return os.path.abspath(candidate)
-        return None
-
-    def get_ms_files(self, ms_name):
-        authorized_names = ["build.gradle", "dependencyMgmt.gradle", "main.gradle"]
-        ms_files = []
-        ms_path = self._get_ms_path(ms_name)
-        if not ms_path: return []
-        for root, dirs, files in os.walk(ms_path):
-            for t in files:
-                if t in authorized_names:
-                    ms_files.append(os.path.join(root, t))
-        return ms_files
-
-    def _discover_gradle(self, ms_path):
-        """ Localiza el binario de gradle en el sistema o el proyecto. """
-        if self.gradle_bin: return self.gradle_bin
-
-        gradle_cmd = self.gradle_path
-        
-        if not gradle_cmd:
-            for c in [os.path.join(ms_path, "gradlew"), os.path.join(self.root_path, "gradlew")]:
-                if is_windows: c += ".bat"
-                if os.path.exists(c):
-                    gradle_cmd = c
-                    break
-        
-        if not gradle_cmd:
-            common_paths = [
-                "/usr/local/bin/gradle",
-                "/opt/homebrew/bin/gradle",
-                "/usr/bin/gradle",
-                "/bin/gradle"
-            ]
-            for p in common_paths:
-                if os.path.exists(p):
-                    gradle_cmd = p
-                    break
-        
-        if not gradle_cmd:
-            return None
-        
-        self.gradle_bin = gradle_cmd
-        return self.gradle_bin
-
-    def _validate_ms(self, ms_name, timeout=300):
-        ms_path = self._get_ms_path(ms_name)
-        if not ms_path: return True
-
-        LAB_MODE = os.getenv("AGENT_IA_LAB_MODE", "false").lower() == "true"
-        if LAB_MODE:
-            if self.debug:
-                print(f"    🔍 [DEBUG] Modo Laboratorio activo. Saltando ejecución física.")
-            print(f"    🔍 [*] Validando {ms_name} (MODO LAB)...")
-            print(f"    ⚠️ [!] MODO LAB: Simulación de progreso [==========] 100%")
-            return True
-
-        DEBUG_MODE = self.debug
-        print(f"    🔍 [*] Validando {ms_name} (gradle clean test)...")
-        
-        gradle_cmd = self._discover_gradle(ms_path)
-        if not gradle_cmd:
-            print(f"    ❌ [ERROR] No se encontró 'gradle' ni 'gradlew'.")
-            return False 
-        
-        if DEBUG_MODE:
-            print(f"    🔍 [DEBUG] Usando comando Gradle: {gradle_cmd}")
-
-        full_cmd = [gradle_cmd, "clean", "test", "--console=plain"]
-        if DEBUG_MODE:
-            full_cmd.append("--info")
+            self.fs.restore_files(backups)
             
-        process = None
-        try:
-            popen_kwargs = {
-                "cwd": ms_path,
-                "stdout": subprocess.PIPE,
-                "stderr": subprocess.STDOUT,
-                "text": True,
-                "shell": is_windows,
-                "bufsize": 1,
-                "universal_newlines": True
-            }
-            if not is_windows and hasattr(os, "setsid"):
-                popen_kwargs["preexec_fn"] = os.setsid
+            # v.30.13: Detección de error fatal de infraestructura (JDK, etc.)
+            if isinstance(logs, str) and "INFRA_ERROR" in logs:
+                return False, {"fatal": True, "message": logs}
 
-            process = subprocess.Popen(full_cmd, **popen_kwargs)
-            stdout_lines = []
-
-            while True:
-                line = process.stdout.readline()
-                if not line and process.poll() is not None:
-                    break
-                if line:
-                    clean_line = line.strip()
-                    stdout_lines.append(line)
-                    if DEBUG_MODE: print(f"    [GRADLE] {clean_line}")
-                    elif clean_line.startswith("> Task"): print(f"    ⚙️ [PROGRESS] {clean_line}")
-                    elif "FAILED" in clean_line or "Error" in clean_line: print(f"    ⚠️ [INFO] {clean_line}")
-
-            process.wait()
-            if process.returncode != 0:
-                print(f"    🚫 [X] FALLO EN PRUEBAS: Errores detectados.")
-                if not DEBUG_MODE:
-                    print("    --- ÚLTIMAS LÍNEAS DE SALIDA ---")
-                    for l in stdout_lines[-20:]: print(f"    {l.strip()}")
-                return False
-            return True
-        except Exception as e:
-            print(f"    ❌ [ERROR] Fallo crítico durante validación: {str(e)}")
-            return False
-        finally:
-            if process and process.poll() is None:
-                try:
-                    import signal
-                    if is_windows: process.terminate()
-                    else: os.killpg(os.getpgid(process.pid), signal.SIGTERM)
-                except:
-                    try: process.kill()
-                    except: pass
-
-    def _git_process_results(self, success_count):
-        """
-        Lógica de Branching y Commit v.30: Solo si hay éxitos.
-        """
-        if not self.commit_enabled:
-            return
-
-        if success_count == 0:
-            print("\n⚠️  [GIT] No se detectaron remediaciones exitosas. Saltando creación de rama.")
-            return
-
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        branch_name = f"security/remediation_{timestamp}"
-        
-        print(f"\n🌱 [GIT] Creando rama de seguridad: {branch_name}...")
-        try:
-            # 1. Crear y cambiar a la rama
-            subprocess.run(["git", "checkout", "-b", branch_name], check=True, capture_output=True)
-            
-            # 2. Stage de todos los archivos modificados
-            print(f"📦 [GIT] Preparando commit de todos los archivos estabilizados...")
-            subprocess.run(["git", "add", "."], check=True)
-            
-            # 3. Generar mensaje consolidado de alta calidad
-            fixes_by_ms = {}
-            all_cves = set()
-            for e in self.history:
-                if e["status"] == "FIXED" and e.get("changed"):
-                    ms = e["ms"]
-                    if ms not in fixes_by_ms: fixes_by_ms[ms] = []
-                    fixes_by_ms[ms].append(e["id"])
-                    all_cves.add(e["id"])
-            
-            summary_msg = f"fix(security): global remediation ({len(fixes_by_ms)} services, {len(all_cves)} CVEs)\n\n"
-            summary_msg += "Remediaciones validadas:\n"
-            for ms, cves in fixes_by_ms.items():
-                summary_msg += f"- [{ms}]: {', '.join(sorted(list(set(cves))))}\n"
-            
-            summary_msg += f"\nImpacto Total: {len(all_cves)} vulnerabilidades resueltas."
-            summary_msg += f"\nEstado: BUILD SUCCESSFUL (Verificado mediante gradle clean test)"
-            
-            # 4. Commit
-            subprocess.run(["git", "commit", "-m", summary_msg], check=True, capture_output=True)
-            print(f"✅ [GIT] Commit global realizado exitosamente en la rama {branch_name}")
-            
-        except subprocess.CalledProcessError as e:
-            print(f"❌ [GIT] Error durante las operaciones de Git: {e.stderr.decode() if e.stderr else str(e)}")
-        except Exception as e:
-            print(f"❌ [GIT] Error inesperado en integración Git: {str(e)}")
-
-    def _get_all_ms_names(self):
-        """ Escanea el monorepo en busca de microservicios, respetando exclusiones. """
-        ms_names = []
-        # Excluir infraestructura del agente, entornos virtuales y carpetas de pruebas de estrés
-        EXCLUDE_FOLDERS = ["agent_ia", ".git", ".gradle", "venv", "__pycache__", "out", "build", "stress", "tests", "certification"]
-        
-        for d in os.listdir(self.root_path):
-            if any(ex in d.lower() for ex in EXCLUDE_FOLDERS): continue
-            
-            p_dir = os.path.join(self.root_path, d)
-            if os.path.isdir(p_dir):
-                if os.path.exists(os.path.join(p_dir, "build.gradle")):
-                    ms_names.append(d)
-                else:
-                    # Búsqueda en subdirectorios (Estructura monorepo)
-                    for sd in os.listdir(p_dir):
-                        if any(ex in sd.lower() for ex in EXCLUDE_FOLDERS): continue
-                        sub_dir = os.path.join(p_dir, sd)
-                        if os.path.isdir(sub_dir) and os.path.exists(os.path.join(sub_dir, "build.gradle")):
-                            ms_names.append(sd)
-        return list(set(ms_names))
+            if self.debug: 
+                print(f"    [DEBUG] Fallo en Gradle. Logs resumidos: {logs[:100]}...")
+            print(f"    🔄 [ROLLBACK] Validación fallida. Estado restaurado en {ms_name}.")
+            return False, f"Fallo en validación de Gradle tras parche. Rollback ejecutado: {logs[:200]}"
 
     def run(self):
         try:
             print("\n" + "="*60)
-            print("🛡️ AGENTE DE REMEDIACIÓN GENERATIVA v.30")
+            print("🛡️ AGENTE DE REMEDIACIÓN GENERATIVA v.30 (ADAPTIVE)")
             print("="*60)
-            if not os.path.exists(self.report_path):
-                print(f"[!] Error: Reporte {self.report_path} no encontrado.")
-                return
-            start_time = time.time()
-            with open(self.report_path, 'r') as f:
-                vulnerabilities = json.load(f)
-                if not isinstance(vulnerabilities, list):
-                    vulnerabilities = vulnerabilities.get("vulnerabilities", [])
+            
+            vulnerabilities = self._load_report()
+            if not vulnerabilities: return
+            
             if self.target_folders:
                 print(f"🎯 [*] Filtrando ejecución para: {', '.join(self.target_folders)}")
-            for vuln in vulnerabilities:
-                self._process_generative_vuln(vuln)
             
-            end_time = time.time()
+            for vuln_entry in vulnerabilities:
+                self._process_entry(vuln_entry)
             
-            # Procesar Git al finalizar si hay éxitos REALES (hubo cambios físicos)
-            real_fixes_count = len([e for e in self.history if e.get("changed") and e["status"] == "FIXED"])
-            self._git_process_results(real_fixes_count)
+            self.git.process_remediation(self.history)
+            self._print_summary()
             
-            self._print_summary((end_time - start_time) / 60)
         except KeyboardInterrupt:
-            print("\n\n🛑 [!] INTERRUPCIÓN MANUAL DETECTADA. Limpiando procesos...")
+            print("\n\n🛑 [!] INTERRUPCIÓN MANUAL. Abortando...")
             sys.exit(0)
 
-    def _process_generative_vuln(self, entry):
-        vuln_id = entry.get('cve') or entry.get('id')
-        ms_name = entry.get("microservice")
-        target_mss = [ms_name] if ms_name else self._get_all_ms_names()
-        if self.target_folders:
-            target_mss = [m for m in target_mss if m in self.target_folders]
-        for ms in target_mss:
-            self.current_ms = ms
-            ms_path = self._get_ms_path(ms)
-            
-            # v.30: Capa de Inteligencia de Grafo
-            lineage_info = "UNKNOWN"
-            # Asegurar que tenemos el binario de gradle para el grafo (Discovery)
-            self._discover_gradle(ms_path)
+    def _load_report(self) -> List[Dict]:
+        if not os.path.exists(self.report_path):
+            print(f"[!] Error: Reporte {self.report_path} no encontrado.")
+            return []
+        with open(self.report_path, 'r') as f:
+            data = json.load(f)
+            return data if isinstance(data, list) else data.get("vulnerabilities", [])
 
-            if self.gradle_bin and ms_path:
-                print(f"    🔍 [GRAPH] Analizando linaje de dependencias para {ms}...")
-                self.graph_analyzer = DependencyGraph(self.gradle_bin)
-                if self.graph_analyzer.build_for_project(ms_path):
-                    lineage = self.graph_analyzer.get_lineage(vuln_id if ":" in vuln_id else entry.get('library', ''))
-                    lineage_info = " -> ".join(lineage)
+    def _process_entry(self, entry: Dict):
+        vuln = Vulnerability(entry)
+        
+        potential_mss = []
+        if vuln.microservice:
+            potential_mss = [vuln.microservice]
+        else:
+            potential_mss = self.fs.get_microservices()
+
+        for ms in potential_mss:
+            if self.target_folders and ms not in self.target_folders:
+                continue
+
+            ms_path = self.fs.get_ms_path(ms)
+            if not ms_path:
+                if self.debug: print(f"    [DEBUG] No se pudo encontrar ruta física para {ms}")
+                continue
+
+            self.current_ms = ms
+            print(f"📦 [*] Procesando {ms} | CVE: {vuln.id}")
+
+            # Inteligencia de Grafo JDK-Aware (v.30.13)
+            lineage_info = "UNKNOWN"
+            gradle_bin = self.gradle.discover(ms_path, self.root_path)
+            if gradle_bin:
+                graph = DependencyGraph(gradle_bin)
+                if graph.build_for_project(ms_path):
+                    target_id = vuln.id if ":" in vuln.id else vuln.library
+                    lineage_info = " -> ".join(graph.get_lineage(target_id))
                     print(f"    🔍 [GRAPH] Paternidad: {lineage_info}")
 
-            print(f"\n📦 [*] Procesando {ms} | CVE: {vuln_id}")
             success, explanation, metadata = self.cycle_controller.run_remediation_cycle(entry, f"MS: {ms} | Lineage: {lineage_info}")
             
-            changed = metadata.get("changed", False) if metadata else False
             self.history.append({
-                "ms": ms, 
-                "id": vuln_id, 
+                "ms": ms, "id": vuln.id, 
                 "status": "FIXED" if success else "ERROR", 
                 "explanation": explanation,
-                "changed": changed
+                "changed": metadata.get("changed", False) if metadata else False
             })
 
-    def _print_summary(self, duration_min):
+    def _print_summary(self):
         print("\n" + "="*40)
-        print("📊 RESUMEN DE REMEDIACIÓN v.30 (GENERATIVA)")
+        print("📊 RESUMEN DE REMEDIACIÓN v.30 (ADAPTIVE)")
         print("="*40)
         for e in self.history:
             icon = "✅" if e["status"] == "FIXED" else "❌"
             print(f"{icon} [{e['ms']}] {e['id']}: {e['status']}")
         print("="*40)
-        print(f"⏱️ Tiempo total de ejecución: {duration_min:.2f} minutos")
-        print("="*40)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="🛡️ Agente de Remediación Generativa v.30")
+    parser = argparse.ArgumentParser(description="🛡️ Agente de Remediación Generativa v.30.13")
     parser.add_argument("--debug", action="store_true")
     parser.add_argument("--folders", "-f", nargs="+")
     parser.add_argument("--report")
-    parser.add_argument("--commit", "-c", action="store_true", help="Habilita la creación de rama y commit global al finalizar con éxito")
-    parser.add_argument("--gradle-path", help="Ruta absoluta al binario de gradle (ej: /usr/local/bin/gradle)")
+    parser.add_argument("--commit", "-c", action="store_true")
+    parser.add_argument("--gradle-path")
     args = parser.parse_args()
+    
     agent = RemediationAgent(os.getcwd(), report_path=args.report, debug=args.debug, target_folders=args.folders, commit_enabled=args.commit, gradle_path=args.gradle_path)
     agent.run()
