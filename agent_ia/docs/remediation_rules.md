@@ -1,4 +1,4 @@
-# Master Remediation Rulebook v2.0
+# Master Remediation Rulebook v.30 "Zero-Risk"
 ## Manual Maestro de Operaciones e Inteligencia del Agente IA
 
 Este documento define la misión, los estándares técnicos y los protocolos de ejecución del Agente de Remediación. Sirve como la **Fuente de Verdad** para la toma de decisiones autónomas en el monorepo.
@@ -13,18 +13,21 @@ El objetivo fundamental del Agente es la **Estabilización y Aseguramiento Autó
 ### 2. Estándares de Infraestructura (LTS)
 Para garantizar la estabilidad en entornos monorepo de alto rendimiento (Gradle 8/9, Spring Boot 3), se establecen los siguientes requisitos innegociables:
 
-- **Entorno JVM (Java 21 LTS)**: Todos los procesos de construcción deben ejecutarse bajo JDK 21. Se prohíbe el uso de JDK 25 o superiores para evitar incompatibilidades críticas con procesadores de anotaciones (Lombok).
-- **Validación de Tests (JUnit Platform)**: Cada microservicio debe incluir `testRuntimeOnly 'org.junit.platform:junit-platform-launcher'` para asegurar que el motor de pruebas de JUnit 5 sea detectable por Gradle.
-- **Configuración Persistente**: La propiedad `org.gradle.java.home` en `gradle.properties` debe apuntar siempre al SDK de Java 21 definido por el administrador.
+- **Entorno JVM (Java 21 LTS)**: Todos los procesos de construcción deben ejecutarse bajo JDK 21. Se prohíbe el uso de versiones superiores para evitar incompatibilidades críticas.
+- **Acceso Modular**: Es obligatorio configurar `jvmargs` con `--add-opens` y `--add-exports` en `gradle.properties` para procesadores de anotaciones (Lombok).
+- **Validación de Tests (JUnit Platform)**: Cada microservicio debe incluir `testRuntimeOnly 'org.junit.platform:junit-platform-launcher'`.
+- **Configuración Persistente**: La propiedad `org.gradle.java.home` debe estar sincronizada en todo el monorepo.
 
 ---
 
 ### 3. Inteligencia de Remediación (Precision First)
 El Agente utiliza una estrategia de **Mutación de Alta Precisión** para evitar inyectar código malformado:
 
-- **Regla de Versión Única**: Queda terminantemente prohibido el uso de listas, comas o rangos de versiones en las variables de Gradle. El Agente **DEBE elegir estrictamente UNA (1) versión segura** que coincida con la rama del proyecto (Ej: `'4.1.132.Final'`).
-- **Standard de Metadatos (Auditoría)**: Cada cambio debe documentarse en el campo `because` de Gradle siguiendo el patrón: `Fix: CVE-XXXX-XXXXX`. Este campo solo debe contener los IDs de seguridad activos, sin historial acumulado.
-- **Weighted Token-Based Matching**: El sistema de detección de variables utiliza pesos semánticos para diferenciar entre componentes de una misma familia (ej: `netty-codec` vs `netty-handler`) y evitar colisiones de nombres.
+- **Regla de Versión Única**: Se prohíbe el uso de rangos. El Agente elige una versión segura compatible con la rama del proyecto.
+- **Inteligencia Adaptativa (Regla 4)**: Si la versión del reporte falla, el Agente tiene facultad de **Override** para aplicar la versión sugerida por su Cerebro Generativo tras el fallo.
+- **Estándar de Indentación**: Todas las inyecciones en bloques `ext` deben seguir el estándar industrial de **4 espacios** para alineación perfecta.
+- **Standard de Metadatos (Auditoría)**: Uso estricto de `because "Fix: CVE-XXXX-XXXXX"` sin acumulación de historial.
+- **Exclusiones de Seguridad**: El Agente nunca debe intervenir carpetas de infraestructura (`agent_ia`), de estrés (`stress`) o de certificación (`certification`).
 
 ---
 
@@ -32,8 +35,9 @@ El Agente utiliza una estrategia de **Mutación de Alta Precisión** para evitar
 El Agente opera bajo un ciclo cerrado de retroalimentación recursiva:
 1. **PENSAMIENTO**: Análisis de la vulnerabilidad y el contexto del microservicio.
 2. **ACCIÓN**: Generación y aplicación física del parche estructural.
-3. **VALIDACIÓN**: Ejecución de `gradle clean test`.
-4. **APRENDIZAJE**: Si la validación falla, el error se re-inyecta a la memoria del Agente para generar un nuevo parche corregido (Hasta 3 intentos).
+3. **VALIDACIÓN FÍSICA**: Ejecución de `gradle clean compileJava test` para certificar la veracidad del cambio.
+4. **AUTO-HEAL**: Si falta la infraestructura de seguridad o el vínculo en `main.gradle`, el Agente la reconstruye antes de la validación.
+5. **APRENDIZAJE**: Si el build falla, el error se re-inyecta para un override inteligente de versión (Hasta 3 intentos).
 
 ---
 
@@ -57,4 +61,4 @@ Para operar el Agente de forma eficiente y portable, utiliza los siguientes flag
 | **Modo Debug** | `python3 remediation_agent.py --debug --folders ms-clients` |
 
 ---
-*Este manual es una extensión de la visión v2.0, optimizado para la automatización total del flujo DevSecOps.*
+*Este manual es una extensión de la visión v.30, optimizado para la automatización total del flujo DevSecOps.*

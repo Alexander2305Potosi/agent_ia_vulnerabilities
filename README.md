@@ -1,15 +1,15 @@
-# 🛡️ Agente de Seguridad SCA: v2.0 (Edición Generativa)
+# 🛡️ Agente de Seguridad SCA: v.30 "Zero-Risk" (Edición Inteligencia Adaptativa)
 
 Bienvenido a la **Versión 2.0** del Agente de Remediación. Este sistema ha evolucionado de un modelo predictivo tradicional a un ecosistema de **Inteligencia Artificial Generativa Autónoma**.
 
-## 🚀 ¿Qué hay de nuevo en la v2.0?
+## 🚀 ¿Qué hay de nuevo en la v.30 "Zero-Risk"?
 
-A diferencia de las versiones anteriores, la v2.0 utiliza un **Cerebro Generativo (LLM)** que permite al agente razonar antes de actuar.
+A diferencia de las versiones anteriores, la v.30 integra **Resiliencia Física y Aprendizaje Adaptativo**.
 
-*   **Razonamiento Autónomo**: El agente sigue un ciclo lógico de pensamiento crítico (ReAct).
-*   **Auto-Sanación Estructural**: Capacidad de reconstruir la infraestructura de seguridad de un proyecto desde cero.
-*   **Integración Git Profesional (v2.0)**: Creación de ramas y commits automáticos de alta calidad basados en el éxito de la remediación.
-*   **Portabilidad Robusta**: Autodescubrimiento de Gradle y soporte para entornos restringidos.
+*   **Inteligencia Adaptativa**: El Agente sobreescribe versiones del reporte si detecta fallos de compilación, aprendiendo del error en tiempo real.
+*   **Auto-Sanación Estructural (Auto-Heal)**: Reconstruye `dependencyMgmt.gradle` y cura vínculos en `main.gradle` o `gradle.properties` de forma quirúrgica.
+*   **Veracidad Física**: Se garantiza el éxito de `compileJava` antes de cualquier confirmación de cambio.
+*   **Protección de Infraestructura**: Excluye automáticamente carpetas críticas (`agent_ia`, `stress`, `certification`) para evitar auto-mutaciones.
 
 ### 🧠 El Marco ReAct (Reason + Act)
 El agente sigue un ciclo lógico:
@@ -18,7 +18,7 @@ El agente sigue un ciclo lógico:
 3.  **EXPLICACIÓN**: Justifica técnicamente la remediación siguiendo el **Estándar de Trinomio**.
 
 ![Ciclo de Entrenamiento y Conciencia](agent_ia/docs/assets/ciclo_entrenamiento.png)
-*Visualización del Ciclo de Conciencia v2.0: Desde la detección hasta la auto-corrección.*
+*Visualización del Ciclo de Conciencia v.30: Desde la detección hasta la auto-corrección.*
 
 ## 🛡️ Garantía de Privacidad: Tu código NO sale de tu equipo
 > [!IMPORTANT]
@@ -39,10 +39,9 @@ El agente opera como una colmena coordinada de componentes locales:
 
 ## 📋 Requisitos de Entorno
 - **Python 3.10+** (Recomendado 3.11+)
-- **Java 21 (LTS)**: El Agente requiere JDK 21 para validaciones de Gradle. Se prohíbe JDK 25 por incompatibilidades con Lombok.
-- **Git**: Instalado y configurado en el PATH.
-- `pip install -r agent_ia/requirements.txt`
-- Modelo GGUF en `agent_ia/models/` (Recomendado: 4-6GB RAM libres).
+- **Java 21 (LTS)**: Requisito fundamental. Se requiere configuración modular (`jvmargs`) para compatibilidad industrial con Lombok.
+- **Git**: Instalado y configurado para persistencia de remediación exitosa.
+- **Suite de Certificación**: Acceso al script `run_master_certification.py` para auditorías de cumplimiento.
 
 ## 🖱️ Guía de Ejecución Rápida
 El Agente es flexible y permite operar en modo "Solo Lectura/Escritura Local" o en modo "Persistencia Git". Selecciona la combinación que mejor se adapte a tu flujo de trabajo:
@@ -76,24 +75,24 @@ python3 remediation_agent.py --debug
 python3 remediation_agent.py -f ms-clients --debug
 ```
 
-## ✨ Últimas Innovaciones v2.0
+## ✨ Últimas Innovaciones v.30
 
 ### 🧩 Almacenamiento de Dependencias Híbrido
-A diferencia de versiones anteriores que delegaban todo a la centralización, la **v2.0** utiliza ahora un enfoque híbrido:
+A diferencia de versiones anteriores que delegaban todo a la centralización, la **v.30** utiliza ahora un enfoque híbrido:
 - **Centralización Directa**: Mantiene las reglas de resolución en `dependencyMgmt.gradle`.
 - **Preservación Local**: Las líneas `implementation` en cada `build.gradle` se mantienen, pero se sustituyen automáticamente por variables (ej. `implementation "group:artifact:${varName}"`), garantizando que el microservicio siga siendo autodocumentado.
 
 ## 📚 Gobernanza y Documentación
 Para profundizar en la arquitectura y operación del Agente, consulta los manuales maestros:
 
-1.  👉 **[Master Remediation Rulebook v2.0](agent_ia/docs/remediation_rules.md)**: Estándares técnicos, leyes de inyección y protocolos de Git.
+1.  👉 **[Master Remediation Rulebook v.30](agent_ia/docs/remediation_rules.md)**: Estándares técnicos, leyes de inyección y protocolos de Git.
 2.  👉 **[Technical & Operator Manual](agent_ia/docs/manuals/TECHNICAL_MANUAL.md)**: Teoría de la IA Autónoma, facultades del Agente, flujos de ejecución y resolución de problemas.
 
-### 🏗️ Inyección de Configuración Robusta
-El motor de mutación ha sido robustecido en esta versión para garantizar scripts Gradle válidos y limpios:
-- **Indentación Estricta**: Cada bloque inyectado sigue un estándar de 8 espacios, eliminando el desorden visual.
-- **Header dinámico**: Cada script de remediación comienza con metadatos claros para evitar errores de compilación (`Unexpected input`).
-- **Seguridad de Parseo**: Evita la mezcla de bloques `if` en la misma línea, asegurando una estructura legible para humanos y máquinas.
+### 🏗️ Inyección de Configuración Robusta (v.30)
+El motor de mutación ha sido rediseñado para una **Estética Industrial**:
+- **Indentación Estándar**: Cada bloque inyectado sigue el estándar de **4 espacios**, garantizando limpieza visual en el código fuente.
+- **Veracidad de Compilación**: Cada parche es validado físicamente previo a su aprobación lógica.
+- **Header Dinámico**: Metadatos de seguridad claros en cada script generado.
 
 ---
-*Protección Generativa para Microservices. Inteligencia v2.0 Local y Privada.*
+*Protección Generativa para Microservices. Inteligencia v.30 Local y Privada.*

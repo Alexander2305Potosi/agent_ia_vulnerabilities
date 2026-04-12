@@ -30,7 +30,7 @@ class TestGradleMutator(unittest.TestCase):
         self.assertIn("implementation project(':')", result)
 
     def test_inject_resolution_strategy_rule_formatting(self):
-        """ Checks that rules are injected with correct indentation and headers (v2.0 standard). """
+        """ Checks that rules are injected with correct indentation and headers (v.30 standard). """
         content = """
         configurations.all {
             resolutionStrategy.eachDependency { DependencyResolveDetails details ->

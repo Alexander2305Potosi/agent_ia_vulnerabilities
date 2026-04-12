@@ -3,7 +3,7 @@ import os
 
 class CycleOfConsciousness:
     """
-    Controlador del bucle de autocuración (v2.0).
+    Controlador del bucle de autocuración (v.30).
     Permite que el agente aprenda de sus errores de ejecución de forma recursiva.
     """
     
@@ -21,7 +21,7 @@ class CycleOfConsciousness:
         
         while attempts < self.max_attempts:
             attempts += 1
-            print(f"    [Ciclo v2.0] Intento {attempts}/{self.max_attempts}...")
+            print(f"    [Ciclo v.30] Intento {attempts}/{self.max_attempts}...")
             
             # 1. GENERACIÓN (Cerebro Generativo)
             response = self.engine.generate_remediation(cve_data, local_context, previous_error)

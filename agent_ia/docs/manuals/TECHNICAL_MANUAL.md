@@ -1,4 +1,4 @@
-# Manual Técnico y de Operación: Agente IA v2.0
+# Manual Técnico y de Operación: Agente IA v.30
 
 Este documento constituye la fuente única de verdad para entender la teoría, las facultades autónomas y la operación práctica del Agente de Remediación Generativa.
 
@@ -16,7 +16,7 @@ A diferencia de la automatización tradicional, este sistema opera como un **Age
 
 ---
 
-## 2. Arquitectura de Pensamiento (v2.0)
+## 2. Arquitectura de Pensamiento (v.30)
 
 ### De Predicción a Razonamiento
 El agente ha abandonado los modelos estadísticos rígidos por un marco deductivo en tiempo real:
@@ -49,4 +49,4 @@ Para garantizar la estabilidad del sistema, el entorno debe cumplir con:
 - **Conflicto de Familias**: La IA prioriza siempre la versión más reciente que mantenga la compatibilidad con el Rulebook Maestro.
 
 ---
-*Manual Maestro Unificado v2.0.*
+*Manual Maestro Unificado v.30.*

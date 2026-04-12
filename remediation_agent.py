@@ -5,15 +5,19 @@ import time
 import shutil
 import subprocess
 import argparse
+import re
 from datetime import datetime
 
-# Carga de Módulos Modulares v2.0
+is_windows = os.name == 'nt'
+
+# Carga de Módulos Modulares v.30
 from agent_ia.core.mutator import GradleMutator
 from agent_ia.engine.generative import GenerativeAgentV2
 from agent_ia.core.consciousness import CycleOfConsciousness
+from agent_ia.core.graph import DependencyGraph
 
 class RemediationAgent:
-    # CONFIGURACIÓN v2.0: Ruta al modelo GGUF en la nueva estructura modular
+    # CONFIGURACIÓN v.30: Ruta al modelo GGUF en la nueva estructura modular
     MODEL_PATH = os.path.join(os.path.dirname(__file__), "agent_ia", "models", "remediation_v2_3bits.gguf")
 
     def __init__(self, root_path, report_path=None, debug=False, target_folders=None, commit_enabled=False, gradle_path=None):
@@ -22,17 +26,19 @@ class RemediationAgent:
         self.target_folders = target_folders or []
         self.commit_enabled = commit_enabled
         self.gradle_path = gradle_path
+        self.gradle_bin = None # Determinado dinámicamente
         
-        # Lógica de rutas de datos v2.0
+        # Lógica de rutas de datos v.30
         default_report = os.path.join(os.path.dirname(__file__), "agent_ia", "data", "cve", "snyk_monorepo.json")
         self.report_path = report_path or default_report
         
         self.history = []
         
-        # Inicialización de Inteligencia Generativa v2.0
-        print(f"🚀 [*] Inicializando Cerebro Generativo v2.0...")
+        # Inicialización de Inteligencia Generativa v.30
+        print(f"🚀 [*] Inicializando Cerebro Generativo v.30...")
         self.engine = GenerativeAgentV2(model_path=self.MODEL_PATH if os.path.exists(self.MODEL_PATH) else None)
         self.cycle_controller = CycleOfConsciousness(self.engine, self._validate_and_learn)
+        self.graph_analyzer = None # Inicializado bajo demanda
 
     def _validate_and_learn(self, action, attempt, cve_data):
         """
@@ -48,8 +54,18 @@ class RemediationAgent:
         # 1. APLICACIÓN FÍSICA
         package = cve_data.get('library') or cve_data.get('packageName')
         raw_safe_ver = cve_data.get('safe_version') or "LATEST"
-        # v2.0: Asegurar VERSION ÚNICA en el paso físico (Sanitización de datos de entrada)
-        safe_ver = str(raw_safe_ver).split(',')[0].strip()
+        
+        # v.30: INTELIGENCIA ADAPTATIVA
+        # Intentamos extraer una versión sugerida por el CEREBRO en la cadena 'action'
+        # Formato esperado: variableName = '1.2.3'
+        suggested_ver_match = re.search(r"=\s*['\"](.*?)['\"]", action)
+        if suggested_ver_match:
+            safe_ver = suggested_ver_match.group(1).strip()
+            if self.debug: print(f"    🧠 [IA] Usando versión sugerida por el Cerebro: {safe_ver}")
+        else:
+            # v.30: Respaldo en la versión sanitizada del reporte
+            safe_ver = str(raw_safe_ver).split(',')[0].strip()
+
         reason_msg = f"Fix: {cve_data.get('cve')}"
         
         print(f"    ⚙️ [MUTACIÓN] Aplicando {package} -> {safe_ver} en {ms_name}...")
@@ -120,20 +136,11 @@ class RemediationAgent:
                     ms_files.append(os.path.join(root, t))
         return ms_files
 
-    def _validate_ms(self, ms_name, timeout=300):
-        LAB_MODE = os.getenv("AGENT_IA_LAB_MODE", "false").lower() == "true"
-        if LAB_MODE:
-            print(f"    🔍 [*] Validando {ms_name} (MODO LAB)...")
-            print(f"    ⚠️ [!] MODO LAB: Simulación de progreso [==========] 100%")
-            return True
+    def _discover_gradle(self, ms_path):
+        """ Localiza el binario de gradle en el sistema o el proyecto. """
+        if self.gradle_bin: return self.gradle_bin
 
-        DEBUG_MODE = self.debug
-        ms_path = self._get_ms_path(ms_name)
-        if not ms_path: return True
-        
-        print(f"    🔍 [*] Validando {ms_name} (gradle clean test)...")
         gradle_cmd = self.gradle_path
-        is_windows = os.name == 'nt'
         
         if not gradle_cmd:
             for c in [os.path.join(ms_path, "gradlew"), os.path.join(self.root_path, "gradlew")]:
@@ -143,7 +150,6 @@ class RemediationAgent:
                     break
         
         if not gradle_cmd:
-            # v2.0: Autodescubrimiento Robusto y Portable
             common_paths = [
                 "/usr/local/bin/gradle",
                 "/opt/homebrew/bin/gradle",
@@ -156,8 +162,29 @@ class RemediationAgent:
                     break
         
         if not gradle_cmd:
-            print(f"    ❌ [ERROR] No se encontró 'gradlew' ni 'gradle' en el PATH ni en rutas comunes.")
-            print(f"    💡 [TIP] Puedes especificarla manualmente usando --gradle-path <ruta>")
+            return None
+        
+        self.gradle_bin = gradle_cmd
+        return self.gradle_bin
+
+    def _validate_ms(self, ms_name, timeout=300):
+        ms_path = self._get_ms_path(ms_name)
+        if not ms_path: return True
+
+        LAB_MODE = os.getenv("AGENT_IA_LAB_MODE", "false").lower() == "true"
+        if LAB_MODE:
+            if self.debug:
+                print(f"    🔍 [DEBUG] Modo Laboratorio activo. Saltando ejecución física.")
+            print(f"    🔍 [*] Validando {ms_name} (MODO LAB)...")
+            print(f"    ⚠️ [!] MODO LAB: Simulación de progreso [==========] 100%")
+            return True
+
+        DEBUG_MODE = self.debug
+        print(f"    🔍 [*] Validando {ms_name} (gradle clean test)...")
+        
+        gradle_cmd = self._discover_gradle(ms_path)
+        if not gradle_cmd:
+            print(f"    ❌ [ERROR] No se encontró 'gradle' ni 'gradlew'.")
             return False 
         
         if DEBUG_MODE:
@@ -218,7 +245,7 @@ class RemediationAgent:
 
     def _git_process_results(self, success_count):
         """
-        Lógica de Branching y Commit v2.0: Solo si hay éxitos.
+        Lógica de Branching y Commit v.30: Solo si hay éxitos.
         """
         if not self.commit_enabled:
             return
@@ -267,23 +294,31 @@ class RemediationAgent:
             print(f"❌ [GIT] Error inesperado en integración Git: {str(e)}")
 
     def _get_all_ms_names(self):
+        """ Escanea el monorepo en busca de microservicios, respetando exclusiones. """
         ms_names = []
+        # Excluir infraestructura del agente, entornos virtuales y carpetas de pruebas de estrés
+        EXCLUDE_FOLDERS = ["agent_ia", ".git", ".gradle", "venv", "__pycache__", "out", "build", "stress", "tests", "certification"]
+        
         for d in os.listdir(self.root_path):
-            if os.path.isdir(os.path.join(self.root_path, d)):
-                if os.path.exists(os.path.join(self.root_path, d, "build.gradle")):
+            if any(ex in d.lower() for ex in EXCLUDE_FOLDERS): continue
+            
+            p_dir = os.path.join(self.root_path, d)
+            if os.path.isdir(p_dir):
+                if os.path.exists(os.path.join(p_dir, "build.gradle")):
                     ms_names.append(d)
                 else:
-                    sub_dir = os.path.join(self.root_path, d)
-                    if os.path.isdir(sub_dir):
-                        for sd in os.listdir(sub_dir):
-                            if os.path.isdir(os.path.join(sub_dir, sd)) and os.path.exists(os.path.join(sub_dir, sd, "build.gradle")):
-                                ms_names.append(sd)
+                    # Búsqueda en subdirectorios (Estructura monorepo)
+                    for sd in os.listdir(p_dir):
+                        if any(ex in sd.lower() for ex in EXCLUDE_FOLDERS): continue
+                        sub_dir = os.path.join(p_dir, sd)
+                        if os.path.isdir(sub_dir) and os.path.exists(os.path.join(sub_dir, "build.gradle")):
+                            ms_names.append(sd)
         return list(set(ms_names))
 
     def run(self):
         try:
             print("\n" + "="*60)
-            print("🛡️ AGENTE DE REMEDIACIÓN GENERATIVA v2.0")
+            print("🛡️ AGENTE DE REMEDIACIÓN GENERATIVA v.30")
             print("="*60)
             if not os.path.exists(self.report_path):
                 print(f"[!] Error: Reporte {self.report_path} no encontrado.")
@@ -317,8 +352,23 @@ class RemediationAgent:
             target_mss = [m for m in target_mss if m in self.target_folders]
         for ms in target_mss:
             self.current_ms = ms
+            ms_path = self._get_ms_path(ms)
+            
+            # v.30: Capa de Inteligencia de Grafo
+            lineage_info = "UNKNOWN"
+            # Asegurar que tenemos el binario de gradle para el grafo (Discovery)
+            self._discover_gradle(ms_path)
+
+            if self.gradle_bin and ms_path:
+                print(f"    🔍 [GRAPH] Analizando linaje de dependencias para {ms}...")
+                self.graph_analyzer = DependencyGraph(self.gradle_bin)
+                if self.graph_analyzer.build_for_project(ms_path):
+                    lineage = self.graph_analyzer.get_lineage(vuln_id if ":" in vuln_id else entry.get('library', ''))
+                    lineage_info = " -> ".join(lineage)
+                    print(f"    🔍 [GRAPH] Paternidad: {lineage_info}")
+
             print(f"\n📦 [*] Procesando {ms} | CVE: {vuln_id}")
-            success, explanation, metadata = self.cycle_controller.run_remediation_cycle(entry, f"MS: {ms}")
+            success, explanation, metadata = self.cycle_controller.run_remediation_cycle(entry, f"MS: {ms} | Lineage: {lineage_info}")
             
             changed = metadata.get("changed", False) if metadata else False
             self.history.append({
@@ -331,7 +381,7 @@ class RemediationAgent:
 
     def _print_summary(self, duration_min):
         print("\n" + "="*40)
-        print("📊 RESUMEN DE REMEDIACIÓN v2.0 (GENERATIVA)")
+        print("📊 RESUMEN DE REMEDIACIÓN v.30 (GENERATIVA)")
         print("="*40)
         for e in self.history:
             icon = "✅" if e["status"] == "FIXED" else "❌"
@@ -341,7 +391,7 @@ class RemediationAgent:
         print("="*40)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="🛡️ Agente de Remediación Generativa v2.0")
+    parser = argparse.ArgumentParser(description="🛡️ Agente de Remediación Generativa v.30")
     parser.add_argument("--debug", action="store_true")
     parser.add_argument("--folders", "-f", nargs="+")
     parser.add_argument("--report")

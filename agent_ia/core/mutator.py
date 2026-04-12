@@ -17,7 +17,7 @@ class GradleMutator:
     def is_already_fixed(current_version, safe_version_str):
         """ 
         DETERMINA si la versión actual cumple con los requisitos de seguridad.
-        v2.0: Soporta MÚLTIPLES ramas seguras (ej: '4.1.132, 4.2.10').
+        v.30: Soporta MÚLTIPLES ramas seguras (ej: '4.1.132, 4.2.10').
         """
         curr_tup = GradleMutator._version_to_tuple(current_version)
         safe_versions = [s.strip() for s in str(safe_version_str).split(',')]
@@ -93,22 +93,23 @@ class GradleMutator:
     def update_ext_variable(content, var_name, actual_version):
         """
         Updates a variable definition in any ext block.
-        Ensures the entire value is replaced.
+        Ensures the entire value is replaced and aligns indentation to 4 spaces.
         """
         actual_version = str(actual_version).strip()
-        pattern = rf"({var_name}\s*=\s*['\"])([^'\"]+)(['\"])"
+        # Capturamos el inicio de línea y cualquier espacio para normalizar a 4 espacios
+        pattern = rf"^\s*({var_name}\s*=\s*['\"])([^'\"]+)(['\"])"
         
         def replace_fn(match):
-            return f"{match.group(1)}{actual_version}{match.group(3)}"
+            return f"    {match.group(1)}{actual_version}{match.group(3)}"
             
-        new_content, count = re.subn(pattern, replace_fn, content)
+        new_content, count = re.subn(pattern, replace_fn, content, flags=re.MULTILINE)
         return new_content, count > 0
 
     @staticmethod
     def substitute_literal_with_variable(content, package, var_name):
         """
         Replaces literal versions 'group:artifact:version' with 'group:artifact:$variableName'.
-        v2.0: Ahora es FAMILY-AWARE. Si el paquete pertenece a una familia, sustituye TODO el grupo.
+        v.30: Ahora es FAMILY-AWARE. Si el paquete pertenece a una familia, sustituye TODO el grupo.
         """
         # Determinar si el paquete pertenece a una familia (solo el grupo)
         families = ["io.netty", "org.springframework", "com.fasterxml.jackson", "org.apache.logging.log4j"]
@@ -158,7 +159,7 @@ class GradleMutator:
     def find_variable_name_in_ext(content, artifact_name):
         """ 
         Identifica qué variable en el bloque ext corresponde al artefacto usando PESOS.
-        v2.0: Evita colisiones de prefijos (ej: springBoot vs springWebflux).
+        v.30: Evita colisiones de prefijos (ej: springBoot vs springWebflux).
         """
         # Tokenizar el nombre del artefacto para scoring (ej: 'netty-codec-http' -> ['netty', 'codec', 'http'])
         art_tokens = set(re.split(r'[\.\-\:]', artifact_name.lower()))
@@ -192,7 +193,7 @@ class GradleMutator:
     def _accumulate_reason(existing_reason, new_reason):
         """ 
         PROCESA la razón de remediación (Whitelist). 
-        v2.0: Solo mantiene la razón NUEVA, sin concatenar las anteriores.
+        v.30: Solo mantiene la razón NUEVA, sin concatenar las anteriores.
         """
         prefix = "Fix: "
         
@@ -261,13 +262,15 @@ class GradleMutator:
         match_field = "group" if is_group else "name"
         
         # 1. Buscar si ya existe la regla específica
-        search_pattern = f"details.requested.{match_field} == '{package_or_name}'"
-        pos = content.find(search_pattern)
+        # v3.3: Soporta tanto comillas sencillas como dobles para búsqueda robusta
+        regex = rf"details\.requested\.{match_field}\s*==\s*['\"]{re.escape(package_or_name)}['\"]"
+        match = re.search(regex, content)
         
         existing_rule_range = (None, None)
         existing_reason = ""
         
-        if pos != -1:
+        if match:
+            pos = match.start()
             # Buscar el inicio del 'if' retrocediendo
             if_start = content.rfind("if", 0, pos)
             if if_start != -1:
@@ -282,7 +285,7 @@ class GradleMutator:
 
         final_reason = GradleMutator._accumulate_reason(existing_reason, reason)
         
-        # v2.0: Indentación estándar
+        # v.30: Indentación estándar
         i4 = "    "
         i8 = "        "
         i12 = "            "
@@ -379,7 +382,7 @@ configurations.all {{
     def _link_infrastructure(project_files, target_folder):
         """
         Asegura que el archivo orquestador (main o build) tenga el vínculo a dependencyMgmt.gradle
-        v2.0: Usa ${rootDir}, bloque allprojects y configuración de repositorios.
+        v.30: Usa ${rootDir}, bloque allprojects y configuración de repositorios.
         INYECCIÓN INTELIGENTE: Evita duplicados analizando el contenido interno del bloque.
         """
         main_gradle = os.path.join(target_folder, "main.gradle")
@@ -405,13 +408,13 @@ configurations.all {{
                     block_content = content[start:end]
                     needs_update = False
                     
-                    # v2.0: Regex más permisiva para detectar el link sin importar formatos de variables
+                    # v.30: Regex más permisiva para detectar el link sin importar formatos de variables
                     has_link = re.search(r"apply\s+from:.*dependencyMgmt\.gradle", block_content)
                     
                     if not has_link:
                         print(f"    🔗 [SYNC] Asegurando vínculo de infraestructura en {os.path.basename(orchestrator)}...")
                         
-                        # v2.0: Inyección Quirúrgica (Surgical Injection)
+                        # v.30: Inyección Quirúrgica (Surgical Injection)
                         # Insertamos inmediatamente después de la llave de apertura '{'
                         # preserving whatever was there before and after.
                         insertion = f"\n    {new_link_line}"
@@ -435,7 +438,7 @@ configurations.all {{
     @staticmethod
     def apply_coordinated_remediation(project_files, mode, artifact_name, version, reason, override_var_name=None):
         """
-        Orquestador v2.0: Auto-Sanación + Remediación + Purga
+        Orquestador v.30: Auto-Sanación + Remediación + Purga
         """
         # --- PASO 0: Normalización y Auto-Sanación ---
         project_files = [os.path.abspath(f) for f in project_files]
@@ -458,7 +461,7 @@ configurations.all {{
                 project_files.append(new_path)
             has_changes = True
 
-        # v2.0: Asegurar VÍNCULO siempre
+        # v.30: Asegurar VÍNCULO siempre
         if constraint_files and build_gradles:
             root_folder = os.path.dirname(root_build_gradle)
             if GradleMutator._link_infrastructure(project_files, root_folder):
@@ -469,7 +472,7 @@ configurations.all {{
         current_version = None
 
         # --- PASO 1: Identificar Variable y Versión Actual ---
-        # v2.0: Prioridad RAÍZ para detección
+        # v.30: Prioridad RAÍZ para detección
         for file_path in build_gradles:
             with open(file_path, 'r') as f:
                 content = f.read()
@@ -484,7 +487,7 @@ configurations.all {{
             elif found_var:
                 var_name = found_var
                 # Si se encuentra en raíz, perfecto. Si no, marcaremos para MIGRACIÓN a raíz.
-                definer_file = root_build_gradle # v2.0: Forzamos que la definición final sea siempre en raíz
+                definer_file = root_build_gradle # v.30: Forzamos que la definición final sea siempre en raíz
             
             if var_name:
                 pattern = rf"{var_name}\s*=\s*['\"]([^'\"]+)['\"]"
@@ -493,7 +496,7 @@ configurations.all {{
                     current_version = match.group(1)
                     if is_root: break # Si encontramos en raíz, ya tenemos todo
                     
-        # v2.0 NEW: Si no hay variable o no se encontró versión, buscar literal
+        # v.30 NEW: Si no hay variable o no se encontró versión, buscar literal
         if not current_version:
             for file_path in build_gradles:
                 with open(file_path, 'r') as f:
@@ -521,9 +524,9 @@ configurations.all {{
                     content = f.read()
                 
                 if "ext {" in content:
-                    new_content = content.replace("ext {", f"ext {{\n        {var_name} = '{safe_v}'")
+                    new_content = content.replace("ext {", f"ext {{\n    {var_name} = '{safe_v}'")
                 else:
-                    new_content = f"ext {{\n        {var_name} = '{safe_v}'\n}}\n" + content
+                    new_content = f"ext {{\n    {var_name} = '{safe_v}'\n}}\n" + content
                 with open(definer_file, 'w') as f:
                     f.write(new_content)
                 has_changes = True
@@ -533,9 +536,9 @@ configurations.all {{
                 new_content, changed = GradleMutator.update_ext_variable(content, var_name, safe_v)
                 if not changed:
                     if "ext {" in new_content:
-                        new_content = new_content.replace("ext {", f"ext {{\n        {var_name} = '{safe_v}'")
+                        new_content = new_content.replace("ext {", f"ext {{\n    {var_name} = '{safe_v}'")
                     else:
-                        new_content = f"ext {{\n        {var_name} = '{safe_v}'\n}}\n" + new_content
+                        new_content = f"ext {{\n    {var_name} = '{safe_v}'\n}}\n" + new_content
                 with open(definer_file, 'w') as f:
                     f.write(new_content)
                 has_changes = True
@@ -556,14 +559,14 @@ configurations.all {{
         for file_path in gradle_files:
             with open(file_path, 'r') as f:
                 content = f.read()
-            # v2.0/2.0 logic: Reemplazar literales de la familia por la variable
+            # v.30/2.0 logic: Reemplazar literales de la familia por la variable
             new_content, changed = GradleMutator.substitute_literal_with_variable(content, artifact_name, var_name)
             if changed:
                 with open(file_path, 'w') as f:
                     f.write(new_content)
                 has_changes = True
 
-        # --- PASO 5: Purga Global de Subcarpetas (Centralización v2.0) ---
+        # --- PASO 5: Purga Global de Subcarpetas (Centralización v.30) ---
         if var_name:
             for file_path in build_gradles:
                 is_root = (file_path == root_build_gradle)
