@@ -4,7 +4,7 @@ import os
 import shutil
 import re
 
-# --- CONFIGURACIÓN DE CUMPLIMIENTO (Rulebook v.30) ---
+# --- CONFIGURACIÓN DE CUMPLIMIENTO (Rulebook v.3.0) ---
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 AGENT_CMD = ["python3", os.path.join(PROJECT_ROOT, "remediation_agent.py")]
 CVE_REPORT_PATH = os.path.join(PROJECT_ROOT, "agent_ia", "data", "cve", "snyk_monorepo.json")
@@ -197,7 +197,7 @@ if __name__ == "__main__":
             backup_file(os.path.join(p, f))
             
     print("\n" + "█"*60)
-    print("🛡️  CERTIFICACIÓN MAESTRA DE REGLAS AGENTE IA v.30")
+    print("🛡️  CERTIFICACIÓN MAESTRA DE REGLAS AGENTE IA v.3.0")
     print("█"*60)
     
     results = [

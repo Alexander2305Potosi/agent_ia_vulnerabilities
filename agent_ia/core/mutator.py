@@ -3,7 +3,7 @@ import os
 from typing import List, Dict, Optional, Tuple, Union
 
 class InfrastructureHealer:
-    """Maneja la Regla 6: Auto-Sanación de Infraestructura (v.30.12)."""
+    """Maneja la Regla 6: Auto-Sanación de Infraestructura (v.3.0.12)."""
     
     INFRA_TEMPLATE = """// Standardized Dependency Management - Centralized AI Security Rules
 configurations.all {
@@ -52,7 +52,7 @@ configurations.all {
 
 
 class VariableManager:
-    """Gestiona variables ext y sustitución de literales (v.30.12 - Final Certified)."""
+    """Gestiona variables ext y sustitución de literales (v.3.0.12 - Final Certified)."""
     FAMILIES = ["io.netty", "org.springframework", "com.fasterxml.jackson", "org.apache.logging.log4j"]
 
     @staticmethod
@@ -86,7 +86,7 @@ class VariableManager:
 
     @staticmethod
     def substitute_literals(content: str, package: str, var_name: str) -> Tuple[str, bool]:
-        """Sustituye literales de versión forzando comillas dobles para interpolación (v.30.12)."""
+        """Sustituye literales de versión forzando comillas dobles para interpolación (v.3.0.12)."""
         group = package.split(':')[0]
         is_fam = any(group.startswith(f) for f in VariableManager.FAMILIES)
         match_t = group if is_fam else package
@@ -102,7 +102,7 @@ class VariableManager:
 
 
 class RuleInjector:
-    """Motor de Inyección de Reglas (v.30.12)."""
+    """Motor de Inyección de Reglas (v.3.0.12)."""
 
     @staticmethod
     def inject_rule(content: str, package: str, var_name: str, reason: str) -> Tuple[str, bool]:
@@ -158,7 +158,7 @@ class RuleInjector:
 
 
 class GradleMutator:
-    """Fachada coordinada v.30.12 Stable Final."""
+    """Fachada coordinada v.3.0.12 Stable Final."""
 
     @staticmethod
     def apply_coordinated_remediation(project_files: List[str], mode: str, artifact: str, safe_version_str: str, reason: str, override_var_name: Optional[str] = None) -> Union[bool, str]:

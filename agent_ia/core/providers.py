@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import List, Dict, Optional, Tuple
 
 class FSProvider:
-    """Proveedor para operaciones en el sistema de archivos (v.30.13 Hardened)."""
+    """Proveedor para operaciones en el sistema de archivos (v.3.0.13 Hardened)."""
     
     EXCLUDE_FOLDERS = ["agent_ia", ".git", ".gradle", "venv", "__pycache__", "out", "build", "stress", "tests", "certification", "api", "usecase", "domain", "infrastructure", "src", "bin"]
 
@@ -67,7 +67,7 @@ class FSProvider:
 
 
 class JDKManager:
-    """Gestor Inteligente de Java (v.30.13 Adaptive JDK)."""
+    """Gestor Inteligente de Java (v.3.0.13 Adaptive JDK)."""
     
     PREFERRED_VERSIONS = ["21", "17"]
 
@@ -94,7 +94,7 @@ class JDKManager:
 
 
 class GradleProvider:
-    """Proveedor para operaciones de Gradle (v.30.13 JDK-Aware)."""
+    """Proveedor para operaciones de Gradle (v.3.0.13 JDK-Aware)."""
 
     def __init__(self, debug: bool = False, gradle_path: str = None):
         self.debug = debug
@@ -191,5 +191,5 @@ class GitProvider:
         msg = f"fix(security): global remediation ({len(ms_map)} services)\n\n"
         for ms, ids in ms_map.items():
             msg += f"- [{ms}]: {', '.join(sorted(list(set(ids))))}\n"
-        msg += f"\nEstado: BUILD SUCCESSFUL (Verificado mediante v.30.13 rules)"
+        msg += f"\nEstado: BUILD SUCCESSFUL (Verificado mediante v.3.0.13 rules)"
         return msg

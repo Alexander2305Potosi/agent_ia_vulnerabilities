@@ -3,12 +3,12 @@ import re
 
 class GenerativeAgentV2:
     """
-    Orquestador de Inteligencia Generativa v.30.
+    Orquestador de Inteligencia Generativa v.3.0.
     Implementa el marco ReAct y el Master System Prompt.
     """
     
     MASTER_PROMPT = """
-    [ROL]: Arquitecto de Seguridad Autónomo Senior v.30.
+    [ROL]: Arquitecto de Seguridad Autónomo Senior v.3.0.
     [OBJETIVO]: Remediación Generativa de CVEs.
     
     [LÓGICA ReAct]:
@@ -19,7 +19,7 @@ class GenerativeAgentV2:
     [ESTÁNDARES DE ARQUITECTURA]:
     1. TRINOMIO: Definición en 'ext' + Lógica en 'dependencyMgmt'.
     2. FAMILIAS: Agrupar por grupo (io.netty, etc).
-    3. LINAJE (v.30): Analizar el origen de la dependencia para decidir si aplicar un 'force' centralizado o una variable puntual.
+    3. LINAJE (v.3.0): Analizar el origen de la dependencia para decidir si aplicar un 'force' centralizado o una variable puntual.
 
     FORMATO OBLIGATORIO:
     [PENSAMIENTO]: (Aquí el agente debe mencionar el linaje detectado).
@@ -64,7 +64,7 @@ class GenerativeAgentV2:
         return match.group(1).strip() if match else f"No se encontró el bloque {block_name}"
 
     def _mock_llm_response(self, cve_data, previous_error):
-        """ Simula la respuesta experta del modelo v.30. """
+        """ Simula la respuesta experta del modelo v.3.0. """
         if previous_error:
             return """
             [PENSAMIENTO]: El error indica un conflicto con la versión de Netty. Debo ajustar la versión de la familia nettyCodecVersion a una más estable compatible con el entorno actual.
@@ -74,7 +74,7 @@ class GenerativeAgentV2:
         else:
             library_name = cve_data.get('library', '')
             vuln_id = cve_data.get('cve') or cve_data.get('id', 'N/A')
-            # v.30: Lógica de simulación dinámica por familia (Priorizando consolidación manual pero permitiendo autonomía)
+            # v.3.0: Lógica de simulación dinámica por familia (Priorizando consolidación manual pero permitiendo autonomía)
             if "netty" in library_name:
                 target_var = "nettyCodecVersion"
             elif "jackson" in library_name:
@@ -90,7 +90,7 @@ class GenerativeAgentV2:
                 parts = library_name.split(':')[-1].split('-')
                 target_var = parts[0] + "".join(p.capitalize() for p in parts[1:]) + "Version"
             
-            # v.30: Generar un razonamiento dinámico basado en la decisión tomada
+            # v.3.0: Generar un razonamiento dinámico basado en la decisión tomada
             reasoning = f"Analizando {vuln_id}. La librería detectada es {library_name}."
             if "netty" in library_name:
                 reasoning += " Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'."
@@ -103,7 +103,7 @@ class GenerativeAgentV2:
             else:
                 reasoning += f" No pertenece a un grupo común conocido. Genero variable específica '{target_var}'."
 
-            # v.30: Asegurar VERSION ÚNICA (Respecting Master Rulebook)
+            # v.3.0: Asegurar VERSION ÚNICA (Respecting Master Rulebook)
             safe_ver_list = str(cve_data.get('safe_version', 'LATEST')).split(',')
             final_safe_v = safe_ver_list[0].strip()
 

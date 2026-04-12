@@ -7,7 +7,7 @@ import re
 from datetime import datetime
 from typing import List, Dict, Optional
 
-# Orquestador Final v.30.13 (Intelligent Lifecycle)
+# Orquestador Final v.3.0.13 (Intelligent Lifecycle)
 from agent_ia.core.mutator import GradleMutator
 from agent_ia.engine.generative import GenerativeAgentV2
 from agent_ia.core.consciousness import CycleOfConsciousness
@@ -16,7 +16,7 @@ from agent_ia.core.providers import FSProvider, GradleProvider, GitProvider
 from agent_ia.models.vulnerability import Vulnerability, RemediationResult
 
 class RemediationAgent:
-    """Orquestador Principal v.30.13 (Adaptive Environment)."""
+    """Orquestador Principal v.3.0.13 (Adaptive Environment)."""
     
     MODEL_PATH = os.path.join(os.path.dirname(__file__), "agent_ia", "models", "remediation_v2_3bits.gguf")
 
@@ -32,7 +32,7 @@ class RemediationAgent:
         self.report_path = report_path or os.path.join(os.path.dirname(__file__), "agent_ia", "data", "cve", "snyk_monorepo.json")
         self.history = []
         
-        print(f"🚀 [*] Inicializando Cerebro Generativo v.30...")
+        print(f"🚀 [*] Inicializando Cerebro Generativo v.3.0...")
         self.engine = GenerativeAgentV2(model_path=self.MODEL_PATH if os.path.exists(self.MODEL_PATH) else None)
         self.cycle_controller = CycleOfConsciousness(self.engine, self._validate_and_learn)
         self.current_ms = None
@@ -54,7 +54,7 @@ class RemediationAgent:
 
         suggested_var = action.split('=')[0].strip() if "=" in action else None
         
-        print(f"    ⚙️ [MUTACIÓN] [{vuln.id}] Aplicando {vuln.library} -> {safe_ver} en {ms_name}...")
+        print(f"        ⚙️ [MUTACIÓN] [{vuln.id}] Aplicando {vuln.library} -> {safe_ver} en {ms_name}...")
         
         did_modify = GradleMutator.apply_coordinated_remediation(
             ms_files, "TRANSITIVE", vuln.library, safe_ver, 
@@ -75,7 +75,7 @@ class RemediationAgent:
         else:
             self.fs.restore_files(backups)
             
-            # v.30.13: Detección de error fatal de infraestructura (JDK, etc.)
+            # v.3.0.13: Detección de error fatal de infraestructura (JDK, etc.)
             if isinstance(logs, str) and "INFRA_ERROR" in logs:
                 return False, {"fatal": True, "message": logs}
 
@@ -87,7 +87,7 @@ class RemediationAgent:
     def run(self):
         try:
             print("\n" + "="*60)
-            print("🛡️ AGENTE DE REMEDIACIÓN GENERATIVA v.30 (ADAPTIVE)")
+            print("🛡️ AGENTE DE REMEDIACIÓN GENERATIVA v.3.0 (ADAPTIVE)")
             print("="*60)
             
             vulnerabilities = self._load_report()
@@ -135,7 +135,7 @@ class RemediationAgent:
             self.current_ms = ms
             print(f"📦 [*] Procesando {ms} | CVE: {vuln.id}")
 
-            # Inteligencia de Grafo JDK-Aware (v.30.13)
+            # Inteligencia de Grafo JDK-Aware (v.3.0.13)
             lineage_info = "UNKNOWN"
             gradle_bin = self.gradle.discover(ms_path, self.root_path)
             if gradle_bin:
@@ -156,7 +156,7 @@ class RemediationAgent:
 
     def _print_summary(self):
         print("\n" + "="*40)
-        print("📊 RESUMEN DE REMEDIACIÓN v.30 (ADAPTIVE)")
+        print("📊 RESUMEN DE REMEDIACIÓN v.3.0 (ADAPTIVE)")
         print("="*40)
         for e in self.history:
             icon = "✅" if e["status"] == "FIXED" else "❌"
@@ -164,7 +164,7 @@ class RemediationAgent:
         print("="*40)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="🛡️ Agente de Remediación Generativa v.30.13")
+    parser = argparse.ArgumentParser(description="🛡️ Agente de Remediación Generativa v.3.0.13")
     parser.add_argument("--debug", action="store_true")
     parser.add_argument("--folders", "-f", nargs="+")
     parser.add_argument("--report")

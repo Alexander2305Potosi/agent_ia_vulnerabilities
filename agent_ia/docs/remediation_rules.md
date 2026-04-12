@@ -1,4 +1,4 @@
-# Master Remediation Rulebook v.30 "Zero-Risk"
+# Master Remediation Rulebook v.3.0 "Zero-Risk"
 ## Manual Maestro de Operaciones e Inteligencia del Agente IA
 
 Este documento define la misión, los estándares técnicos y los protocolos de ejecución del Agente de Remediación. Sirve como la **Fuente de Verdad** para la toma de decisiones autónomas en el monorepo.
@@ -61,4 +61,4 @@ Para operar el Agente de forma eficiente y portable, utiliza los siguientes flag
 | **Modo Debug** | `python3 remediation_agent.py --debug --folders ms-clients` |
 
 ---
-*Este manual es una extensión de la visión v.30, optimizado para la automatización total del flujo DevSecOps.*
+*Este manual es una extensión de la visión v.3.0, optimizado para la automatización total del flujo DevSecOps.*

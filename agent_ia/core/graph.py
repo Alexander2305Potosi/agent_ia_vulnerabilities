@@ -5,7 +5,7 @@ from agent_ia.core.providers import JDKManager
 
 class DependencyGraph:
     """
-    Analizador de Grafo de Dependencias v.30.13.
+    Analizador de Grafo de Dependencias v.3.0.13.
     Permite descubrir el linaje y origen de las vulnerabilidades transitivas.
     Soporta Adaptación de Entorno (JDK-Aware).
     """
@@ -18,10 +18,10 @@ class DependencyGraph:
     def build_for_project(self, project_path):
         """ Ejecuta gradle dependencies y construye el grafo en memoria. """
         try:
-            # v.30: Usar configuración runtimeClasspath por ser la más certera para seguridad
+            # v.3.0: Usar configuración runtimeClasspath por ser la más certera para seguridad
             cmd = [self.gradle_cmd, "dependencies", "--configuration", "runtimeClasspath"]
             
-            # v.30.13: Inyectar JAVA_HOME si fue detectado para evitar fallos de inicialización
+            # v.3.0.13: Inyectar JAVA_HOME si fue detectado para evitar fallos de inicialización
             env = os.environ.copy()
             if self.java_home:
                 env["JAVA_HOME"] = self.java_home
@@ -75,7 +75,7 @@ class DependencyGraph:
         if target not in self.graph:
             return ["UNKNOWN_ORIGIN"]
             
-        # Retornamos la ruta más corta hasta el ROOT (simplificado para v.30)
+        # Retornamos la ruta más corta hasta el ROOT (simplificado para v.3.0)
         path = [target]
         curr = target
         while curr in self.graph:

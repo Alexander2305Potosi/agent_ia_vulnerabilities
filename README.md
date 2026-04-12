@@ -1,10 +1,10 @@
-# 🛡️ Agente de Seguridad SCA: v.30 "Zero-Risk" (Edición Inteligencia Adaptativa)
+# 🛡️ Agente de Seguridad SCA: v.3.0 "Zero-Risk" (Edición Inteligencia Adaptativa)
 
 Bienvenido a la **Versión 2.0** del Agente de Remediación. Este sistema ha evolucionado de un modelo predictivo tradicional a un ecosistema de **Inteligencia Artificial Generativa Autónoma**.
 
-## 🚀 ¿Qué hay de nuevo en la v.30 "Zero-Risk"?
+## 🚀 ¿Qué hay de nuevo en la v.3.0 "Zero-Risk"?
 
-A diferencia de las versiones anteriores, la v.30 integra **Resiliencia Física y Aprendizaje Adaptativo**.
+A diferencia de las versiones anteriores, la v.3.0 integra **Resiliencia Física y Aprendizaje Adaptativo**.
 
 *   **Inteligencia Adaptativa**: El Agente sobreescribe versiones del reporte si detecta fallos de compilación, aprendiendo del error en tiempo real.
 *   **Auto-Sanación Estructural (Auto-Heal)**: Reconstruye `dependencyMgmt.gradle` y cura vínculos en `main.gradle` o `gradle.properties` de forma quirúrgica.
@@ -18,7 +18,7 @@ El agente sigue un ciclo lógico:
 3.  **EXPLICACIÓN**: Justifica técnicamente la remediación siguiendo el **Estándar de Trinomio**.
 
 ![Ciclo de Entrenamiento y Conciencia](agent_ia/docs/assets/ciclo_entrenamiento.png)
-*Visualización del Ciclo de Conciencia v.30: Desde la detección hasta la auto-corrección.*
+*Visualización del Ciclo de Conciencia v.3.0: Desde la detección hasta la auto-corrección.*
 
 ## 🛡️ Garantía de Privacidad: Tu código NO sale de tu equipo
 > [!IMPORTANT]
@@ -75,24 +75,24 @@ python3 remediation_agent.py --debug
 python3 remediation_agent.py -f ms-clients --debug
 ```
 
-## ✨ Últimas Innovaciones v.30
+## ✨ Últimas Innovaciones v.3.0
 
 ### 🧩 Almacenamiento de Dependencias Híbrido
-A diferencia de versiones anteriores que delegaban todo a la centralización, la **v.30** utiliza ahora un enfoque híbrido:
+A diferencia de versiones anteriores que delegaban todo a la centralización, la **v.3.0** utiliza ahora un enfoque híbrido:
 - **Centralización Directa**: Mantiene las reglas de resolución en `dependencyMgmt.gradle`.
 - **Preservación Local**: Las líneas `implementation` en cada `build.gradle` se mantienen, pero se sustituyen automáticamente por variables (ej. `implementation "group:artifact:${varName}"`), garantizando que el microservicio siga siendo autodocumentado.
 
 ## 📚 Gobernanza y Documentación
 Para profundizar en la arquitectura y operación del Agente, consulta los manuales maestros:
 
-1.  👉 **[Master Remediation Rulebook v.30](agent_ia/docs/remediation_rules.md)**: Estándares técnicos, leyes de inyección y protocolos de Git.
+1.  👉 **[Master Remediation Rulebook v.3.0](agent_ia/docs/remediation_rules.md)**: Estándares técnicos, leyes de inyección y protocolos de Git.
 2.  👉 **[Technical & Operator Manual](agent_ia/docs/manuals/TECHNICAL_MANUAL.md)**: Teoría de la IA Autónoma, facultades del Agente, flujos de ejecución y resolución de problemas.
 
-### 🏗️ Inyección de Configuración Robusta (v.30)
+### 🏗️ Inyección de Configuración Robusta (v.3.0)
 El motor de mutación ha sido rediseñado para una **Estética Industrial**:
 - **Indentación Estándar**: Cada bloque inyectado sigue el estándar de **4 espacios**, garantizando limpieza visual en el código fuente.
 - **Veracidad de Compilación**: Cada parche es validado físicamente previo a su aprobación lógica.
 - **Header Dinámico**: Metadatos de seguridad claros en cada script generado.
 
 ---
-*Protección Generativa para Microservices. Inteligencia v.30 Local y Privada.*
+*Protección Generativa para Microservices. Inteligencia v.3.0 Local y Privada.*

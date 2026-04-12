@@ -3,7 +3,7 @@ import os
 
 class CycleOfConsciousness:
     """
-    Controlador del bucle de autocuración (v.30).
+    Controlador del bucle de autocuración (v.3.0).
     Permite que el agente aprenda de sus errores de ejecución de forma recursiva.
     """
     
@@ -21,14 +21,14 @@ class CycleOfConsciousness:
         
         while attempts < self.max_attempts:
             attempts += 1
-            print(f"    [Ciclo v.30] Intento {attempts}/{self.max_attempts}...")
+            print(f"    [Ciclo v.3.0] Intento {attempts}/{self.max_attempts}...")
             
             # 1. GENERACIÓN (Cerebro Generativo)
             response = self.engine.generate_remediation(cve_data, local_context, previous_error)
             parsed = self.engine.parse_react_response(response)
             
-            print(f"    [PENSAMIENTO]: {parsed['thought']}")
-            print(f"    [ACCIÓN]: {parsed['action']}")
+            print(f"        [PENSAMIENTO]: {parsed['thought']}")
+            print(f"        [ACCIÓN]: {parsed['action']}")
             
             # 2. APLICACIÓN (Aquí iría el Mutator real, simulamos éxito para la prueba lógica)
             # self.apply(parsed['action'])
@@ -37,7 +37,7 @@ class CycleOfConsciousness:
             success, result_data = self.validate(parsed['action'], attempts, cve_data)
             
             if success:
-                print(f"    [OK] Ciclo completado exitosamente en el intento {attempts}.")
+                print(f"        [OK] Ciclo completado exitosamente en el intento {attempts}.")
                 return True, parsed['explanation'], result_data
             else:
                 # 4. ERROR FATAL (Abortar Ciclo)
@@ -46,7 +46,7 @@ class CycleOfConsciousness:
                     return False, f"Abortado por error fatal: {result_data.get('message')}", result_data
 
                 # 5. APRENDIZAJE (Ciclo de Conciencia)
-                print(f"    [!] Error detectado. Re-inyectando contexto de fallo al modelo...")
+                print(f"        [!] Error detectado. Re-inyectando contexto de fallo al modelo...")
                 previous_error = result_data # Aquí result_data es el error_log
                 
         print("    [ERROR] No se pudo solventar la vulnerabilidad tras los intentos permitidos.")
