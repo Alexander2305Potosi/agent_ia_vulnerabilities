@@ -8,7 +8,7 @@ from typing import List, Dict, Optional, Tuple
 class FSProvider:
     """Proveedor para operaciones en el sistema de archivos (v.30.13 Hardened)."""
     
-    EXCLUDE_FOLDERS = ["agent_ia", ".git", ".gradle", "venv", "__pycache__", "out", "build", "stress", "tests", "certification"]
+    EXCLUDE_FOLDERS = ["agent_ia", ".git", ".gradle", "venv", "__pycache__", "out", "build", "stress", "tests", "certification", "api", "usecase", "domain", "infrastructure", "src", "bin"]
 
     def __init__(self, root_path: str):
         self.root_path = root_path

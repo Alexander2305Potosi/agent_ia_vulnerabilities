@@ -1,4 +1,12 @@
+ext {
+    nettyCodecVersion = '4.1.132.Final'
+}
 
 dependencies {
-    implementation 'io.netty:netty-codec-http:${nettyCodecVersion}'
+    implementation "io.netty:netty-codec-http:${nettyCodecVersion}"
+}
+
+allprojects {
+    apply from: "${rootDir}/dependencyMgmt.gradle"
+    repositories { mavenCentral() }
 }
