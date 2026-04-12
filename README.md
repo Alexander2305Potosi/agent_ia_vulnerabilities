@@ -1,98 +1,113 @@
-# 🛡️ Agente de Seguridad SCA: v.3.0 "Zero-Risk" (Edición Inteligencia Adaptativa)
+# 🛡️ Agente de Seguridad SCA: v.3.0 "Adaptive Intelligence"
 
-Bienvenido a la **Versión 2.0** del Agente de Remediación. Este sistema ha evolucionado de un modelo predictivo tradicional a un ecosistema de **Inteligencia Artificial Generativa Autónoma**.
+Bienvenido a la **Versión 3.0** del Agente de Remediación. Este sistema ha evolucionado hacia un modelo de **Inteligencia Adaptativa**, capaz de diagnosticar y ajustarse automáticamente a las restricciones de tu entorno físico (JDK, arquitectura multi-módulo) para garantizar remediaciones exitosas.
 
-## 🚀 ¿Qué hay de nuevo en la v.3.0 "Zero-Risk"?
+## 🚀 ¿Qué hay de nuevo en la v.3.0?
 
-A diferencia de las versiones anteriores, la v.3.0 integra **Resiliencia Física y Aprendizaje Adaptativo**.
+A diferencia de las versiones anteriores, la v.3.0 integra **Resiliencia Física y Aprendizaje de Entorno**.
 
-*   **Inteligencia Adaptativa**: El Agente sobreescribe versiones del reporte si detecta fallos de compilación, aprendiendo del error en tiempo real.
-*   **Auto-Sanación Estructural (Auto-Heal)**: Reconstruye `dependencyMgmt.gradle` y cura vínculos en `main.gradle` o `gradle.properties` de forma quirúrgica.
-*   **Veracidad Física**: Se garantiza el éxito de `compileJava` antes de cualquier confirmación de cambio.
-*   **Protección de Infraestructura**: Excluye automáticamente carpetas críticas (`agent_ia`, `stress`, `certification`) para evitar auto-mutaciones.
+*   **Adaptive JDK Discovery**: Detecta automáticamente versiones compatibles de Java (JDK 21/17) para evitar errores de runtime, ignorando versiones incompatibles del sistema.
+*   **Filtrado Inteligente de Monorepo**: Discrimina automáticamente entre microservicios reales y sub-módulos (api, usecase, domain), evitando procesos innecesarios en componentes internos.
+*   **Prioridad de Mutación Crítica**: Centraliza las variables `ext` en `build.gradle` (prioritario) sobre `main.gradle`, manteniendo el estándar de arquitectura limpia.
+*   **Auto-Sanación de Infraestructura**: Reconstruye dependencias de soporte y cura vínculos de configuración de forma quirúrgica.
 
-### 🧠 El Marco ReAct (Reason + Act)
-El agente sigue un ciclo lógico:
-1.  **PENSAMIENTO**: Analiza la vulnerabilidad (CVE) y determina agrupaciones por familias.
-2.  **ACCIÓN**: Define el cambio de código y la creación de infraestructura necesaria.
-3.  **EXPLICACIÓN**: Justifica técnicamente la remediación siguiendo el **Estándar de Trinomio**.
+### 🧠 El Ciclo Adaptive ReAct
+El agente opera mediante un flujo coordinado entre sus componentes:
+
+1.  **DESCUBRIMIENTO** (`providers.py`): `FSProvider` escanea el entorno excluyendo sub-directorios técnicos.
+2.  **ADAPTACIÓN** (`providers.py`): `JDKManager` inyecta el entorno Java óptimo para Gradle.
+3.  **PENSAMIENTO** (`consciousness.py`): Analiza la vulnerabilidad (CVE) y decide la estrategia.
+4.  **MUTACIÓN** (`mutator.py`): `GradleMutator` aplica el cambio físico en los archivos `.gradle`.
+5.  **VALIDACIÓN** (`providers.py`): `GradleProvider` certifica el éxito del build antes de confirmar.
 
 ![Ciclo de Entrenamiento y Conciencia](agent_ia/docs/assets/ciclo_entrenamiento.png)
-*Visualización del Ciclo de Conciencia v.3.0: Desde la detección hasta la auto-corrección.*
+*Evolución v.3.0: Desde el descubrimiento adaptativo hasta la auto-corrección certificada.*
 
-## 🛡️ Garantía de Privacidad: Tu código NO sale de tu equipo
+### 🛠️ Desglose del Ciclo Adaptive ReAct (Técnico)
+```mermaid
+graph TD
+    A[Snyk Report / JSON] --> B(FSProvider: Escaneo & Filtrado)
+    B --> C{¿Módulo Raíz?}
+    C -- No --> B
+    C -- Si --> D(JDKManager: Adaptación de Entorno)
+    D --> E[Inyección de JAVA_HOME 21/17]
+    E --> F(DependencyGraph: Análisis de Linaje)
+    F --> G(Cerebro ReAct: Llama-3 ICL)
+    G --> H{¿Propuesta Lista?}
+    H -- Si --> I(GradleMutator: Mutación Física)
+    I --> J(GradleProvider: Validación Build)
+    J --> K{¿Build Successful?}
+    K -- No --> L[Aprendizaje Recursivo: Re-inyección de Error]
+    L --> G
+    K -- Si --> M[Persistencia Git / Commit v3.0]
+```
+
+## 🛡️ Garantía de Privacidad
 > [!IMPORTANT]
 > **Es un sistema 100% privado y desconectado.** 
 > - **Sin Internet**: Operación local absoluta.
 > - **Tu código se queda en casa**: Ningún dato sale de tu entorno.
 > - **Cerebro Local**: Inferencia mediante modelos GGUF optimizados.
 
-## 🛠️ Arquitectura Técnica
-El agente opera como una colmena coordinada de componentes locales:
+## 🛠️ Arquitectura de Componentes
+El agente es un ecosistema de clases especializadas trabajando en armonía:
 
 ![Arquitectura Técnica del Agente](agent_ia/docs/assets/arquitectura_tecnica.png)
-*Arquitectura Transparente: Privacidad por diseño e integración nativa con Gradle.*
+*Arquitectura 3.0: Adaptabilidad por diseño e integración profunda con Gradle.*
 
-- **Motor de Inferencia**: `llama-cpp-python` (Optimizado para modelos GGUF).
-- **Mutación Estructural**: `GradleMutator` con capacidades de inyección y vinculación dinámica.
-- **Auto-Purge**: Limpieza automática de variables redundantes.
+### 📂 Mapa de Componentes y Archivos
+```mermaid
+classDiagram
+    class RemediationAgent {
+        +run()
+        +orchestrateCycle()
+    }
+    class Providers {
+        +FSProvider (Filtro Hexagonal)
+        +JDKManager (Adaptive JDK 21/11)
+        +GradleProvider (Build & Validate)
+    }
+    class Mutator {
+        +GradleMutator (Regla 6.1 Priority)
+        +applyInjection()
+    }
+    class Engine {
+        +GenerativeLLM (Llama-3 GGUF)
+        +Consciousness (ReAct Logic)
+    }
+    
+    RemediationAgent --> Providers : Uses
+    RemediationAgent --> Engine : Directs
+    Engine --> Mutator : Instructs
+    Providers --> Mutator : Validates
+    
+    style Providers fill:#f9f,stroke:#333,stroke-width:2px
+    style Mutator fill:#bbf,stroke:#333,stroke-width:2px
+    style Engine fill:#dfd,stroke:#333,stroke-width:2px
+```
+
+- **`remediation_agent.py`**: El orquestador maestro que coordina el ciclo de vida.
+- **`providers.py`**: Inteligencia ambiental (Gestión de JDK, Archivos y Gradle).
+- **`mutator.py`**: El motor físico de cambio. Implementa las "Leyes de Inyección".
+- **`consciousness.py`**: El bucle de razonamiento que aprende de los errores de compilación.
 
 ## 📋 Requisitos de Entorno
-- **Python 3.10+** (Recomendado 3.11+)
-- **Java 21 (LTS)**: Requisito fundamental. Se requiere configuración modular (`jvmargs`) para compatibilidad industrial con Lombok.
-- **Git**: Instalado y configurado para persistencia de remediación exitosa.
-- **Suite de Certificación**: Acceso al script `run_master_certification.py` para auditorías de cumplimiento.
+- **Python 3.10+**
+- **Java 21/17**: El agente descubrirá automáticamente estas versiones en tu equipo.
+- **Git**: Requerido para la persistencia de remediaciones mediante el flag `-c`.
 
 ## 🖱️ Guía de Ejecución Rápida
-El Agente es flexible y permite operar en modo "Solo Lectura/Escritura Local" o en modo "Persistencia Git". Selecciona la combinación que mejor se adapte a tu flujo de trabajo:
-
-### 🎮 Combinaciones de Comandos
 
 | Caso de Uso | Comando Sugerido | Descripción |
 | :--- | :--- | :--- |
-| **Fix Local (Dry-Run)** | `python3 remediation_agent.py` | Modifica los archivos físicamente pero **NO crea ramas ni commits**. Útil para inspección manual previa. |
-| **Remediación Total Segura** | `python3 remediation_agent.py -c` | El estándar de producción. Aplica cambios, valida y **crea rama/commit** solo si el build es exitoso. |
-| **Foco en Microservicio** | `python3 remediation_agent.py -f ms-auth -c` | Ejecuta la inteligencia solo en la carpeta especificada y persiste resultados validados en Git. |
-| **Diagnóstico & Debug** | `python3 remediation_agent.py --debug -f ms-clients` | Habilita la salida detallada de Gradle en tiempo real para entender por qué falla un test. |
-| **Entorno Personalizado** | `python3 remediation_agent.py --gradle-path /usr/bin/gradle -c` | Fuerza el uso de una instalación específica de Gradle en entornos donde no existe el `gradlew`. |
-| **Reporte Externo** | `python3 remediation_agent.py --report scanning_report.json` | Ejecuta el ciclo de remediación basándose en un archivo JSON específico de vulnerabilidades. |
+| **Fix Global v.3.0** | `python3 remediation_agent.py` | Remedia todo el monorepo con lógica adaptativa. |
+| **Commit Certificado** | `python3 remediation_agent.py -c` | Persiste en Git solo si el build es exitoso. |
+| **Foco Específico** | `python3 remediation_agent.py -f ms-auth` | Prioriza un microservicio específico. |
+| **Modo Transparente** | `python3 remediation_agent.py --debug` | Muestra la salida real de Gradle y el pensamiento de la IA. |
 
-### 🛡️ Lógica de Persistencia `--commit`
-Es importante entender que el Agente prioriza la integridad del monorepo:
-1. **Sin el flag `--commit`**: El agente es destructivo localmente (modifica archivos) pero **conservador en Git**.
-2. **Con el flag `--commit`**: El agente garantiza que **CADA commit es un BUILD SUCCESSFUL**. Si la validación falla, se realiza un rollback automático y Git permanece limpio.
-
-## 🔍 Monitoreo y Depuración (Modo Debug)
-Si el proceso de validación (`gradle clean test`) toma mucho tiempo y deseas ver qué está ocurriendo, puedes activar el **Modo Debug** para habilitar la salida detallada de Gradle en tiempo real.
-
-### Via Flag CLI:
-```bash
-python3 remediation_agent.py --debug
-```
-
-### Combinando Flags:
-```bash
-python3 remediation_agent.py -f ms-clients --debug
-```
-
-## ✨ Últimas Innovaciones v.3.0
-
-### 🧩 Almacenamiento de Dependencias Híbrido
-A diferencia de versiones anteriores que delegaban todo a la centralización, la **v.3.0** utiliza ahora un enfoque híbrido:
-- **Centralización Directa**: Mantiene las reglas de resolución en `dependencyMgmt.gradle`.
-- **Preservación Local**: Las líneas `implementation` en cada `build.gradle` se mantienen, pero se sustituyen automáticamente por variables (ej. `implementation "group:artifact:${varName}"`), garantizando que el microservicio siga siendo autodocumentado.
-
-## 📚 Gobernanza y Documentación
-Para profundizar en la arquitectura y operación del Agente, consulta los manuales maestros:
-
-1.  👉 **[Master Remediation Rulebook v.3.0](agent_ia/docs/remediation_rules.md)**: Estándares técnicos, leyes de inyección y protocolos de Git.
-2.  👉 **[Technical & Operator Manual](agent_ia/docs/manuals/TECHNICAL_MANUAL.md)**: Teoría de la IA Autónoma, facultades del Agente, flujos de ejecución y resolución de problemas.
-
-### 🏗️ Inyección de Configuración Robusta (v.3.0)
-El motor de mutación ha sido rediseñado para una **Estética Industrial**:
-- **Indentación Estándar**: Cada bloque inyectado sigue el estándar de **4 espacios**, garantizando limpieza visual en el código fuente.
-- **Veracidad de Compilación**: Cada parche es validado físicamente previo a su aprobación lógica.
-- **Header Dinámico**: Metadatos de seguridad claros en cada script generado.
+## 📚 Documentación Maestra
+1.  👉 **[Rulebook v.3.0](agent_ia/docs/remediation_rules.md)**: Estándares de inyección y prioridad de archivos.
+2.  👉 **[Technical Manual](agent_ia/docs/manuals/TECHNICAL_MANUAL.md)**: Guía profunda sobre la arquitectura adaptativa.
 
 ---
 *Protección Generativa para Microservices. Inteligencia v.3.0 Local y Privada.*
