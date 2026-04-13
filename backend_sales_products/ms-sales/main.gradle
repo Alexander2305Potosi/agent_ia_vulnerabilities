@@ -14,4 +14,5 @@ test {
 
 allprojects {
     apply from: "${rootDir}/dependencyMgmt.gradle"
+    repositories { mavenCentral() }
 }

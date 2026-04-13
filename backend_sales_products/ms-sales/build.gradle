@@ -5,7 +5,6 @@ plugins {
 }
 
 ext {
-    log4jCoreVersion = '2.24.1'
     nettyCodecVersion = '4.1.132.Final'
     springBootVersion = '3.3.4'
     jacksonCoreVersion = '2.18.1'

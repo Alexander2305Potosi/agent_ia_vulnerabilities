@@ -167,7 +167,7 @@ class GradleMutator:
         priority = {"build.gradle": 0, "main.gradle": 1}
         root_candidates = sorted(
             [f for f in gradles if os.path.basename(f) in priority],
-            key=lambda x: priority.get(os.path.basename(x), 100)
+            key=lambda x: (x.count(os.sep), priority.get(os.path.basename(x), 100))
         )
         root_gradle = root_candidates[0] if root_candidates else None
         if not root_gradle: return False

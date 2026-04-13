@@ -36,6 +36,7 @@ El Agente opera bajo reglas físicas estrictas:
     2.  Prioridad 2: `main.gradle`
 - **Standard de Metadatos (Auditoría)**: El Motor Físico inyectará obligatoriamente la regla `details.because "Fix: CVE-XXXX"` al crear resoluciones transitivas. No acumular historial, sobrescribir con el último CVE atendido.
 - **Exclusiones de Seguridad**: El sistema tiene instrucciones inquebrantables de ignorar carpetas de infraestructura (`agent_ia`), de estrés (`stress`) o de certificación (`certification`), protegiendo el entorno operativo.
+- **Ley de Profundidad Hexagonal (Depth Sort)**: Para proyectos multi-módulo (ej: Arquitectura Hexagonal), el Agente inferirá el archivo `build.gradle` Maestro contando la profundidad de su ruta (menor cantidad de separadores = Raíz). Las variables `ext` se inyectarán exclusivamente en esta Raíz, mientras que la sustitución por variables `"${version}"` se aplicará en cascada a todos los submódulos.
 
 ---
 
@@ -62,7 +63,7 @@ Para operar el Agente con la flexibilidad que exige la v.3.0, el Panel de Contro
 
 | Operación | Comando Sugerido |
 | :--- | :--- |
-| **Remediación Total Segura** | `python3 remediation_agent.py --commit` |
+| **Remediación Total Segura** | `python3 remediation_agent.py` |
 | **Filtrado por Sistemas** | `python3 remediation_agent.py --folders ms-auth ms-sales` |
 | **Modo Debug (Trace/Auditoría)**| `python3 remediation_agent.py --debug` |
 | **Simulación de Falla** | Sin dependencia externa, rollback asegurado. |
