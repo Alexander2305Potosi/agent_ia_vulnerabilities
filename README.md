@@ -39,7 +39,7 @@ graph TD
     J --> K{¿Build Successful?}
     K -- No --> L[Aprendizaje Recursivo: Re-inyección de Error]
     L --> G
-    K -- Si --> M[Persistencia Git / Commit v3.0]
+    K -- Si --> M[Certificación Exitosa (Zero-Risk)]
 ```
 
 ## 🛡️ Garantía de Privacidad
@@ -94,14 +94,13 @@ classDiagram
 ## 📋 Requisitos de Entorno
 - **Python 3.10+**
 - **Java 21/17**: El agente descubrirá automáticamente estas versiones en tu equipo.
-- **Git**: Requerido para la persistencia de remediaciones mediante el flag `-c`.
 
 ## 🖱️ Guía de Ejecución Rápida
 
 | Caso de Uso | Comando Sugerido | Descripción |
 | :--- | :--- | :--- |
 | **Fix Global v.3.0** | `python3 remediation_agent.py` | Remedia todo el monorepo con lógica adaptativa. |
-| **Commit Certificado** | `python3 remediation_agent.py -c` | Persiste en Git solo si el build es exitoso. |
+
 | **Foco Específico** | `python3 remediation_agent.py -f ms-auth` | Prioriza un microservicio específico. |
 | **Modo Transparente** | `python3 remediation_agent.py --debug` | Muestra la salida real de Gradle y el pensamiento de la IA. |
 

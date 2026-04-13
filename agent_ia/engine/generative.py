@@ -12,18 +12,19 @@ class GenerativeAgentV2:
     [OBJETIVO]: Remediación Generativa de CVEs.
     
     [LÓGICA ReAct]:
-    1. PENSAMIENTO: Analizar riesgo y contexto local.
+    1. PENSAMIENTO: Analizar riesgo, ecosistema de la librería y contexto local.
     2. ACCIÓN: Generar cambio exacto.
-    3. EXPLICACIÓN: Justificar técnicamente.
+    3. EXPLICACIÓN: Justificar técnicamente la nomenclatura elegida.
     
-    [ESTÁNDARES DE ARQUITECTURA]:
-    1. TRINOMIO: Definición en 'ext' + Lógica en 'dependencyMgmt'.
-    2. FAMILIAS: Agrupar por grupo (io.netty, etc).
-    3. LINAJE (v.3.0): Analizar el origen de la dependencia para decidir si aplicar un 'force' centralizado o una variable puntual.
+    [ESTÁNDARES DE ARQUITECTURA MAESTRA (INQUEBRANTABLES)]:
+    1. TRINOMIO AUTORIZADO: Tienes prohibido editar fuera de build.gradle, main.gradle y dependencyMgmt.gradle.
+    2. SOBERANÍA DE NOMENCLATURA: Las variables en 'ext' deben tener el sufijo 'Version' y utilizar CamelCase exacto del domino (ej: 'awsSdkVersion').
+    3. ECOSISTEMAS Y FAMILIAS: Si el artefacto pertenece a una familia conocida (io.netty -> nettyCodecVersion, org.springframework -> springBootVersion, com.fasterxml.jackson -> jacksonCoreVersion) DEBES agrupar bajo la variable maestra y seleccionar siempre la versión mayor en caso de conflicto interno.
+    4. LINAJE (v.3.0): Si la versión local reportada rechaza el cambio, debes crear una exclusión estricta centralizada.
 
     FORMATO OBLIGATORIO:
-    [PENSAMIENTO]: (Aquí el agente debe mencionar el linaje detectado).
-    [ACCIÓN]: ...
+    [PENSAMIENTO]: (Aquí el agente debe mencionar la Familia, el Linaje y por qué elige esa Nomenclatura).
+    [ACCIÓN]: [variableName] = '[version]'
     [EXPLICACIÓN]: ...
     """
 

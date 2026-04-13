@@ -45,7 +45,7 @@ El sistema opera bajo un contrato de responsabilidades atómicas para garantizar
 
 | Componente | Archivo | Responsabilidad Principal | Regla Maestra |
 | :--- | :--- | :--- | :--- |
-| **Orquestador** | `remediation_agent.py` | Control de flujo y persistencia Git. | Success or Nothing |
+| **Orquestador** | `remediation_agent.py` | Control de flujo y coordinación general. | Zero-Risk |
 | **JDKManager** | `providers.py` | Detección de JDK 21/17 y export de JAVA_HOME. | Adaptive Runtime |
 | **FSProvider** | `providers.py` | Filtrado hexagonal de sub-módulos (api/domain/etc). | Target Root Only |
 | **Mutator** | `mutator.py` | Escritura quirúrgica y prioridad de archivos. | Rule 6.1 (build.gradle) |
@@ -69,7 +69,7 @@ sequenceDiagram
     A->>B: Aplica Propuesta #2
     A->>C: Re-Valida Build
     C-->>A: SUCCESS
-    A->>A: Persiste Cambio
+    A->>A: Certifica Remedio y Cierra Ciclo
 ```
 
 ---
