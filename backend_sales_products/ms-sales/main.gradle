@@ -1,13 +1,129 @@
 allprojects {
-    repositories { 
-        mavenCentral() 
+    apply from: "${rootDir}/dependencyMgmt.gradle"
+    repositories {
+        maven ()
+    }
+
+    configurations.configureEach {
+        resolutionStrategy {
+            force "org.apache.commons:commons-lang3:${commonsLang3Version}"
+            force "org.assertj:assertj-core:3.27.7"
+        }
     }
 }
 
-dependencies {
-    implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+apply plugin: 'info.solidsoft.pitest.aggregator'
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'jacoco'
+    apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'info.solidsoft.pitest'
+    pitest {
+        targetClasses = ['co.com.']
+        verbose = true
+        outputFormats = ['XML', 'HTML']
+        threads = 8
+        exportLineCoverage = true
+        junit5PluginVersion = '1.2.1'
+        pitestVersion = '1.20.6'
+        timestampedReports = false
+        failWhenNoMutations = false
+    }
+
+    compileJava.dependsOn validateStructure
+    sourceCompatibility = JavaVersion.VERSION_21
+    test {
+        useJUnitPlatform()
+    }
+    dependencies {
+        implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+        testImplementation 'org.xmlunit:xmlunit-core:2.10.0'
+        testImplementation 'io.projectreactor:reactor-test'
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+        compileOnly "org.projectlombok:lombok:${lombokVersion}"
+        annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+        testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+        testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+        compileOnly 'com.fasterxml.jackson.core:jackson-databind:2.17.1'
+
+        testImplementation(platform("org.junit:junit-bom:${jUnit}"))
+        testImplementation "org.junit.jupiter:junit-jupiter-api"
+        testRuntimeOnly "org.junit.platform:junit-platform-launcher:${junitPlatformVersion}"
+        testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
+        testRuntimeOnly "org.junit.vintage:junit-vintage-engine"
+    }
+
+    tasks.withType(Test).configureEach {
+        if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_17)) {
+            jvmArgs += [
+                    "-XX:+AllowRedefinitionToAddDeleteMethods"
+            ]
+        }
+    }
+
+    test.finalizedBy(project.tasks.jacocoTestReport)
+
+    jacocoTestReport {
+        dependsOn = [test, 'pitest']
+        reports {
+            xml.setRequired true
+            xml.setOutputLocation file("${buildDir}/reports/jacoco.xml")
+            csv.setRequired false
+            html.setOutputLocation file("${buildDir}/reports/jacocoHtml")
+        }
+    }
+
 }
 
-test {
-    useJUnitPlatform()
+pitestReportAggregate {
+    doLast {
+        def reportDir = file("$buildDir/reports/pitest")
+        def consolidatedReport = new File(reportDir, 'mutations.xml')
+        consolidatedReport.withWriter { writer ->
+            writer.write("<mutations>\n")
+            subprojects.each { subproject ->
+                def xmlReport = new File(subproject.buildDir, 'reports/pitest/mutations.xml')
+                if (xmlReport.exists()) {
+                    def xmlContent = xmlReport.text
+                    xmlContent = xmlContent.replaceAll("<\\?xml[^>]*>", "")
+                    xmlContent = xmlContent.replaceAll("</?mutations( partial=\"true\")?>", "")
+                    writer.write(xmlContent.trim() + "\n")
+                }
+            }
+            writer.write("</mutations>")  // Cierra la etiqueta <mutations> al final
+        }
+    }
+}
+
+jacoco {
+    toolVersion = "${jacocoVersion}"
+    reportsDirectory = file("$buildDir/reports")
+}
+
+tasks.register('jacocoMergedReport', JacocoReport) {
+    dependsOn = [pitestReportAggregate, subprojects.jacocoTestReport]
+    additionalSourceDirs.setFrom files(subprojects.sourceSets.main.allSource.srcDirs)
+    sourceDirectories.setFrom files(subprojects.sourceSets.main.allSource.srcDirs)
+    classDirectories.setFrom files(subprojects.sourceSets.main.output)
+    executionData.setFrom project.fileTree(dir: '.', include: '**/build/jacoco/test.exec')
+    reports {
+        xml.setRequired true
+        csv.setRequired false
+        html.setRequired true
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs = [
+            '-Amapstruct.suppressGeneratorTimestamp=true'
+    ]
+}
+tasks.named('wrapper') {
+    gradleVersion = '8.9'
 }

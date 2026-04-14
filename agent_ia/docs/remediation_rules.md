@@ -72,3 +72,22 @@ Para operar el Agente con la flexibilidad que exige la v.3.0, el Panel de Contro
 
 ---
 *Este manual es una extensión de la visión v.3.0 Adaptive, optimizado para la automatización total del flujo DevSecOps.*
+
+---
+
+### 8. Arquitectura Consolidada (Refactorización v.3.0.12)
+
+A partir de la refactorización ejecutada en la sesión de estabilización final, el agente opera con **4 módulos Python** en lugar de los 14 archivos dispersos originales.
+
+| Módulo | Contenido | Rol |
+| :--- | :--- | :--- |
+| `remediation_agent.py` | `RemediationAgent`, `RollbackManager` | CLI Orchestrator |
+| `agent_ia/core/__init__.py` | `Vulnerability`, `JDKManager`, `FSProvider`, `GradleProvider`, `GitProvider`, `DependencyGraph`, `InfrastructureHealer`, `VariableManager`, `RuleInjector`, `GradleMutator`, `CycleOfConsciousness` | Motor Físico Completo |
+| `agent_ia/brain.py` | `GenerativeAgentV2` | Cerebro ReAct LLM |
+| `agent_ia/scripts/run_master_certification.py` | 7 escenarios de certificación | Suite QA |
+
+**Archivos eliminados en esta refactorización:**
+- `agent_ia/core/mutator.py`, `consciousness.py`, `providers.py`, `graph.py`, `utils.py`, `diag_graph.py`, `test_parser.py`
+- `agent_ia/engine/generative.py`
+- `agent_ia/models/vulnerability.py`
+- `debug_mutator.py`, `test_debug.py` (scripts temporales)

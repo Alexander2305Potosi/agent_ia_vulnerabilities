@@ -1,18 +1,18 @@
 [
     {
-        "priority": "medium low",
+        "priority": "high",
         "cve": "CVE-2026-33870",
         "library": "io.netty:netty-codec-http",
-        "vulnerable_version": "4.1.130.Final",
-        "safe_version": "4.1.132.Final, 4.2.10.Final",
-        "description": "Netty is an asynchronous, event-driven network application framework. In versions prior to 4.1.132.Final and 4.2.10.Final, Netty incorrectly parses qu"
+        "vulnerable_version": "4.1.86.Final",
+        "safe_version": "4.1.132.Final",
+        "microservice": "ms-sales"
     },
     {
-        "priority": "medium low",
+        "priority": "critical",
         "cve": "CVE-2026-33871",
         "library": "io.netty:netty-codec-http2",
-        "vulnerable_version": "4.1.130.Final",
-        "safe_version": "4.1.132.Final, 4.2.11.Final",
-        "description": "Netty is an asynchronous, event-driven network application framework. In versions prior to 4.1.132.Final and 4.2.10.Final, a remote user can trigger a"
+        "vulnerable_version": "4.1.86.Final",
+        "safe_version": "4.1.132.Final",
+        "microservice": "ms-sales"
     }
 ]
