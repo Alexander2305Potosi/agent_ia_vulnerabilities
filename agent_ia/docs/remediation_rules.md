@@ -34,9 +34,10 @@ El Agente opera bajo reglas físicas estrictas:
 - **Regla de Prioridad 6.1**: Para la inyección de variables globales `ext`:
     1.  Prioridad 1: `build.gradle`
     2.  Prioridad 2: `main.gradle`
-- **Standard de Metadatos (Auditoría)**: El Motor Físico inyectará obligatoriamente la regla `details.because "Fix: CVE-XXXX"` al crear resoluciones transitivas. No acumular historial, sobrescribir con el último CVE atendido.
+- **Standard de Metadatos (Auditoría y Zero-Watermark)**: El Motor Físico inyectará obligatoriamente la regla `details.because "Fix: CVE-XXXX"` al crear resoluciones transitivas. La infraestructura generada (ej. `dependencyMgmt.gradle`) se escribirá limpia y sin marcas de agua o comentarios del agente para salvaguardar la estética del repositorio.
 - **Exclusiones de Seguridad**: El sistema tiene instrucciones inquebrantables de ignorar carpetas de infraestructura (`agent_ia`), de estrés (`stress`) o de certificación (`certification`), protegiendo el entorno operativo.
 - **Ley de Profundidad Hexagonal (Depth Sort)**: Para proyectos multi-módulo (ej: Arquitectura Hexagonal), el Agente inferirá el archivo `build.gradle` Maestro contando la profundidad de su ruta (menor cantidad de separadores = Raíz). Las variables `ext` se inyectarán exclusivamente en esta Raíz, mientras que la sustitución por variables `"${version}"` se aplicará en cascada a todos los submódulos.
+- **Inyección Seamless (Indent Sniffing)**: Si la arquitectura concentra sus variables dentro de un scope de compilación (ej. `buildscript { ext { } }`), el Agente es capaz de escanear la profundidad de su indentación y replicarla matemáticamente para las nuevas vulnerabilidades inyectadas, garantizando una alineación visual perfecta y erradicando el desfase de tabulaturas.
 
 ---
 

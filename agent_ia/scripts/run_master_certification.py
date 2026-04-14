@@ -108,12 +108,77 @@ def cert_rule_3_3_audit():
     
     with open(dep_mgmt, 'r') as f:
         content = f.read()
-        if "Fix: CVE-2026-1001" in content and "CVE-OLD-9999" not in content:
-            print("✅ [CERTIFIED] Regla 3.3: Auditoría limpia (historial previo eliminado).")
+        watermark = "// Standardized Dependency Management"
+        if "Fix: CVE-2026-1001" in content and "CVE-OLD-9999" not in content and watermark not in content:
+            print("✅ [CERTIFIED] Regla 3.3: Auditoría limpia y cumplimiento Zero-Watermark.")
             return True
         else:
-            print(f"❌ [FAILED] Regla 3.3: Fallo en reemplazo. Contenido: {content}")
+            print(f"❌ [FAILED] Regla 3.3: Fallo en reemplazo o marca de agua presente.")
             return False
+
+def cert_hexagonal_depth():
+    """ Escenario de Arquitectura Hexagonal: Validar Depth Sort """
+    reset_env()
+    print("[*] Certificando Ley de Profundidad Hexagonal (Depth Sort)...")
+    
+    api_gradle = os.path.join(MS_AUTH_PATH, "api", "build.gradle")
+    os.makedirs(os.path.dirname(api_gradle), exist_ok=True)
+    with open(api_gradle, 'w') as f:
+        f.write("// Submodulo interno falso\nplugins { id 'java' }\n")
+        
+    setup_cve([{
+        "priority": "critical", "cve": "CVE-2026-DEPTH",
+        "library": "org.apache.commons:commons-lang3",
+        "safe_version": "3.14.0",
+        "microservice": "ms-auth"
+    }])
+    
+    run_agent(["ms-auth"])
+    
+    root_gradle = os.path.join(MS_AUTH_PATH, "build.gradle")
+    
+    with open(api_gradle, 'r') as f:
+        api_content = f.read()
+        
+    with open(root_gradle, 'r') as f:
+        root_content = f.read()
+        
+    shutil.rmtree(os.path.dirname(api_gradle), ignore_errors=True)
+    
+    if "commonsLang3Version =" in root_content and "commonsLang3Version =" not in api_content:
+        print("✅ [CERTIFIED] Profundidad Hexagonal: Inyección global anclada en el directorio Raíz.")
+        return True
+    else:
+        print("❌ [FAILED] Profundidad Hexagonal: Falla en priorización Depth Sort.")
+        return False
+
+def cert_seamless_buildscript():
+    """ Escenario de Inyección Visual: Validar Indent Sniffing """
+    reset_env()
+    print("[*] Certificando Inyección Seamless (Indent Sniffing)...")
+    
+    root_gradle = os.path.join(MS_SALES_PATH, "build.gradle")
+    with open(root_gradle, 'w') as f:
+        f.write("buildscript {\n    ext {\n        fakeVersion = '1.0'\n    }\n}\nplugins { id 'java' }\n")
+        
+    setup_cve([{
+        "priority": "critical", "cve": "CVE-2026-ALIGN",
+        "library": "io.netty:netty-codec-http",
+        "safe_version": "4.1.132.Final",
+        "microservice": "ms-sales"
+    }])
+    
+    run_agent(["ms-sales"])
+    
+    with open(root_gradle, 'r') as f:
+        root_content = f.read()
+        
+    if "        nettyCodecVersion =" in root_content and "        fakeVersion" in root_content:
+        print("✅ [CERTIFIED] Inyección Seamless: Variable anidada a la perfección visual (Indent Sniffing).")
+        return True
+    else:
+        print(f"❌ [FAILED] Inyección Seamless: Desalineación visual detectada.")
+        return False
 
 def cert_multi_project_orchestration():
     """ Escenario de Orquestación Multiproyecto """
@@ -203,6 +268,8 @@ if __name__ == "__main__":
     results = [
         cert_rule_6_sync(),
         cert_rule_3_3_audit(),
+        cert_hexagonal_depth(),
+        cert_seamless_buildscript(),
         cert_multi_project_orchestration(),
         cert_cli_interface(),
         cert_rule_4_adaptive_intel()

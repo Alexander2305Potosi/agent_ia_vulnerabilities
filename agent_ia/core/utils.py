@@ -6,8 +6,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..
 root_dir = os.path.join(PROJECT_ROOT, "backend_sales_products")
 
 # Valid empty shell for dependencyMgmt.gradle
-RESET_CONTENT = """// Standardized Dependency Management - Centralized AI Security Rules
-configurations.all {
+RESET_CONTENT = """configurations.all {
     resolutionStrategy.eachDependency { DependencyResolveDetails details ->
         // Inject rules here
     }

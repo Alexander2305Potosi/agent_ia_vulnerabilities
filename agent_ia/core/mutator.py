@@ -5,8 +5,7 @@ from typing import List, Dict, Optional, Tuple, Union
 class InfrastructureHealer:
     """Maneja la Regla 6: Auto-Sanación de Infraestructura (v.3.0.12)."""
     
-    INFRA_TEMPLATE = """// Standardized Dependency Management - Centralized AI Security Rules
-configurations.all {
+    INFRA_TEMPLATE = """configurations.all {
     resolutionStrategy.eachDependency { DependencyResolveDetails details ->
     }
 }
@@ -73,14 +72,22 @@ class VariableManager:
         return best_var, cur_val
 
     @staticmethod
-    def update_variable(content: str, var_name: str, version: str) -> Tuple[str, bool]:
-        pattern = rf"^\s*\b{var_name}\b\s*=\s*['\"][^'\"]+['\"]"
-        new_content, count = re.subn(pattern, f"    {var_name} = '{version}'", content, flags=re.MULTILINE)
+    def update_variable(content: str, var_name: str, version: str, is_root: bool = True) -> Tuple[str, bool]:
+        pattern = rf"^(\s*)\b{var_name}\b\s*=\s*['\"][^'\"]+['\"]"
+        new_content, count = re.subn(pattern, rf"\g<1>{var_name} = '{version}'", content, flags=re.MULTILINE)
         if count == 0:
-            if "ext {" in content:
-                new_content = content.replace("ext {", f"ext {{\n    {var_name} = '{version}'")
+            if not is_root:
+                return content, False
+            m_ext = re.search(r"^([ \t]*)ext\s*\{", content, flags=re.MULTILINE)
+            if m_ext:
+                indent = m_ext.group(1) + "    "
+                new_content = content[:m_ext.end()] + f"\n{indent}{var_name} = '{version}'" + content[m_ext.end():]
             else:
-                new_content = f"ext {{\n    {var_name} = '{version}'\n}}\n" + content
+                m_plug = re.search(r"^plugins\s*\{[^}]+\}", content, flags=re.MULTILINE|re.DOTALL)
+                if m_plug:
+                    new_content = content[:m_plug.end()] + f"\n\next {{\n    {var_name} = '{version}'\n}}" + content[m_plug.end():]
+                else:
+                    new_content = content + f"\n\next {{\n    {var_name} = '{version}'\n}}\n"
             return new_content, True
         return new_content, True
 
@@ -164,6 +171,9 @@ class GradleMutator:
     def apply_coordinated_remediation(project_files: List[str], mode: str, artifact: str, safe_version_str: str, reason: str, override_var_name: Optional[str] = None) -> Union[bool, str]:
         has_changes = False
         gradles = [f for f in project_files if f.endswith(".gradle")]
+        # Ordenamiento Hexagonal por Default: Menor número de carpetas = True Root
+        gradles.sort(key=lambda x: x.count(os.sep))
+        
         priority = {"build.gradle": 0, "main.gradle": 1}
         root_candidates = sorted(
             [f for f in gradles if os.path.basename(f) in priority],
@@ -199,11 +209,19 @@ class GradleMutator:
             if not v_name:
                 parts = artifact.split(':')[-1].split('-')
                 v_name = parts[0] + "".join(p.capitalize() for p in parts[1:]) + "Version"
-            with open(root_gradle, 'r') as f: content = f.read()
-            nc, ch = VariableManager.update_variable(content, v_name, safe_v)
-            if ch:
-                with open(root_gradle, 'w') as f: f.write(nc)
-                has_changes = True
+            
+            for idx, build_file in enumerate(gradles):
+                with open(build_file, 'r') as f:
+                    content = f.read()
+
+                new_content, success = VariableManager.update_variable(
+                    content, v_name, safe_v, is_root=(idx == 0)
+                )
+                
+                if success and new_content != content:
+                    with open(build_file, 'w') as f:
+                        f.write(new_content)
+                    has_changes = True
 
         dep_mgmt = os.path.join(os.path.dirname(root_gradle), "dependencyMgmt.gradle")
         if mode == "TRANSITIVE" and os.path.exists(dep_mgmt):
