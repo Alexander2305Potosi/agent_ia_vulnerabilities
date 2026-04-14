@@ -108,37 +108,46 @@ class FSProvider:
     def __init__(self, root_path: str):
         self.root_path = root_path
 
+    def _is_valid_microservice_path(self, path: str) -> bool:
+        """
+        Verifica que la ruta sea un microservicio válido.
+        Un path es válido si ninguno de sus componentes está exactamente en la lista de exclusiones,
+        y el directorio tiene build.gradle.
+        """
+        # Verificar que tiene build.gradle
+        if not os.path.exists(os.path.join(path, "build.gradle")):
+            return False
+
+        # Obtener componentes de la ruta relativa a root_path
+        rel_path = os.path.relpath(path, self.root_path)
+        parts = rel_path.split(os.sep)
+
+        # Verificar que ninguna parte esté EXACTAMENTE en exclusiones
+        # (comparación exacta, no substring)
+        exclude_exact = set(self.EXCLUDE_FOLDERS)
+        for part in parts:
+            if part.lower() in exclude_exact:
+                return False
+
+        return True
+
     def get_microservices(self) -> List[str]:
         """
-        Detecta microservicios buscando directorios con build.gradle.
-        Solo considera directorios de nivel 1 (hijos directos de root_path)
-        o nivel 2 (subdirectorios inmediatos de hijos de root_path).
-        No busca más profundo para evitar falsos positivos.
+        Detecta microservicios buscando recursivamente directorios con build.gradle.
+        Solo considera directorios que pasen la validación de _is_valid_microservice_path.
+        Esto evita detectar subcarpetas internas de microservicios (src/, bin/, etc.).
         """
         ms_names = []
+        exclude_exact = set(self.EXCLUDE_FOLDERS)
         try:
-            # Nivel 1: Hijos directos de root_path
-            with os.scandir(self.root_path) as entries:
-                for entry in entries:
-                    if entry.is_dir():
-                        dir_name = entry.name.lower()
-                        # Verificar si no está en exclusiones
-                        if not any(ex in dir_name for ex in self.EXCLUDE_FOLDERS):
-                            # Verificar si tiene build.gradle en su raíz
-                            if os.path.exists(os.path.join(entry.path, "build.gradle")):
-                                ms_names.append(entry.name)
-                            else:
-                                # Nivel 2: Buscar en subdirectorios de primer nivel
-                                try:
-                                    with os.scandir(entry.path) as subentries:
-                                        for subentry in subentries:
-                                            if subentry.is_dir():
-                                                subdir_name = subentry.name.lower()
-                                                if not any(ex in subdir_name for ex in self.EXCLUDE_FOLDERS):
-                                                    if os.path.exists(os.path.join(subentry.path, "build.gradle")):
-                                                        ms_names.append(subentry.name)
-                                except (PermissionError, FileNotFoundError):
-                                    pass
+            for root, dirs, files in os.walk(self.root_path):
+                # Filtrar directorios excluidos para no recorrerlos (comparación exacta)
+                dirs[:] = [d for d in dirs if d.lower() not in exclude_exact]
+
+                # Si este directorio tiene build.gradle, verificar si es un microservicio válido
+                if "build.gradle" in files:
+                    if self._is_valid_microservice_path(root):
+                        ms_names.append(os.path.basename(root))
         except (PermissionError, FileNotFoundError):
             pass
         return list(set(ms_names))
@@ -146,36 +155,19 @@ class FSProvider:
     def get_ms_path(self, ms_name: str) -> Optional[str]:
         """
         Busca el path de un microservicio por nombre (normalizado).
-        Busca en nivel 1 y nivel 2 (similar a get_microservices).
+        Busca recursivamente pero solo retorna paths válidos.
         """
         target_norm = _normalize_ms_name(ms_name)
+        exclude_exact = set(self.EXCLUDE_FOLDERS)
         try:
-            # Nivel 1: Hijos directos de root_path
-            with os.scandir(self.root_path) as entries:
-                for entry in entries:
-                    if entry.is_dir():
-                        dir_name = entry.name
-                        # Verificar si no está en exclusiones
-                        if not any(ex in dir_name.lower() for ex in self.EXCLUDE_FOLDERS):
-                            current_norm = _normalize_ms_name(dir_name)
-                            if current_norm == target_norm:
-                                build_gradle_path = os.path.join(entry.path, "build.gradle")
-                                if os.path.exists(build_gradle_path):
-                                    return os.path.abspath(entry.path)
-                            # Nivel 2: Buscar en subdirectorios
-                            try:
-                                with os.scandir(entry.path) as subentries:
-                                    for subentry in subentries:
-                                        if subentry.is_dir():
-                                            subdir_name = subentry.name
-                                            if not any(ex in subdir_name.lower() for ex in self.EXCLUDE_FOLDERS):
-                                                sub_norm = _normalize_ms_name(subdir_name)
-                                                if sub_norm == target_norm:
-                                                    build_gradle_path = os.path.join(subentry.path, "build.gradle")
-                                                    if os.path.exists(build_gradle_path):
-                                                        return os.path.abspath(subentry.path)
-                            except (PermissionError, FileNotFoundError):
-                                pass
+            for root, dirs, files in os.walk(self.root_path):
+                # Filtrar directorios excluidos (comparación exacta)
+                dirs[:] = [d for d in dirs if d.lower() not in exclude_exact]
+
+                if "build.gradle" in files:
+                    current_norm = _normalize_ms_name(os.path.basename(root))
+                    if current_norm == target_norm and self._is_valid_microservice_path(root):
+                        return os.path.abspath(root)
         except (PermissionError, FileNotFoundError):
             pass
         return None
