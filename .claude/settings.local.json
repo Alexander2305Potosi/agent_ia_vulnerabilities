@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gradle -p \"backend_sales_products/ms-products\" clean build --no-daemon)",
+      "Bash(lsof -ti:8082)",
+      "Bash(xargs kill:*)",
+      "Bash(nohup gradle:*)",
+      "Bash(curl -s http://localhost:8082/api/v1/products/health)",
+      "Bash(curl -s http://localhost:8082/api/v1/products/info)",
+      "Bash(curl -s http://localhost:8082/swagger-ui.html)",
+      "Bash(curl -s http://localhost:8082/v3/api-docs)",
+      "Bash(curl -s \"http://localhost:8082/api/v1/products/ab\")",
+      "Bash(curl -s \"http://localhost:8082/api/v1/products/prod@123\")"
+    ]
+  }
+}

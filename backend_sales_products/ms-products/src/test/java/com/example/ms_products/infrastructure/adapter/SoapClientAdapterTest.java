@@ -2,6 +2,8 @@ package com.example.ms_products.infrastructure.adapter;
 
 import com.example.ms_products.domain.model.SoapProductRequest;
 import com.example.ms_products.domain.model.SoapProductResponse;
+import com.example.ms_products.infrastructure.soap.SoapEnvelopeBuilder;
+import com.example.ms_products.infrastructure.soap.SoapResponseParser;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterEach;
@@ -13,19 +15,27 @@ import reactor.test.StepVerifier;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class SoapClientAdapterTest {
 
     private MockWebServer mockWebServer;
     private SoapClientAdapter soapClientAdapter;
+    private SoapEnvelopeBuilder envelopeBuilder;
+    private SoapResponseParser responseParser;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         mockWebServer = new MockWebServer();
         WebClient webClient = WebClient.builder()
                 .baseUrl(mockWebServer.url("/").toString())
                 .build();
-        soapClientAdapter = new SoapClientAdapter(webClient);
+
+        // Crear instancias reales de los builders JAXB
+        envelopeBuilder = new SoapEnvelopeBuilder();
+        responseParser = new SoapResponseParser();
+
+        soapClientAdapter = new SoapClientAdapter(webClient, envelopeBuilder, responseParser);
     }
 
     @AfterEach

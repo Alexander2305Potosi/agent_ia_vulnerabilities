@@ -1,19 +1,20 @@
 package com.example.ms_products.infrastructure.adapter;
 
 import com.example.ms_products.domain.gateway.SoapGateway;
-import com.example.ms_products.domain.model.ProductInfo;
 import com.example.ms_products.domain.model.SoapProductRequest;
 import com.example.ms_products.domain.model.SoapProductResponse;
+import com.example.ms_products.domain.usecase.GetProductFromSoapUseCase;
+import com.example.ms_products.infrastructure.soap.SoapEnvelopeBuilder;
+import com.example.ms_products.infrastructure.soap.SoapResponseParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 
 @Slf4j
 @Component
@@ -21,101 +22,77 @@ import java.nio.charset.StandardCharsets;
 public class SoapClientAdapter implements SoapGateway {
 
     private final WebClient webClient;
+    private final SoapEnvelopeBuilder envelopeBuilder;
+    private final SoapResponseParser responseParser;
 
     @Value("${soap.service.url:http://localhost:8081/ws/product}")
     private String soapServiceUrl;
 
+    @Value("${soap.service.timeout:10000}")
+    private int soapTimeout;
+
     @Override
     public Mono<SoapProductResponse> callSoapService(SoapProductRequest request) {
-        log.info("Calling SOAP service for product: {}", request.getProductId());
+        log.info("Calling SOAP service for product: {} (timeout: {}ms)", request.getProductId(), soapTimeout);
 
-        String soapEnvelope = buildSoapEnvelope(request);
+        // Usar JAXB para construir el envelope SOAP (reemplaza String.format manual)
+        String soapEnvelope = envelopeBuilder.buildSoapEnvelope(request.getProductId());
 
         return webClient.post()
                 .uri(soapServiceUrl)
                 .header(HttpHeaders.CONTENT_TYPE, "text/xml; charset=UTF-8")
-                .header(HttpHeaders.SOAPACTION, "http://example.com/products/GetProductInfo")
+                .header("SOAPAction", "http://example.com/products/GetProductInfo")
                 .bodyValue(soapEnvelope)
                 .retrieve()
                 .bodyToMono(String.class)
-                .flatMap(this::parseSoapResponse)
+                // Timeout a nivel de infraestructura (adapter) - buena práctica
+                .timeout(Duration.ofMillis(soapTimeout),
+                        Mono.error(new GetProductFromSoapUseCase.SoapServiceTimeoutException(
+                                "Timeout esperando respuesta SOAP para producto: " + request.getProductId())))
+                // Usar JAXB para parsear la respuesta (reemplaza regex manual)
+                .flatMap(xml -> responseParser.parseSoapResponse(xml)
+                        .map(productInfo -> SoapProductResponse.builder()
+                                .success(true)
+                                .message("Product retrieved successfully")
+                                .productInfo(productInfo)
+                                .build()))
                 .doOnNext(response -> log.info("SOAP response received for product: {}", request.getProductId()))
                 .doOnError(error -> log.error("Error calling SOAP service: {}", error.getMessage()));
     }
 
-    private String buildSoapEnvelope(SoapProductRequest request) {
-        return String.format("""
-            <?xml version="1.0" encoding="UTF-8"?>
-            <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
-                           xmlns:prod="http://example.com/products">
-                <soap:Header/>
-                <soap:Body>
-                    <prod:GetProductInfoRequest>
-                        <prod:ProductId>%s</prod:ProductId>
-                    </prod:GetProductInfoRequest>
-                </soap:Body>
-            </soap:Envelope>
-            """, escapeXml(request.getProductId()));
-    }
+    @Override
+    public Mono<SoapProductResponse> callSoapServiceWithFile(
+            String productId,
+            String fileName,
+            Long fileSize,
+            String fileExtension,
+            byte[] content) {
 
-    private Mono<SoapProductResponse> parseSoapResponse(String xmlResponse) {
-        try {
-            log.debug("Parsing SOAP response: {}", xmlResponse);
+        log.info("Calling SOAP service with file: {} ({} bytes, timeout: {}ms)",
+                fileName, fileSize, soapTimeout);
 
-            ProductInfo productInfo = ProductInfo.builder()
-                    .productId(extractValue(xmlResponse, "ProductId"))
-                    .name(extractValue(xmlResponse, "Name"))
-                    .description(extractValue(xmlResponse, "Description"))
-                    .price(parseDoubleOrNull(extractValue(xmlResponse, "Price")))
-                    .stockQuantity(parseIntOrNull(extractValue(xmlResponse, "StockQuantity")))
-                    .category(extractValue(xmlResponse, "Category"))
-                    .supplier(extractValue(xmlResponse, "Supplier"))
-                    .build();
+        // Construir envelope SOAP con información del archivo
+        String soapEnvelope = envelopeBuilder.buildSoapEnvelopeWithFile(
+                productId, fileName, fileSize, fileExtension, content);
 
-            return Mono.just(SoapProductResponse.builder()
-                    .success(true)
-                    .message("Product retrieved successfully")
-                    .productInfo(productInfo)
-                    .build());
-
-        } catch (Exception e) {
-            log.error("Error parsing SOAP response: {}", e.getMessage());
-            return Mono.just(SoapProductResponse.builder()
-                    .success(false)
-                    .message("Error parsing response: " + e.getMessage())
-                    .build());
-        }
-    }
-
-    private String extractValue(String xml, String tagName) {
-        String pattern = "<(?:[^>:]*:)?" + tagName + ">([^<]+)</(?:[^>:]*:)?" + tagName + ">";
-        java.util.regex.Pattern r = java.util.regex.Pattern.compile(pattern);
-        java.util.regex.Matcher m = r.matcher(xml);
-        return m.find() ? m.group(1) : null;
-    }
-
-    private Double parseDoubleOrNull(String value) {
-        try {
-            return value != null ? Double.parseDouble(value) : null;
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
-
-    private Integer parseIntOrNull(String value) {
-        try {
-            return value != null ? Integer.parseInt(value) : null;
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
-
-    private String escapeXml(String input) {
-        if (input == null) return "";
-        return input.replace("&", "&amp;")
-                .replace("<", "&lt;")
-                .replace(">", "&gt;")
-                .replace("\"", "&quot;")
-                .replace("'", "&apos;");
+        return webClient.post()
+                .uri(soapServiceUrl)
+                .header(HttpHeaders.CONTENT_TYPE, "text/xml; charset=UTF-8")
+                .header("SOAPAction", "http://example.com/products/GetProductInfo")
+                .bodyValue(soapEnvelope)
+                .retrieve()
+                .bodyToMono(String.class)
+                // Timeout a nivel de infraestructura (adapter) - buena práctica
+                .timeout(Duration.ofMillis(soapTimeout),
+                        Mono.error(new GetProductFromSoapUseCase.SoapServiceTimeoutException(
+                                "Timeout esperando respuesta SOAP para archivo: " + fileName)))
+                .flatMap(xml -> responseParser.parseSoapResponse(xml)
+                        .map(productInfo -> SoapProductResponse.builder()
+                                .success(true)
+                                .message("File processed successfully")
+                                .productInfo(productInfo)
+                                .build()))
+                .doOnNext(response -> log.info("SOAP response received for file: {}", fileName))
+                .doOnError(error -> log.error("Error calling SOAP service with file: {}", error.getMessage()));
     }
 }
