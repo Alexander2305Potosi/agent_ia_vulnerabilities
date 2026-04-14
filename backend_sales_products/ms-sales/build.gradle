@@ -1,8 +1,8 @@
 buildscript {
     ext {
-    springBootVersion = '3.3.4'
-    jacksonCoreVersion = '2.18.1'
-    lombokVersion = '1.18.36'
+        springBootVersion = '3.3.4'
+        jacksonCoreVersion = '2.18.1'
+        lombokVersion = '1.18.36'
     }
 }
 
