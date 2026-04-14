@@ -109,20 +109,75 @@ class FSProvider:
         self.root_path = root_path
 
     def get_microservices(self) -> List[str]:
+        """
+        Detecta microservicios buscando directorios con build.gradle.
+        Solo considera directorios de nivel 1 (hijos directos de root_path)
+        o nivel 2 (subdirectorios inmediatos de hijos de root_path).
+        No busca más profundo para evitar falsos positivos.
+        """
         ms_names = []
-        for root, dirs, files in os.walk(self.root_path):
-            dirs[:] = [d for d in dirs if not any(ex in d.lower() for ex in self.EXCLUDE_FOLDERS)]
-            if "build.gradle" in files:
-                ms_names.append(os.path.basename(root))
+        try:
+            # Nivel 1: Hijos directos de root_path
+            with os.scandir(self.root_path) as entries:
+                for entry in entries:
+                    if entry.is_dir():
+                        dir_name = entry.name.lower()
+                        # Verificar si no está en exclusiones
+                        if not any(ex in dir_name for ex in self.EXCLUDE_FOLDERS):
+                            # Verificar si tiene build.gradle en su raíz
+                            if os.path.exists(os.path.join(entry.path, "build.gradle")):
+                                ms_names.append(entry.name)
+                            else:
+                                # Nivel 2: Buscar en subdirectorios de primer nivel
+                                try:
+                                    with os.scandir(entry.path) as subentries:
+                                        for subentry in subentries:
+                                            if subentry.is_dir():
+                                                subdir_name = subentry.name.lower()
+                                                if not any(ex in subdir_name for ex in self.EXCLUDE_FOLDERS):
+                                                    if os.path.exists(os.path.join(subentry.path, "build.gradle")):
+                                                        ms_names.append(subentry.name)
+                                except (PermissionError, FileNotFoundError):
+                                    pass
+        except (PermissionError, FileNotFoundError):
+            pass
         return list(set(ms_names))
 
     def get_ms_path(self, ms_name: str) -> Optional[str]:
+        """
+        Busca el path de un microservicio por nombre (normalizado).
+        Busca en nivel 1 y nivel 2 (similar a get_microservices).
+        """
         target_norm = _normalize_ms_name(ms_name)
-        for root, dirs, files in os.walk(self.root_path):
-            dirs[:] = [d for d in dirs if not any(ex in d.lower() for ex in self.EXCLUDE_FOLDERS)]
-            current_norm = _normalize_ms_name(os.path.basename(root))
-            if current_norm == target_norm and "build.gradle" in files:
-                return os.path.abspath(root)
+        try:
+            # Nivel 1: Hijos directos de root_path
+            with os.scandir(self.root_path) as entries:
+                for entry in entries:
+                    if entry.is_dir():
+                        dir_name = entry.name
+                        # Verificar si no está en exclusiones
+                        if not any(ex in dir_name.lower() for ex in self.EXCLUDE_FOLDERS):
+                            current_norm = _normalize_ms_name(dir_name)
+                            if current_norm == target_norm:
+                                build_gradle_path = os.path.join(entry.path, "build.gradle")
+                                if os.path.exists(build_gradle_path):
+                                    return os.path.abspath(entry.path)
+                            # Nivel 2: Buscar en subdirectorios
+                            try:
+                                with os.scandir(entry.path) as subentries:
+                                    for subentry in subentries:
+                                        if subentry.is_dir():
+                                            subdir_name = subentry.name
+                                            if not any(ex in subdir_name.lower() for ex in self.EXCLUDE_FOLDERS):
+                                                sub_norm = _normalize_ms_name(subdir_name)
+                                                if sub_norm == target_norm:
+                                                    build_gradle_path = os.path.join(subentry.path, "build.gradle")
+                                                    if os.path.exists(build_gradle_path):
+                                                        return os.path.abspath(subentry.path)
+                            except (PermissionError, FileNotFoundError):
+                                pass
+        except (PermissionError, FileNotFoundError):
+            pass
         return None
 
     def get_ms_files(self, ms_path: str) -> List[str]:

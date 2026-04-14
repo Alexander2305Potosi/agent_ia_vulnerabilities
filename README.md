@@ -20,27 +20,9 @@ Bienvenido a la **Versión 3.1** del Agente de Remediación. Este sistema opera 
 
 ---
 
-## 🚀 Mejoras de la v.3.0 (Base)
-
-| Capacidad | Descripción |
-| :--- | :--- |
-| **Adaptive JDK Discovery** | Detecta automáticamente JDK 21/17, ignorando versiones incompatibles. |
-| **Ley de Profundidad Hexagonal** | Discrimina microservicios raíz de sub-módulos por profundidad de ruta. |
-| **Inyección Seamless (Indent Sniffing)** | Detecta y replica la indentación del bloque `ext` existente. |
-| **Zero-Watermark Policy** | Archivos generados 100% limpios, sin marcas de agente. |
-| **Target Locking** | Solo `build.gradle` raíz puede declarar variables globales. |
-| **Inyección Pura de Infraestructura** | El `allprojects { }` se respeta y anida limpiamente. |
-| **Rollback Zero-Risk** | Restauración automática ante cualquier fallo de compilación. |
-
----
-
 ## 🧠 Arquitectura Consolidada (v.3.1 Enhanced)
 
 La v.3.1 opera con **9 módulos Python** especializados para máxima flexibilidad y extensibilidad.
-
-```
-4 módulos → 9 módulos especializados
-```
 
 ```
 remediation_agent.py                ← Orquestador CLI
@@ -53,20 +35,20 @@ agent_ia/
   event_bus.py                       ← Arquitectura Event-Driven (Pub/Sub)
   dry_run_mode.py                    ← Preview de remediaciones con diff
   config_manager.py                  ← Configuración declarativa (.remediation.yaml)
-  test_containers.py                 ├── Validación en contenedores
-  tests/test_mutation.py             └── Mutation testing
+  test_containers.py                 ← Validación en contenedores
+  tests/test_mutation.py             ← Mutation testing
   scripts/run_master_certification.py ← Suite QA (7 escenarios)
-  data/cve/snyk_monorepo.json        ← Base de datos de vulnerabilidades
-  docs/remediation_rules.md           ← Rulebook oficial v.3.1
+  data/cve/snyk_monorepo.json        ← Base de datos de vulnerabilidades (globales)
+  docs/remediation_rules.md          ← Rulebook oficial v.3.1
 ```
 
 ### 🔌 Clases en `agent_ia/core/`
 
 | Clase | Responsabilidad |
 | :--- | :--- |
-| `Vulnerability` | Modelo de datos para CVEs/GHSAs |
+| `Vulnerability` | Modelo de datos para CVEs/GHSAs (vulnerabilidades globales) |
 | `JDKManager` | Selección adaptativa de Java 21/17 |
-| `FSProvider` | Escaneo de monorepo, filtrado hexagonal |
+| `FSProvider` | Escaneo de monorepo (solo nivel 1-2), filtrado hexagonal |
 | `GradleProvider` | Descubrimiento de Gradle y validación de builds |
 | `GitProvider` | Commits de seguridad automáticos |
 | `DependencyGraph` | Análisis de linaje de dependencias transitivas |
@@ -82,30 +64,118 @@ agent_ia/
 
 ```mermaid
 graph TD
-    A[snyk_monorepo.json] --> B(FSProvider: Escaneo & Filtrado Hexagonal)
-    B --> C{¿Módulo Raíz?}
-    C -- No --> B
-    C -- Sí --> D(JDKManager: Adaptación de Entorno)
-    D --> E[JAVA_HOME 21/17 Inyectado]
-    E --> F(DependencyGraph: Análisis de Linaje)
-    F --> G(brain.py: ReAct LLM)
-    G --> H(GradleMutator: Mutación con Target Lock & Indent Sniff)
-    H --> I(GradleProvider: Validación Build)
-    I --> J{¿BUILD SUCCESSFUL?}
-    J -- No --> K[CycleOfConsciousness: Reinyectar Error al LLM]
-    K --> G
-    J -- Sí --> L[✅ Certificación Exitosa — Zero-Risk]
+    A[snyk_monorepo.json] --> B(FSProvider: Escaneo & Filtrado)
+    B --> C{¿--folders especificado?}
+    C -- Sí --> D[Procesar solo carpetas indicadas]
+    C -- No --> E[Procesar todos los microservicios]
+    D --> F(JDKManager: Adaptación de Entorno)
+    E --> F
+    F --> G[JAVA_HOME 21/17 Inyectado]
+    G --> H(DependencyGraph: Análisis de Linaje)
+    H --> I(brain.py: ReAct LLM con Prompt Caching)
+    I --> J(GradleMutator: Mutación con Target Lock & Indent Sniff)
+    J --> K(GradleProvider: Validación Build)
+    K --> L{¿BUILD SUCCESSFUL?}
+    L -- No --> M[CycleOfConsciousness: Reinyectar Error al LLM]
+    M --> I
+    L -- Sí --> N[✅ Certificación Exitosa — Zero-Risk]
+    N --> O[LongTermMemory: Guardar patrón de éxito]
 ```
 
 ---
 
-## 🛡️ Garantía de Privacidad
+## 🔍 Detección de Microservicios
 
-> [!IMPORTANT]
-> **Es un sistema 100% local y desconectado.**
-> - **Sin Internet**: Operación completamente offline.
-> - **Tu código se queda en casa**: Ningún dato sale de tu entorno.
-> - **Cerebro Local**: Inferencia mediante reglas ReAct hard-coded (extensible con modelos GGUF locales).
+El agente detecta automáticamente los microservicios buscando archivos `build.gradle` **solo en el primer y segundo nivel de directorios** desde la raíz del proyecto:
+
+```
+raiz_proyecto/              ← Nivel 0
+├── backend_sales_products/ ← Nivel 1
+│   ├── ms_sales/           ← Nivel 2 ✅ Detectado
+│   │   ├── src/            ← Nivel 3 ❌ Ignorado
+│   │   └── build.gradle
+│   └── ms-auth/            ← Nivel 2 ✅ Detectado
+└── agent_ia/               ← Nivel 1 ❌ Excluido
+```
+
+### Exclusiones Automáticas
+
+Los siguientes directorios se excluyen automáticamente:
+- `agent_ia`, `.git`, `.gradle`, `venv`, `__pycache__`
+- `out`, `build`, `stress`, `tests`, `certification`
+- `api`, `usecase`, `domain`, `infrastructure`, `src`, `bin`
+
+Esto evita falsos positivos en subcarpetas internas de microservicios.
+
+---
+
+## 🎯 Clasificación de Vulnerabilidades
+
+El agente clasifica automáticamente las vulnerabilidades usando:
+
+- **Score CVSS-like**: Basado en prioridad explícita y análisis de keywords
+- **Exploitability**: Análisis de factibilidad de explotación
+- **Impact**: Consideración de dependencias transitivas y scope
+
+Ejemplo de output:
+```
+[CLASSIFIER] CVE-2026-1234: Score 8.5, Severity: HIGH, Priority: 7.2
+```
+
+### Niveles de Severidad
+
+| Score | Severidad | Acción |
+|-------|-----------|--------|
+| 9.0-10.0 | CRITICAL | Remediación inmediata |
+| 7.0-8.9 | HIGH | Remediación prioritaria |
+| 4.0-6.9 | MEDIUM | Remediación planificada |
+| 0.0-3.9 | LOW | Remediación opcional |
+
+---
+
+## 💾 Memoria a Largo Plazo
+
+El agente aprende de cada remediación:
+
+- **Patrones de éxito**: Familias de librerías y estrategias que funcionan
+- **Patrones de fallo**: Versiones problemáticas, tipos de error frecuentes
+- **Decisiones previas**: Historial de acciones por CVE
+
+Ver el resumen:
+```bash
+python3 remediation_agent.py --learning-summary
+```
+
+**Archivo de memoria**: `.agent_memory.json`
+
+---
+
+## 🔄 Rollback Inteligente
+
+En lugar de restaurar todo el estado, el agente ahora:
+
+- Genera **reverse patches** para archivos específicos
+- Mantiene **historial de snapshots** con metadatos
+- Permite **rollback selectivo** de archivos individuales
+- Detecta conflictos si los archivos cambiaron desde el snapshot
+
+**Archivo de historial**: `.rollback_history.json`
+
+---
+
+## 📋 Modo Dry-Run
+
+Preview completo antes de aplicar cambios:
+
+```bash
+python3 remediation_agent.py --dry-run --folders ms-sales
+```
+
+Muestra:
+- ✅ Diff coloreado de cada cambio
+- 📊 Estimación de impacto (bajo/medio/alto/crítico)
+- ⚠️ Tests potencialmente afectados
+- 💡 Recomendación de acción
 
 ---
 
@@ -126,25 +196,25 @@ graph TD
 
 ---
 
-## ✅ Suite de Certificación Maestra (7 Escenarios)
+## 📁 Estructura del JSON de Vulnerabilidades
 
-El agente incluye una suite de pruebas automática que valida todas las reglas físicas:
+El archivo `agent_ia/data/cve/snyk_monorepo.json` contiene las vulnerabilidades **globales** a remediar:
 
-| Test | Qué valida |
-| :--- | :--- |
-| `cert_rule_6_sync` | Auto-Heal y vinculación de infraestructura |
-| `cert_rule_3_3_audit` | Reemplazo limpio + cumplimiento Zero-Watermark |
-| `cert_hexagonal_depth` | Inyección exclusiva en raíz, submódulos intactos |
-| `cert_seamless_buildscript` | Alineación visual perfecta en bloques `buildscript` |
-| `cert_multi_project_orchestration` | Orquestación de múltiples microservicios |
-| `cert_cli_interface` | Flags `--folders` y `--debug` |
-| `cert_rule_4_adaptive_intel` | Override de versión por el Cerebro IA |
+```json
+[
+    {
+        "priority": "high",
+        "cve": "CVE-2026-33870",
+        "library": "io.netty:netty-codec-http",
+        "vulnerable_version": "4.1.86.Final",
+        "safe_version": "4.1.132.Final"
+    }
+]
+```
 
----
-
-## 📚 Documentación
-
-- 👉 **[Rulebook v.3.0](agent_ia/docs/remediation_rules.md)**: Leyes de inyección, familias y prioridades.
+Las vulnerabilidades son **globales** y se aplican a:
+- **Todos los microservicios** (si no se especifica `--folders`)
+- **Solo los microservicios indicados** (con `--folders`)
 
 ---
 
@@ -172,7 +242,7 @@ rules:
     variable_name: "nettyVersion"
     priority: "high"
 
-# Microservice-specific overrides
+# Microservice-specific Overrides
 microservices:
   ms-auth:
     enabled: true
@@ -188,60 +258,35 @@ global_exclusions:
 
 ---
 
-## 🎯 Clasificación de Vulnerabilidades
+## ✅ Suite de Certificación Maestra (7 Escenarios)
 
-El agente clasifica automáticamente las vulnerabilidades usando:
+El agente incluye una suite de pruebas automática que valida todas las reglas físicas:
 
-- **Score CVSS-like**: Basado en prioridad explícita y análisis de keywords
-- **Exploitability**: Análisis de factibilidad de explotación
-- **Impact**: Consideración de dependencias transitivas y scope
-
-Ejemplo de output:
-```
-[CLASSIFIER] CVE-2026-1234: Score 8.5, Severity: HIGH, Priority: 7.2
-```
-
----
-
-## 🧠 Memoria a Largo Plazo
-
-El agente aprende de cada remediación:
-
-- **Patrones de éxito**: Familias de librerías y estrategias que funcionan
-- **Patrones de fallo**: Versiones problemáticas, tipos de error frecuentes
-- **Decisiones previas**: Historial de acciones por CVE
-
-Ver el resumen:
-```bash
-python3 remediation_agent.py --learning-summary
-```
+| Test | Qué valida |
+| :--- | :--- |
+| `cert_rule_6_sync` | Auto-Heal y vinculación de infraestructura |
+| `cert_rule_3_3_audit` | Reemplazo limpio + cumplimiento Zero-Watermark |
+| `cert_hexagonal_depth` | Inyección exclusiva en raíz, submódulos intactos |
+| `cert_seamless_buildscript` | Alineación visual perfecta en bloques `buildscript` |
+| `cert_multi_project_orchestration` | Orquestación de múltiples microservicios |
+| `cert_cli_interface` | Flags `--folders` y `--debug` |
+| `cert_rule_4_adaptive_intel` | Override de versión por el Cerebro IA |
 
 ---
 
-## 🔄 Rollback Inteligente
+## 🛡️ Garantía de Privacidad
 
-En lugar de restaurar todo el estado, el agente ahora:
-
-- Genera **reverse patches** para archivos específicos
-- Mantiene **historial de snapshots** con metadatos
-- Permite **rollback selectivo** de archivos individuales
-- Detecta conflictos si los archivos cambiaron desde el snapshot
+> [!IMPORTANT]
+> **Es un sistema 100% local y desconectado.**
+> - **Sin Internet**: Operación completamente offline.
+> - **Tu código se queda en casa**: Ningún dato sale de tu entorno.
+> - **Cerebro Local**: Inferencia mediante reglas ReAct hard-coded (extensible con modelos GGUF locales).
 
 ---
 
-## 📋 Modo Dry-Run
+## 📚 Documentación Adicional
 
-Preview completo antes de aplicar cambios:
-
-```bash
-python3 remediation_agent.py --dry-run --folders ms-sales
-```
-
-Muestra:
-- ✅ Diff coloreado de cada cambio
-- 📊 Estimación de impacto (bajo/medio/alto/crítico)
-- ⚠️ Tests potencialmente afectados
-- 💡 Recomendación de acción
+- 👉 **[Rulebook v.3.1](agent_ia/docs/remediation_rules.md)**: Leyes de inyección, familias y prioridades.
 
 ---
 

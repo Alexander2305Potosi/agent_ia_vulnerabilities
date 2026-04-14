@@ -1,3 +1,3 @@
 dependencies {
-    implementation project(':')
+    implementation 'io.netty_netty-codec-http2:4.2.4.Final'
 }
