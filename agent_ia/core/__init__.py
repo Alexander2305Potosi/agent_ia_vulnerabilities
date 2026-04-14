@@ -19,6 +19,7 @@ import os
 import re
 import subprocess
 import shutil
+import sys
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -230,12 +231,31 @@ class GradleProvider:
         if self._analysis_bin:
             return self._analysis_bin
 
-        # Primero buscar gradlew local (ideal)
-        for wrapper in [self.gradle_path, os.path.join(ms_path, "gradlew"), os.path.join(root_path, "gradlew")]:
+        # Determinar extensión correcta según sistema operativo
+        is_windows = os.name == 'nt' or sys.platform.startswith('win')
+        wrapper_ext = ".bat" if is_windows else ""
+
+        # Primero buscar gradlew local (ideal) - con extensión correcta para Windows
+        for wrapper in [
+            self.gradle_path,
+            os.path.join(ms_path, f"gradlew{wrapper_ext}"),
+            os.path.join(root_path, f"gradlew{wrapper_ext}")
+        ]:
             if wrapper and os.path.exists(wrapper):
                 self._analysis_bin = wrapper
                 self._validation_bin = wrapper  # gradlew local → también sirve para validar
                 return wrapper
+
+        # Fallback sin extensión (por si acaso)
+        if is_windows:
+            for wrapper in [
+                os.path.join(ms_path, "gradlew"),
+                os.path.join(root_path, "gradlew")
+            ]:
+                if wrapper and os.path.exists(wrapper):
+                    self._analysis_bin = wrapper
+                    self._validation_bin = wrapper
+                    return wrapper
 
         # Fallback: Gradle del sistema → solo para análisis, NO para validación
         for p in self._SYSTEM_GRADLE_PATHS:
@@ -346,6 +366,18 @@ class DependencyGraph:
             result = subprocess.run(cmd, cwd=project_path, capture_output=True, text=True, check=True, env=env)
             self._parse_output(result.stdout)
             return True
+        except subprocess.CalledProcessError as e:
+            print(f"    ⚠️ [GRAPH] Error en comando Gradle (exit {e.returncode}): {e.stderr[:100] if e.stderr else 'N/A'}")
+            return False
+        except OSError as e:
+            # Manejo específico para WinError 193 y errores similares
+            error_msg = str(e)
+            if "WinError 193" in error_msg or "not a valid Win32 application" in error_msg:
+                print(f"    ⚠️ [GRAPH] Error de compatibilidad Windows: {e}")
+                print(f"        Sugerencia: Asegúrate de usar 'gradlew.bat' en lugar de 'gradlew' en Windows.")
+            else:
+                print(f"    ⚠️ [GRAPH] Error del sistema al ejecutar Gradle: {e}")
+            return False
         except Exception as e:
             print(f"    ⚠️ [GRAPH] Error construyendo grafo: {e}")
             return False
