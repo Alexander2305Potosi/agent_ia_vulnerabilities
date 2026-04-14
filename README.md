@@ -98,14 +98,14 @@ raiz_proyecto/              ← Nivel 0
 └── agent_ia/               ← Nivel 1 ❌ Excluido
 ```
 
-### Exclusiones Automáticas
+### Exclusiones Automáticas (Coincidencia Exacta)
 
-Los siguientes directorios se excluyen automáticamente:
+Los siguientes directorios se excluyen automáticamente usando **coincidencia exacta de nombre** (no por subcadena):
 - `agent_ia`, `.git`, `.gradle`, `venv`, `__pycache__`
 - `out`, `build`, `stress`, `tests`, `certification`
 - `api`, `usecase`, `domain`, `infrastructure`, `src`, `bin`
 
-Esto evita falsos positivos en subcarpetas internas de microservicios.
+> **Nota importante**: El sistema utiliza coincidencia exacta de nombres de carpeta, no búsqueda por subcadena. Esto permite detectar correctamente microservicios con nombres como `ms_adaptador_api_externa` sin que sean excluidos por contener la palabra `api`.
 
 ---
 
