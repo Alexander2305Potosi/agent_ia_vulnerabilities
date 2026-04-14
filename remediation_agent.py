@@ -10,6 +10,7 @@ from agent_ia.core import (
     GradleMutator, Vulnerability,
     FSProvider, GradleProvider, GitProvider,
     DependencyGraph, CycleOfConsciousness,
+    _normalize_ms_name
 )
 from agent_ia.brain import GenerativeAgentV2
 
@@ -85,7 +86,10 @@ class RemediationAgent:
                 return
 
             if self.target_folders:
-                print(f"🎯 [*] Filtrando ejecución para: {', '.join(self.target_folders)}")
+                if not self._validate_target_folders():
+                    print("\n🛑 [!] ERROR: Ninguna de las carpetas especificadas existe en el workspace.")
+                    print("    Asegúrate de que los nombres coincidan exactamente con las carpetas en el disco.")
+                    return
 
             for entry in vulnerabilities:
                 self._process_entry(entry)
@@ -106,7 +110,11 @@ class RemediationAgent:
         microservices = [vuln.microservice] if vuln.microservice else self.fs.get_microservices()
 
         for ms in microservices:
-            if self.target_folders and ms not in self.target_folders:
+            # Normalización para matching adaptativo
+            ms_norm = _normalize_ms_name(ms)
+            targets_norm = [_normalize_ms_name(t) for t in self.target_folders]
+            
+            if self.target_folders and ms_norm not in targets_norm:
                 continue
 
             ms_path = self.fs.get_ms_path(ms)
@@ -130,6 +138,20 @@ class RemediationAgent:
                 "explanation": explanation,
                 "changed": metadata.get("changed", False) if metadata else False,
             })
+
+    def _validate_target_folders(self) -> bool:
+        """Valida que las carpetas solicitadas por el usuario existan físicamente."""
+        print(f"🎯 [*] Filtrando ejecución para: {', '.join(self.target_folders)}")
+        valid_folders = []
+        # Normalizar para permitir flexibilidad en la verificación inicial
+        for folder in self.target_folders:
+            path = self.fs.get_ms_path(folder)
+            if path:
+                valid_folders.append(folder)
+            else:
+                print(f"    [!] WARNING: La carpeta '{folder}' no fue encontrada en el workspace.")
+        
+        return len(valid_folders) > 0
 
     def _build_lineage(self, ms_path: str, vuln: Vulnerability) -> str:
         gradle_bin = self.gradle.discover(ms_path, self.root_path)

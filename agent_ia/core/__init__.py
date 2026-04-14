@@ -27,6 +27,12 @@ from typing import Dict, List, Optional, Tuple, Union
 # I/O Helpers
 # ===========================================================================
 
+def _normalize_ms_name(name: str) -> str:
+    """Normaliza nombres de microservicios para permitir matching flexible (- vs _)."""
+    if not name: return ""
+    return name.lower().replace("-", "_").replace(".", "_")
+
+
 def _read(path: str) -> str:
     if not os.path.exists(path):
         return ""
@@ -112,9 +118,11 @@ class FSProvider:
         return list(set(ms_names))
 
     def get_ms_path(self, ms_name: str) -> Optional[str]:
+        target_norm = _normalize_ms_name(ms_name)
         for root, dirs, files in os.walk(self.root_path):
             dirs[:] = [d for d in dirs if not any(ex in d.lower() for ex in self.EXCLUDE_FOLDERS)]
-            if os.path.basename(root) == ms_name and "build.gradle" in files:
+            current_norm = _normalize_ms_name(os.path.basename(root))
+            if current_norm == target_norm and "build.gradle" in files:
                 return os.path.abspath(root)
         return None
 

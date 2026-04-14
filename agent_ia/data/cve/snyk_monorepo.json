@@ -14,5 +14,13 @@
         "vulnerable_version": "4.1.86.Final",
         "safe_version": "4.1.132.Final",
         "microservice": "ms-sales"
+    },
+    {
+        "priority": "high",
+        "cve": "CVE-2026-44123",
+        "library": "io.netty:netty-handler",
+        "vulnerable_version": "4.1.86.Final",
+        "safe_version": "4.1.132.Final",
+        "microservice": "ms-auth"
     }
 ]

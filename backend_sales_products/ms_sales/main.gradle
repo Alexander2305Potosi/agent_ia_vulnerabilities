@@ -50,7 +50,7 @@ subprojects {
         testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
         testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
-        compileOnly 'com.fasterxml.jackson.core:jackson-databind:2.17.1'
+        compileOnly "com.fasterxml.jackson.core:jackson-databind:${jacksonCoreVersion}"
 
         testImplementation(platform("org.junit:junit-bom:${jUnit}"))
         testImplementation "org.junit.jupiter:junit-jupiter-api"
