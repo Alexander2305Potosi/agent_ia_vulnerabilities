@@ -2,7 +2,7 @@ configurations.all {
     resolutionStrategy.eachDependency { DependencyResolveDetails details ->
         if (details.requested.group == 'io.netty') {
             details.useVersion "${nettyCodecVersion}"
-            details.because "Fix: CVE-2026-33871"
+            details.because "Fix: CVE-2026-44123"
         }
      }
 }

@@ -4,22 +4,22 @@
       {
         "cve_id": "CVE-2026-33870",
         "library": "io.netty:netty-codec-http",
-        "microservice": "ms-sales",
+        "microservice": "ms-auth",
         "attempted_action": "remediation_applied",
         "success": true,
         "error_message": null,
-        "timestamp": "2026-04-14T15:04:00.513424",
+        "timestamp": "2026-04-14T15:28:21.271280",
         "gradle_version": null,
         "java_version": null
       },
       {
         "cve_id": "CVE-2026-33871",
         "library": "io.netty:netty-codec-http2",
-        "microservice": "ms-sales",
+        "microservice": "ms-auth",
         "attempted_action": "remediation_applied",
         "success": true,
         "error_message": null,
-        "timestamp": "2026-04-14T15:04:01.565991",
+        "timestamp": "2026-04-14T15:28:27.112018",
         "gradle_version": null,
         "java_version": null
       },
@@ -30,128 +30,95 @@
         "attempted_action": "remediation_applied",
         "success": true,
         "error_message": null,
-        "timestamp": "2026-04-14T15:04:03.374338",
+        "timestamp": "2026-04-14T15:28:32.809713",
         "gradle_version": null,
         "java_version": null
       },
       {
         "cve_id": "CVE-2026-33870",
         "library": "io.netty:netty-codec-http",
-        "microservice": "ms-sales",
-        "attempted_action": "remediation_applied",
-        "success": true,
-        "error_message": null,
-        "timestamp": "2026-04-14T15:04:15.089453",
-        "gradle_version": null,
-        "java_version": null
-      },
-      {
-        "cve_id": "CVE-2026-33871",
-        "library": "io.netty:netty-codec-http2",
-        "microservice": "ms-sales",
-        "attempted_action": "remediation_applied",
-        "success": true,
-        "error_message": null,
-        "timestamp": "2026-04-14T15:04:18.054176",
-        "gradle_version": null,
-        "java_version": null
-      },
-      {
-        "cve_id": "CVE-2026-44123",
-        "library": "io.netty:netty-handler",
         "microservice": "ms-auth",
         "attempted_action": "remediation_applied",
         "success": true,
         "error_message": null,
-        "timestamp": "2026-04-14T15:04:20.063484",
+        "timestamp": "2026-04-14T15:30:44.486834",
         "gradle_version": null,
         "java_version": null
       },
       {
         "cve_id": "CVE-2026-33870",
         "library": "io.netty:netty-codec-http",
-        "microservice": "ms-sales",
+        "microservice": "ms-clients",
         "attempted_action": "remediation_applied",
         "success": true,
         "error_message": null,
-        "timestamp": "2026-04-14T15:05:26.163310",
-        "gradle_version": null,
-        "java_version": null
-      },
-      {
-        "cve_id": "CVE-2026-33871",
-        "library": "io.netty:netty-codec-http2",
-        "microservice": "ms-sales",
-        "attempted_action": "remediation_applied",
-        "success": true,
-        "error_message": null,
-        "timestamp": "2026-04-14T15:05:27.251301",
-        "gradle_version": null,
-        "java_version": null
-      },
-      {
-        "cve_id": "CVE-2026-44123",
-        "library": "io.netty:netty-handler",
-        "microservice": "ms-auth",
-        "attempted_action": "remediation_applied",
-        "success": true,
-        "error_message": null,
-        "timestamp": "2026-04-14T15:05:28.788857",
+        "timestamp": "2026-04-14T15:30:45.795813",
         "gradle_version": null,
         "java_version": null
       },
       {
         "cve_id": "CVE-2026-33870",
         "library": "io.netty:netty-codec-http",
-        "microservice": "ms-sales",
+        "microservice": "ms_sales",
         "attempted_action": "remediation_applied",
         "success": true,
         "error_message": null,
-        "timestamp": "2026-04-14T15:05:44.924374",
-        "gradle_version": null,
-        "java_version": null
-      },
-      {
-        "cve_id": "CVE-2026-33871",
-        "library": "io.netty:netty-codec-http2",
-        "microservice": "ms-sales",
-        "attempted_action": "remediation_applied",
-        "success": true,
-        "error_message": null,
-        "timestamp": "2026-04-14T15:05:46.579892",
-        "gradle_version": null,
-        "java_version": null
-      },
-      {
-        "cve_id": "CVE-2026-44123",
-        "library": "io.netty:netty-handler",
-        "microservice": "ms-auth",
-        "attempted_action": "remediation_applied",
-        "success": true,
-        "error_message": null,
-        "timestamp": "2026-04-14T15:05:48.109433",
+        "timestamp": "2026-04-14T15:30:46.858691",
         "gradle_version": null,
         "java_version": null
       },
       {
         "cve_id": "CVE-2026-33870",
         "library": "io.netty:netty-codec-http",
-        "microservice": "ms-sales",
+        "microservice": "ms-products",
         "attempted_action": "remediation_applied",
         "success": true,
         "error_message": null,
-        "timestamp": "2026-04-14T15:06:42.062465",
+        "timestamp": "2026-04-14T15:30:48.505704",
         "gradle_version": null,
         "java_version": null
       },
       {
         "cve_id": "CVE-2026-33871",
         "library": "io.netty:netty-codec-http2",
-        "microservice": "ms-sales",
+        "microservice": "ms-auth",
         "attempted_action": "remediation_applied",
         "success": true,
         "error_message": null,
-        "timestamp": "2026-04-14T15:06:43.140919",
+        "timestamp": "2026-04-14T15:30:49.779197",
+        "gradle_version": null,
+        "java_version": null
+      },
+      {
+        "cve_id": "CVE-2026-33871",
+        "library": "io.netty:netty-codec-http2",
+        "microservice": "ms-clients",
+        "attempted_action": "remediation_applied",
+        "success": true,
+        "error_message": null,
+        "timestamp": "2026-04-14T15:30:51.103834",
+        "gradle_version": null,
+        "java_version": null
+      },
+      {
+        "cve_id": "CVE-2026-33871",
+        "library": "io.netty:netty-codec-http2",
+        "microservice": "ms_sales",
+        "attempted_action": "remediation_applied",
+        "success": true,
+        "error_message": null,
+        "timestamp": "2026-04-14T15:30:52.053974",
+        "gradle_version": null,
+        "java_version": null
+      },
+      {
+        "cve_id": "CVE-2026-33871",
+        "library": "io.netty:netty-codec-http2",
+        "microservice": "ms-products",
+        "attempted_action": "remediation_applied",
+        "success": true,
+        "error_message": null,
+        "timestamp": "2026-04-14T15:30:53.678064",
         "gradle_version": null,
         "java_version": null
       },
@@ -162,7 +129,40 @@
         "attempted_action": "remediation_applied",
         "success": true,
         "error_message": null,
-        "timestamp": "2026-04-14T15:06:44.561123",
+        "timestamp": "2026-04-14T15:30:54.900045",
+        "gradle_version": null,
+        "java_version": null
+      },
+      {
+        "cve_id": "CVE-2026-44123",
+        "library": "io.netty:netty-handler",
+        "microservice": "ms-clients",
+        "attempted_action": "remediation_applied",
+        "success": true,
+        "error_message": null,
+        "timestamp": "2026-04-14T15:30:56.105729",
+        "gradle_version": null,
+        "java_version": null
+      },
+      {
+        "cve_id": "CVE-2026-44123",
+        "library": "io.netty:netty-handler",
+        "microservice": "ms_sales",
+        "attempted_action": "remediation_applied",
+        "success": true,
+        "error_message": null,
+        "timestamp": "2026-04-14T15:30:57.055652",
+        "gradle_version": null,
+        "java_version": null
+      },
+      {
+        "cve_id": "CVE-2026-44123",
+        "library": "io.netty:netty-handler",
+        "microservice": "ms-products",
+        "attempted_action": "remediation_applied",
+        "success": true,
+        "error_message": null,
+        "timestamp": "2026-04-14T15:30:58.647273",
         "gradle_version": null,
         "java_version": null
       }
@@ -917,6 +917,256 @@
         },
         "occurrences": 1,
         "last_success": "2026-04-14T15:06:44.561320"
+      },
+      {
+        "library_family": "io.netty",
+        "variable_naming_pattern": "unknown",
+        "version_strategy": "explicit",
+        "context": {
+          "microservice": "ms_sales"
+        },
+        "occurrences": 1,
+        "last_success": "2026-04-14T15:27:04.348527"
+      },
+      {
+        "library_family": "io.netty",
+        "variable_naming_pattern": "unknown",
+        "version_strategy": "explicit",
+        "context": {
+          "microservice": "ms_sales"
+        },
+        "occurrences": 1,
+        "last_success": "2026-04-14T15:27:05.366546"
+      },
+      {
+        "library_family": "io.netty",
+        "variable_naming_pattern": "unknown",
+        "version_strategy": "explicit",
+        "context": {
+          "microservice": "ms_sales"
+        },
+        "occurrences": 1,
+        "last_success": "2026-04-14T15:27:06.397498"
+      },
+      {
+        "library_family": "io.netty",
+        "variable_naming_pattern": "unknown",
+        "version_strategy": "explicit",
+        "context": {
+          "microservice": "ms-clients"
+        },
+        "occurrences": 1,
+        "last_success": "2026-04-14T15:28:13.639547"
+      },
+      {
+        "library_family": "io.netty",
+        "variable_naming_pattern": "unknown",
+        "version_strategy": "explicit",
+        "context": {
+          "microservice": "ms_sales"
+        },
+        "occurrences": 1,
+        "last_success": "2026-04-14T15:28:14.926118"
+      },
+      {
+        "library_family": "io.netty",
+        "variable_naming_pattern": "unknown",
+        "version_strategy": "explicit",
+        "context": {
+          "microservice": "ms-products"
+        },
+        "occurrences": 1,
+        "last_success": "2026-04-14T15:28:19.184276"
+      },
+      {
+        "library_family": "io.netty",
+        "variable_naming_pattern": "unknown",
+        "version_strategy": "explicit",
+        "context": {
+          "microservice": "ms-auth"
+        },
+        "occurrences": 1,
+        "last_success": "2026-04-14T15:28:21.271369"
+      },
+      {
+        "library_family": "io.netty",
+        "variable_naming_pattern": "unknown",
+        "version_strategy": "explicit",
+        "context": {
+          "microservice": "ms-clients"
+        },
+        "occurrences": 1,
+        "last_success": "2026-04-14T15:28:22.706819"
+      },
+      {
+        "library_family": "io.netty",
+        "variable_naming_pattern": "unknown",
+        "version_strategy": "explicit",
+        "context": {
+          "microservice": "ms_sales"
+        },
+        "occurrences": 1,
+        "last_success": "2026-04-14T15:28:23.796679"
+      },
+      {
+        "library_family": "io.netty",
+        "variable_naming_pattern": "unknown",
+        "version_strategy": "explicit",
+        "context": {
+          "microservice": "ms-products"
+        },
+        "occurrences": 1,
+        "last_success": "2026-04-14T15:28:25.629731"
+      },
+      {
+        "library_family": "io.netty",
+        "variable_naming_pattern": "unknown",
+        "version_strategy": "explicit",
+        "context": {
+          "microservice": "ms-auth"
+        },
+        "occurrences": 1,
+        "last_success": "2026-04-14T15:28:27.112108"
+      },
+      {
+        "library_family": "io.netty",
+        "variable_naming_pattern": "unknown",
+        "version_strategy": "explicit",
+        "context": {
+          "microservice": "ms-clients"
+        },
+        "occurrences": 1,
+        "last_success": "2026-04-14T15:28:28.527189"
+      },
+      {
+        "library_family": "io.netty",
+        "variable_naming_pattern": "unknown",
+        "version_strategy": "explicit",
+        "context": {
+          "microservice": "ms_sales"
+        },
+        "occurrences": 1,
+        "last_success": "2026-04-14T15:28:29.562516"
+      },
+      {
+        "library_family": "io.netty",
+        "variable_naming_pattern": "unknown",
+        "version_strategy": "explicit",
+        "context": {
+          "microservice": "ms-products"
+        },
+        "occurrences": 1,
+        "last_success": "2026-04-14T15:28:31.330525"
+      },
+      {
+        "library_family": "io.netty",
+        "variable_naming_pattern": "unknown",
+        "version_strategy": "explicit",
+        "context": {
+          "microservice": "ms-auth"
+        },
+        "occurrences": 1,
+        "last_success": "2026-04-14T15:28:32.809809"
+      },
+      {
+        "library_family": "io.netty",
+        "variable_naming_pattern": "unknown",
+        "version_strategy": "explicit",
+        "context": {
+          "microservice": "ms-auth"
+        },
+        "occurrences": 1,
+        "last_success": "2026-04-14T15:30:44.487029"
+      },
+      {
+        "library_family": "io.netty",
+        "variable_naming_pattern": "unknown",
+        "version_strategy": "explicit",
+        "context": {
+          "microservice": "ms-clients"
+        },
+        "occurrences": 1,
+        "last_success": "2026-04-14T15:30:45.796005"
+      },
+      {
+        "library_family": "io.netty",
+        "variable_naming_pattern": "unknown",
+        "version_strategy": "explicit",
+        "context": {
+          "microservice": "ms_sales"
+        },
+        "occurrences": 1,
+        "last_success": "2026-04-14T15:30:46.858863"
+      },
+      {
+        "library_family": "io.netty",
+        "variable_naming_pattern": "unknown",
+        "version_strategy": "explicit",
+        "context": {
+          "microservice": "ms-products"
+        },
+        "occurrences": 1,
+        "last_success": "2026-04-14T15:30:48.505936"
+      },
+      {
+        "library_family": "io.netty",
+        "variable_naming_pattern": "unknown",
+        "version_strategy": "explicit",
+        "context": {
+          "microservice": "ms-auth"
+        },
+        "occurrences": 1,
+        "last_success": "2026-04-14T15:30:49.779318"
+      },
+      {
+        "library_family": "io.netty",
+        "variable_naming_pattern": "unknown",
+        "version_strategy": "explicit",
+        "context": {
+          "microservice": "ms-clients"
+        },
+        "occurrences": 1,
+        "last_success": "2026-04-14T15:30:51.103984"
+      },
+      {
+        "library_family": "io.netty",
+        "variable_naming_pattern": "unknown",
+        "version_strategy": "explicit",
+        "context": {
+          "microservice": "ms_sales"
+        },
+        "occurrences": 1,
+        "last_success": "2026-04-14T15:30:52.054158"
+      },
+      {
+        "library_family": "io.netty",
+        "variable_naming_pattern": "unknown",
+        "version_strategy": "explicit",
+        "context": {
+          "microservice": "ms-products"
+        },
+        "occurrences": 1,
+        "last_success": "2026-04-14T15:30:53.678169"
+      },
+      {
+        "library_family": "io.netty",
+        "variable_naming_pattern": "unknown",
+        "version_strategy": "explicit",
+        "context": {
+          "microservice": "ms-auth"
+        },
+        "occurrences": 1,
+        "last_success": "2026-04-14T15:30:54.900133"
+      },
+      {
+        "library_family": "io.netty",
+        "variable_naming_pattern": "unknown",
+        "version_strategy": "explicit",
+        "context": {
+          "microservice": "ms-clients"
+        },
+        "occurrences": 1,
+        "last_success": "2026-04-14T15:30:56.105854"
       }
     ],
     "failure_patterns": [],

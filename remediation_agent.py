@@ -144,37 +144,21 @@ class RemediationAgent:
                   f"Severity: {classified.severity.name}, "
                   f"Priority: {classified.remediation_priority:.1f}")
 
-        # Verificar si debe ser ignorada
-        if self.config.should_skip_vulnerability(self.current_ms or "", vuln.id):
-            print(f"    [SKIP] {vuln.id} está en lista de exclusiones")
-            return
-
         # Determinar microservicios a procesar
-        if vuln.microservice:
-            # El CVE es específico de un microservicio
-            target_ms = vuln.microservice
-            ms_norm = _normalize_ms_name(target_ms)
-
-            # Si hay --folders, verificar que el CVE pertenezca a uno de ellos
-            if self.target_folders:
-                targets_norm = [_normalize_ms_name(t) for t in self.target_folders]
-                if ms_norm not in targets_norm:
-                    if self.debug:
-                        print(f"    [DEBUG] {vuln.id} filtrado: pertenece a {target_ms}, "
-                              f"no está en --folders {self.target_folders}")
-                    return
-            microservices = [target_ms]
+        if self.target_folders:
+            microservices = self.target_folders
         else:
-            # El CVE no tiene microservicio específico, aplicar a todos o a los filtrados
-            if self.target_folders:
-                microservices = self.target_folders
-            else:
-                microservices = self.fs.get_microservices()
+            microservices = self.fs.get_microservices()
 
         if self.debug:
             print(f"    [DEBUG] Microservicios a procesar: {microservices}")
 
         for ms in microservices:
+            # Verificar si debe ser ignorada para este microservicio
+            if self.config.should_skip_vulnerability(ms, vuln.id):
+                print(f"    [SKIP] {vuln.id} está en lista de exclusiones para {ms}")
+                continue
+
             ms_path = self.fs.get_ms_path(ms)
             if not ms_path:
                 print(f"    [ERROR] No se encontró ruta para microservicio: {ms}")
@@ -221,7 +205,7 @@ class RemediationAgent:
             elif actually_changed:
                 status = "FIXED"
             else:
-                status = "NO_CHANGE"  # Success pero sin cambios (caso raro)
+                status = "NO_CHANGE"
 
             if success and not actually_changed and not already_fixed:
                 print(f"    [WARNING] {vuln.id} marcado como exitoso pero sin cambios aplicados")
@@ -285,25 +269,6 @@ class RemediationAgent:
             print(f"    [!] WARNING: Las siguientes carpetas no fueron encontradas: {', '.join(not_found)}")
             print(f"    [!] Microservicios disponibles: {', '.join(self.fs.get_microservices())}")
             return False
-
-        # Verificar si las carpetas válidas tienen vulnerabilidades reportadas
-        vulnerabilities = self._load_report()
-        ms_with_vulns = set()
-        for entry in vulnerabilities:
-            vuln = Vulnerability(entry)
-            if vuln.microservice:
-                ms_with_vulns.add(vuln.microservice)
-
-        found_vulns = False
-        for folder in valid_folders:
-            if _normalize_ms_name(folder) in [_normalize_ms_name(m) for m in ms_with_vulns]:
-                found_vulns = True
-                break
-
-        if not found_vulns:
-            print(f"    [!] INFO: Ninguno de los microservicios especificados tiene vulnerabilidades reportadas")
-            print(f"    [!] Microservicios con vulnerabilidades: {', '.join(ms_with_vulns) if ms_with_vulns else 'Ninguno'}")
-            # No retornamos False aquí, porque el usuario puede querer forzar un escaneo
 
         return len(valid_folders) > 0
 

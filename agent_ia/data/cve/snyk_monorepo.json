@@ -4,23 +4,20 @@
         "cve": "CVE-2026-33870",
         "library": "io.netty:netty-codec-http",
         "vulnerable_version": "4.1.86.Final",
-        "safe_version": "4.1.132.Final",
-        "microservice": "ms-sales"
+        "safe_version": "4.1.132.Final"
     },
     {
         "priority": "critical",
         "cve": "CVE-2026-33871",
         "library": "io.netty:netty-codec-http2",
         "vulnerable_version": "4.1.86.Final",
-        "safe_version": "4.1.132.Final",
-        "microservice": "ms-sales"
+        "safe_version": "4.1.132.Final"
     },
     {
         "priority": "high",
         "cve": "CVE-2026-44123",
         "library": "io.netty:netty-handler",
         "vulnerable_version": "4.1.86.Final",
-        "safe_version": "4.1.132.Final",
-        "microservice": "ms-auth"
+        "safe_version": "4.1.132.Final"
     }
 ]

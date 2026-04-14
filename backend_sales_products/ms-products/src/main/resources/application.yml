@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: ms-products
+
+server:
+  port: 8082
+
+# SOAP Service Configuration
+soap:
+  service:
+    url: http://localhost:8081/ws/product
+    timeout: 30000
+
+# Logging
+logging:
+  level:
+    com.example.ms_products: DEBUG
+    org.springframework.web.reactive: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"

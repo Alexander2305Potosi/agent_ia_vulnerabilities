@@ -22,10 +22,20 @@ java {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.springframework.boot:spring-boot-starter-reactor-netty'
+
+    // SOAP dependencies
+    implementation 'javax.xml.bind:jaxb-api:2.3.1'
+    implementation 'org.glassfish.jaxb:jaxb-runtime:4.0.5'
+    implementation 'jakarta.xml.soap:jakarta.xml.soap-api:3.0.1'
+    implementation 'com.sun.xml.messaging.saaj:saaj-impl:3.0.4'
+
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
+    testImplementation 'com.squareup.okhttp3:okhttp:4.12.0'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 

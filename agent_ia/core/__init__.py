@@ -57,7 +57,6 @@ class Vulnerability:
         self.library = data.get('library') or data.get('packageName', '')
         self.safe_version = data.get('safe_version') or 'LATEST'
         self.priority = data.get('priority', 'low')
-        self.microservice = data.get('microservice')
         self.raw_data = data
 
     def __repr__(self):
