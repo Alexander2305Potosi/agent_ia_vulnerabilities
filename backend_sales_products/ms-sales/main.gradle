@@ -1,16 +1,13 @@
-repositories {
-    mavenCentral()
+allprojects {
+    repositories { 
+        mavenCentral() 
+    }
 }
 
 dependencies {
     implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
 }
 
-
 test {
     useJUnitPlatform()
-}
-
-allprojects {
-    repositories { mavenCentral() }
 }

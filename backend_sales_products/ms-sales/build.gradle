@@ -12,8 +12,6 @@ plugins {
     id 'java'
 }
 
-
-
 group = 'com.repaso.lab'
 version = '0.0.1-SNAPSHOT'
 
