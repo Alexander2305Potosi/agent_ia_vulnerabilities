@@ -575,14 +575,18 @@ class GradleMutator:
 
         dep_mgmt = os.path.join(os.path.dirname(root_gradle), "dependencyMgmt.gradle")
         if mode == "TRANSITIVE" and os.path.exists(dep_mgmt):
-            nc, ch = RuleInjector.inject_rule(_read(dep_mgmt), artifact, v_name, reason)
-            if ch:
+            dep_content = _read(dep_mgmt)
+            nc, ch = RuleInjector.inject_rule(dep_content, artifact, v_name, reason)
+            # Solo marcar cambios si el contenido realmente cambió
+            if ch and nc != dep_content:
                 _write(dep_mgmt, nc)
                 has_changes = True
 
         for f in gradles:
-            nc, ch = VariableManager.substitute_literals(_read(f), artifact, v_name)
-            if ch:
+            file_content = _read(f)
+            nc, ch = VariableManager.substitute_literals(file_content, artifact, v_name)
+            # Solo marcar cambios si el contenido realmente cambió
+            if ch and nc != file_content:
                 _write(f, nc)
                 has_changes = True
 

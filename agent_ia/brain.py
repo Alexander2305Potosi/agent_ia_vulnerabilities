@@ -1,4 +1,63 @@
 import re
+import hashlib
+import json
+import os
+from datetime import datetime, timedelta
+
+
+class PromptCacheManager:
+    """Gestor de caché para prompts del cerebro ReAct."""
+
+    CACHE_FILE = os.path.join(os.path.dirname(__file__), ".prompt_cache.json")
+    CACHE_TTL_HOURS = 24
+
+    def __init__(self):
+        self.cache = self._load_cache()
+        self._clean_expired()
+
+    def _load_cache(self) -> dict:
+        if os.path.exists(self.CACHE_FILE):
+            try:
+                with open(self.CACHE_FILE, 'r') as f:
+                    return json.load(f)
+            except:
+                return {}
+        return {}
+
+    def _save_cache(self):
+        with open(self.CACHE_FILE, 'w') as f:
+            json.dump(self.cache, f, indent=2)
+
+    def _clean_expired(self):
+        now = datetime.now()
+        expired = []
+        for key, entry in self.cache.items():
+            cached_at = datetime.fromisoformat(entry.get('timestamp', '2000-01-01'))
+            if now - cached_at > timedelta(hours=self.CACHE_TTL_HOURS):
+                expired.append(key)
+        for key in expired:
+            del self.cache[key]
+        if expired:
+            self._save_cache()
+
+    def _hash(self, content: str) -> str:
+        return hashlib.sha256(content.encode()).hexdigest()[:16]
+
+    def get(self, prompt: str) -> dict:
+        key = self._hash(prompt)
+        entry = self.cache.get(key)
+        if entry:
+            return entry.get('response')
+        return None
+
+    def set(self, prompt: str, response: dict):
+        key = self._hash(prompt)
+        self.cache[key] = {
+            'response': response,
+            'timestamp': datetime.now().isoformat(),
+            'prompt_snippet': prompt[:100] + '...' if len(prompt) > 100 else prompt
+        }
+        self._save_cache()
 
 
 class GenerativeAgentV2:
@@ -50,11 +109,26 @@ class GenerativeAgentV2:
     def __init__(self, model_path=None):
         self.model_path = model_path
         self.is_mock = model_path is None
+        self.cache = PromptCacheManager()
 
     def generate_remediation(self, cve_data: dict, local_context: str, previous_error=None) -> str:
-        """Ejecuta la inferencia generativa (mock o real)."""
+        """Ejecuta la inferencia generativa (mock o real) con caching."""
+        # Cache key basado en CVE + contexto + error previo (sin intento actual)
+        cache_prompt = f"{json.dumps(cve_data, sort_keys=True)}|{local_context}|{previous_error}"
+
+        # Solo cachear si no hay error previo (errores pueden requerir ajustes)
+        if not previous_error:
+            cached = self.cache.get(cache_prompt)
+            if cached:
+                print(f"        [CACHE HIT] Usando respuesta cacheada")
+                return cached.get('response_text', '')
+
         if self.is_mock:
-            return self._mock_llm_response(cve_data, previous_error)
+            response = self._mock_llm_response(cve_data, previous_error)
+            if not previous_error:
+                self.cache.set(cache_prompt, {'response_text': response})
+            return response
+
         # Integración futura con llama-cpp-python
         return "[ERROR]: Motor llama-cpp no inicializado por falta de pesos."
 
