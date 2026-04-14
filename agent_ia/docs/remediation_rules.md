@@ -38,7 +38,8 @@ El Agente opera bajo reglas físicas estrictas:
 - **Exclusiones de Seguridad**: El sistema tiene instrucciones inquebrantables de ignorar carpetas de infraestructura (`agent_ia`), de estrés (`stress`) o de certificación (`certification`), protegiendo el entorno operativo.
 - **Ley de Profundidad Hexagonal (Depth Sort)**: Para proyectos multi-módulo (ej: Arquitectura Hexagonal), el Agente inferirá el archivo `build.gradle` Maestro contando la profundidad de su ruta (menor cantidad de separadores = Raíz). Las variables `ext` se inyectarán exclusivamente en esta Raíz, mientras que la sustitución por variables `"${version}"` se aplicará en cascada a todos los submódulos.
 - **Inyección Seamless (Indent Sniffing)**: Si la arquitectura concentra sus variables dentro de un scope de compilación (ej. `buildscript { ext { } }`), el Agente es capaz de escanear la profundidad de su indentación y replicarla matemáticamente para las nuevas vulnerabilidades inyectadas, garantizando una alineación visual perfecta y erradicando el desfase de tabulaturas.
-
+- **Exclusividad Estructural (Target Locking)**: El motor iterativo tiene prohibido inspeccionar archivos ajenos o complementarios (como `main.gradle`, `settings.gradle`) para crear o buscar variables globales. Estas responsabilidades están estrictamente delegadas a la Raíz designada (`build.gradle` principal).
+- **Inyección Pura de Infraestructura**: Toda vinculación del Auto-Healer hacia los archivos locales se hará respetando implacablemente los bloques pre-armados del usuario (ej. insertando la vinculación como primera línea de `allprojects { }`) con Cero-Adulteración, erradicando repositorios paralelos u overrides indeseados.
 ---
 
 ### 5. Ciclo Adaptive ReAct (Self-Healing)

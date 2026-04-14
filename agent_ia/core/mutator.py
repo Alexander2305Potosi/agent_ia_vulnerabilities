@@ -45,7 +45,8 @@ class InfrastructureHealer:
                 with open(orch, 'w') as f: f.write(new_content)
                 return True
         
-        new_all = f"\n\nallprojects {{\n    {link_str}\n    repositories {{ mavenCentral() }}\n}}\n"
+        # Inyección Pura de Módulo. Sin líneas extra (repo, urls, etc).
+        new_all = f"\n\nallprojects {{\n    {link_str}\n}}\n"
         with open(orch, 'w') as f: f.write(content.rstrip() + new_all)
         return True
 
@@ -210,12 +211,18 @@ class GradleMutator:
                 parts = artifact.split(':')[-1].split('-')
                 v_name = parts[0] + "".join(p.capitalize() for p in parts[1:]) + "Version"
             
-            for idx, build_file in enumerate(gradles):
+            valid_targets = []
+            for f in gradles:
+                if f == root_gradle or os.path.basename(f) == "build.gradle":
+                    if f not in valid_targets:
+                        valid_targets.append(f)
+                        
+            for build_file in valid_targets:
                 with open(build_file, 'r') as f:
                     content = f.read()
 
                 new_content, success = VariableManager.update_variable(
-                    content, v_name, safe_v, is_root=(idx == 0)
+                    content, v_name, safe_v, is_root=(build_file == root_gradle)
                 )
                 
                 if success and new_content != content:
