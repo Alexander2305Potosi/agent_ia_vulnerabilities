@@ -18,6 +18,8 @@ from agent_ia.long_term_memory import LongTermMemory, RemediationDecision
 from agent_ia.smart_rollback import SmartRollbackManager
 from agent_ia.dry_run_mode import DryRunMode
 from agent_ia.config_manager import ConfigManager
+from agent_ia.core.logging_utils import logger, set_log_context, clear_log_context
+from agent_ia.core.shutdown_manager import shutdown_manager, setup_graceful_shutdown, ProcessContext
 
 
 # ---------------------------------------------------------------------------
@@ -35,7 +37,7 @@ class RollbackManager:
 
     def restore(self, backups: Dict[str, str], ms_name: str) -> None:
         self.fs.restore_files(backups)
-        print(f"    🔄 [ROLLBACK] Validación fallida. Estado restaurado en {ms_name}.")
+        logger.warning(f"Rollback ejecutado: Estado restaurado en {ms_name}", indent=2)
 
 
 # ---------------------------------------------------------------------------
@@ -72,7 +74,7 @@ class RemediationAgent:
 
         # Configuración declarativa
         self.config = ConfigManager(root_path)
-        print(f"🚀 [*] Agente v.3.0 | Proyecto: {self.config.config.project_name}")
+        logger.info(f"Agente v.3.0 | Proyecto: {self.config.config.project_name}")
 
         self.fs = FSProvider(root_path)
         self.gradle = GradleProvider(debug=self.debug, gradle_path=gradle_path)
@@ -86,7 +88,7 @@ class RemediationAgent:
         # Modo dry-run
         self.dry_run_mode = DryRunMode() if self.dry_run else None
 
-        print("🚀 [*] Inicializando Cerebro Generativo v.3.0 (con Prompt Caching)...")
+        logger.start("Inicializando Cerebro Generativo v.3.0 (con Prompt Caching)...")
         self.engine = GenerativeAgentV2(
             model_path=self.MODEL_PATH if os.path.exists(self.MODEL_PATH) else None
         )
@@ -97,38 +99,75 @@ class RemediationAgent:
     # ------------------------------------------------------------------
 
     def run(self):
+        # Configurar manejo graceful de señales
+        setup_graceful_shutdown()
+
+        # Registrar funciones de limpieza
+        shutdown_manager.register_cleanup_function(self._cleanup_resources)
+
         try:
             self._print_header()
 
             # Diagnóstico inicial
             if self.debug:
-                print(f"    [DEBUG] Directorio raíz: {self.root_path}")
-                print(f"    [DEBUG] Reporte: {self.report_path}")
+                logger.debug(f"Directorio raíz: {self.root_path}")
+                logger.debug(f"Reporte: {self.report_path}")
                 all_ms = self.fs.get_microservices()
-                print(f"    [DEBUG] Microservicios detectados: {all_ms}")
+                logger.debug(f"Microservicios detectados: {all_ms}")
 
             vulnerabilities = self._load_report()
             if not vulnerabilities:
-                print("[!] No se encontraron vulnerabilidades en el reporte.")
+                logger.warning("No se encontraron vulnerabilidades en el reporte.")
                 return
 
-            print(f"[*] Cargadas {len(vulnerabilities)} vulnerabilidades del reporte")
+            logger.info(f"Cargadas {len(vulnerabilities)} vulnerabilidades del reporte")
 
             if self.target_folders:
                 if not self._validate_target_folders():
-                    print("\n🛑 [!] ERROR: Ninguna de las carpetas especificadas existe en el workspace.")
-                    print("    Asegúrate de que los nombres coincidan exactamente con las carpetas en el disco.")
+                    logger.error("Ninguna de las carpetas especificadas existe en el workspace.")
+                    logger.info("Asegúrate de que los nombres coincidan exactamente con las carpetas en el disco.")
                     return
 
             for entry in vulnerabilities:
+                # Verificar si se solicitó interrupción
+                if shutdown_manager.is_shutting_down():
+                    logger.warning("Interrupción detectada. Deteniendo procesamiento...")
+                    break
+
                 self._process_entry(entry)
 
             self.git.process_remediation(self.history)
             self._print_summary()
 
         except KeyboardInterrupt:
-            print("\n\n🛑 [!] INTERRUPCIÓN MANUAL. Abortando...")
-            sys.exit(0)
+            # El manejador de señales se encargará del cierre graceful
+            pass
+        except Exception as e:
+            logger.error(f"Error inesperado: {e}")
+            raise
+
+    def _cleanup_resources(self):
+        """Limpia recursos al cerrar la aplicación."""
+        try:
+            logger.info("Limpiando recursos...")
+
+            # Cerrar conexiones de Gradle si existen
+            if hasattr(self, 'gradle') and self.gradle:
+                logger.debug("Cerrando conexiones de Gradle...")
+                # No hay método explícito de cierre, pero podemos limpiar referencias
+                self.gradle = None
+
+            # Liberar referencias a objetos grandes
+            if hasattr(self, 'cycle_controller'):
+                self.cycle_controller = None
+
+            if hasattr(self, 'engine'):
+                self.engine = None
+
+            logger.info("Recursos liberados correctamente")
+
+        except Exception as e:
+            logger.error(f"Error durante la limpieza de recursos: {e}")
 
     # ------------------------------------------------------------------
     # Procesamiento por Entrada
@@ -140,9 +179,7 @@ class RemediationAgent:
         # Clasificación de vulnerabilidad
         classified = VulnerabilityClassifier.classify(entry)
         if self.debug:
-            print(f"    [CLASSIFIER] {vuln.id}: Score {classified.base_score:.1f}, "
-                  f"Severity: {classified.severity.name}, "
-                  f"Priority: {classified.remediation_priority:.1f}")
+            logger.debug(f"{vuln.id}: Score {classified.base_score:.1f}, Severity: {classified.severity.name}, Priority: {classified.remediation_priority:.1f}")
 
         # Determinar microservicios a procesar
         if self.target_folders:
@@ -151,44 +188,54 @@ class RemediationAgent:
             microservices = self.fs.get_microservices()
 
         if self.debug:
-            print(f"    [DEBUG] Microservicios a procesar: {microservices}")
+            logger.debug(f"Microservicios a procesar: {microservices}")
 
         for ms in microservices:
+            # Establecer contexto para logs
+            set_log_context(ms=ms, cve=vuln.id)
+            logger.start_cve(vuln.id, vuln.library, classified.severity.name)
+
             # Verificar si debe ser ignorada para este microservicio
             if self.config.should_skip_vulnerability(ms, vuln.id):
-                print(f"    [SKIP] {vuln.id} está en lista de exclusiones para {ms}")
+                logger.warning(f"{vuln.id} está en lista de exclusiones para {ms}")
+                clear_log_context()
                 continue
 
             ms_path = self.fs.get_ms_path(ms)
             if not ms_path:
-                print(f"    [ERROR] No se encontró ruta para microservicio: {ms}")
-                print(f"            Buscando: '{_normalize_ms_name(ms)}'")
+                logger.error(f"No se encontró ruta para microservicio: {ms}")
+                logger.info(f"Buscando: '{_normalize_ms_name(ms)}'")
+                clear_log_context()
                 continue
 
             self.current_ms = ms
 
             # Verificar si microservicio está habilitado
             if not self.config.is_microservice_enabled(ms):
-                print(f"    [SKIP] {ms} está deshabilitado en la configuración")
+                logger.warning(f"{ms} está deshabilitado en la configuración")
+                clear_log_context()
                 continue
 
-            print(f"📦 [*] Procesando {ms} | CVE: {vuln.id} | Priority: {classified.severity.name}")
-            print(f"    [PATH] Ruta: {ms_path}")
+            logger.info(f"Procesando {ms} | CVE: {vuln.id} | Priority: {classified.severity.name}")
+            logger.step("Ruta del MS", "INFO", ms_path)
 
             lineage_info = self._build_lineage(ms_path, vuln)
 
             # Modo dry-run: preview de cambios
             if self.dry_run:
                 self._preview_remediation(ms_path, vuln, classified)
+                clear_log_context()
                 continue
 
             # Verificar versión actual antes de mutar
             ms_files = self.fs.get_ms_files(ms_path)
             if self.debug:
-                print(f"    [DEBUG] Archivos del MS: {len(ms_files)} archivos")
+                logger.debug(f"Archivos del MS: {len(ms_files)} archivos", indent=2)
                 for f in ms_files[:3]:
-                    print(f"            - {f}")
+                    logger.debug(f"  - {f}", indent=3)
 
+            # Ejecutar ciclo de remediación
+            logger.step("Ciclo de Remediación", "START")
             success, explanation, metadata = self.cycle_controller.run_remediation_cycle(
                 entry, f"MS: {ms} | Lineage: {lineage_info}"
             )
@@ -200,15 +247,20 @@ class RemediationAgent:
             # Determinar status más preciso
             if not success:
                 status = "ERROR"
+                logger.step("Ciclo de Remediación", "FAIL", explanation[:50])
+                logger.fail_cve(vuln.id, explanation)
             elif already_fixed:
                 status = "ALREADY_FIXED"
+                logger.step("Ciclo de Remediación", "DONE", "Ya estaba corregido")
+                logger.success(f"{vuln.id} ya estaba corregido")
             elif actually_changed:
                 status = "FIXED"
+                logger.step("Ciclo de Remediación", "DONE", "Cambios aplicados exitosamente")
+                logger.success_cve(vuln.id, "remediado")
             else:
                 status = "NO_CHANGE"
-
-            if success and not actually_changed and not already_fixed:
-                print(f"    [WARNING] {vuln.id} marcado como exitoso pero sin cambios aplicados")
+                logger.step("Ciclo de Remediación", "SKIP", "Sin cambios detectados")
+                logger.warning(f"{vuln.id} marcado como exitoso pero sin cambios aplicados")
 
             # Guardar en memoria
             decision = RemediationDecision(
@@ -230,9 +282,11 @@ class RemediationAgent:
                 "already_fixed": already_fixed,
             })
 
+            clear_log_context()
+
     def _preview_remediation(self, ms_path: str, vuln: Vulnerability, classified):
         """Modo dry-run: muestra preview sin aplicar cambios."""
-        print(f"\n    [DRY-RUN] Preview para {vuln.id}")
+        logger.info(f"Preview de cambios para {vuln.id}", indent=2)
 
         # Simular cambios
         ms_files = self.fs.get_ms_files(ms_path)
@@ -254,7 +308,7 @@ class RemediationAgent:
 
     def _validate_target_folders(self) -> bool:
         """Valida que las carpetas solicitadas por el usuario existan físicamente."""
-        print(f"🎯 [*] Filtrando ejecución para: {', '.join(self.target_folders)}")
+        logger.start(f"Filtrando ejecución para: {', '.join(self.target_folders)}")
         valid_folders = []
         not_found = []
 
@@ -266,22 +320,26 @@ class RemediationAgent:
                 not_found.append(folder)
 
         if not_found:
-            print(f"    [!] WARNING: Las siguientes carpetas no fueron encontradas: {', '.join(not_found)}")
-            print(f"    [!] Microservicios disponibles: {', '.join(self.fs.get_microservices())}")
+            logger.warning(f"Carpetas no encontradas: {', '.join(not_found)}")
+            logger.info(f"Microservicios disponibles: {', '.join(self.fs.get_microservices())}")
             return False
 
-        return len(valid_folders) > 0
+        logger.success(f"Carpetas validadas: {', '.join(valid_folders)}")
+        return True
 
     def _build_lineage(self, ms_path: str, vuln: Vulnerability) -> str:
+        logger.step("Análisis de Dependencias", "START")
         gradle_bin = self.gradle.discover(ms_path, self.root_path)
         if not gradle_bin:
+            logger.warning("No se encontró binario de Gradle", indent=2)
             return "UNKNOWN"
         graph = DependencyGraph(gradle_bin)
         if not graph.build_for_project(ms_path):
+            logger.warning("No se pudo construir grafo de dependencias", indent=2)
             return "UNKNOWN_ORIGIN"
         target_id = vuln.id if ":" in vuln.id else vuln.library
         lineage = " -> ".join(graph.get_lineage(target_id))
-        print(f"    🔍 [GRAPH] Paternidad: {lineage}")
+        logger.step("Análisis de Dependencias", "DONE", f"Lineage: {lineage}")
         return lineage
 
     # ------------------------------------------------------------------
@@ -292,15 +350,17 @@ class RemediationAgent:
         vuln = Vulnerability(cve_data)
         ms_path = self.fs.get_ms_path(self.current_ms)
         if not ms_path:
+            logger.error(f"Ruta para {self.current_ms} no encontrada en validación.", indent=2)
             return False, f"Ruta para {self.current_ms} no encontrada en validación."
 
+        logger.step("Preparando Remediación", "START", f"Intento {attempt}")
         ms_files = self.fs.get_ms_files(ms_path)
         backups = self.rollback.snapshot(ms_files)
 
         safe_ver = self._extract_version(action, vuln)
         suggested_var = action.split('=')[0].strip() if "=" in action else None
 
-        print(f"        ⚙️ [MUTACIÓN] [{vuln.id}] Aplicando {vuln.library} -> {safe_ver} en {self.current_ms}...")
+        logger.processing(f"Aplicando {vuln.library} -> {safe_ver}", indent=2)
 
         # Aplicar remediación y verificar si hubo cambios reales
         remediation_result = GradleMutator.apply_coordinated_remediation(
@@ -310,34 +370,39 @@ class RemediationAgent:
 
         # Analizar resultado de la remediación
         if remediation_result == "ALREADY_FIXED":
-            print(f"        [INFO] {vuln.id} ya estaba corregido, no se requieren cambios")
+            logger.info(f"{vuln.id} ya estaba corregido", indent=2)
             return True, {"changed": False, "already_fixed": True}
         elif remediation_result == False:
-            print(f"        [ERROR] No se pudo aplicar la remediación para {vuln.id}")
+            logger.error(f"No se pudo aplicar la remediación para {vuln.id}", indent=2)
             return False, {"fatal": False, "message": "No se pudo aplicar la remediación"}
 
         # Solo si hubo cambios reales, validar el build
         has_changes = remediation_result == True
 
         if self.debug:
-            print(f"    [DEBUG] Cambios aplicados: {has_changes}")
+            logger.debug(f"Cambios aplicados: {has_changes}", indent=2)
 
+        logger.step("Validación de Build", "START")
         gradle_bin = self.gradle.discover(ms_path, self.root_path)
         if not gradle_bin:
+            logger.error("No se encontró binario de Gradle", indent=2)
             return False, {"fatal": True, "message": "INFRA_ERROR: No se encontró el binario 'gradle' o 'gradlew'."}
 
         if self.debug:
-            print(f"    🔍 [DEBUG] Usando comando Gradle: {gradle_bin}")
+            logger.debug(f"Usando comando Gradle: {gradle_bin}", indent=2)
 
         success, logs = self.gradle.validate(ms_path, gradle_bin)
         if success:
+            logger.step("Validación de Build", "DONE", "BUILD SUCCESSFUL")
             return True, {"changed": has_changes}
 
+        logger.step("Validación de Build", "FAIL", "BUILD FAILED")
+        logger.warning("Ejecutando rollback...", indent=2)
         self.rollback.restore(backups, self.current_ms)
         if isinstance(logs, str) and "INFRA_ERROR" in logs:
             return False, {"fatal": True, "message": logs}
         if self.debug:
-            print(f"    [DEBUG] Fallo en Gradle. Logs resumidos: {logs[:100]}...")
+            logger.debug(f"Fallo en Gradle. Logs: {logs[:100]}...", indent=2)
         return False, f"Fallo en validación de Gradle tras parche. Rollback ejecutado: {logs[:200]}"
 
     def _extract_version(self, action: str, vuln: Vulnerability) -> str:
@@ -345,7 +410,7 @@ class RemediationAgent:
         if match:
             version = match.group(1).strip()
             if self.debug:
-                print(f"    🧠 [IA] Usando versión sugerida por el Cerebro: {version}")
+                logger.debug(f"Usando versión sugerida por el Cerebro: {version}", indent=2)
             return version
         return vuln.safe_version.split(',')[0].strip()
 
@@ -355,52 +420,54 @@ class RemediationAgent:
 
     def _load_report(self) -> List[Dict]:
         if not os.path.exists(self.report_path):
-            print(f"[!] Error: Reporte {self.report_path} no encontrado.")
+            logger.error(f"Reporte {self.report_path} no encontrado.")
             return []
+        logger.info(f"Cargando reporte: {self.report_path}")
         with open(self.report_path, 'r') as f:
             data = json.load(f)
-        return data if isinstance(data, list) else data.get("vulnerabilities", [])
+        vulnerabilities = data if isinstance(data, list) else data.get("vulnerabilities", [])
+        logger.success(f"Reporte cargado: {len(vulnerabilities)} vulnerabilidades encontradas")
+        return vulnerabilities
 
     def _print_header(self):
-        print("\n" + "=" * 60)
-        print("🛡️ AGENTE DE REMEDIACIÓN GENERATIVA v.3.0 (ADAPTIVE)")
-        print("=" * 60)
+        print("\n" + "=" * 70)
+        print("🛡️  AGENTE DE REMEDIACIÓN GENERATIVA v.3.0 (ADAPTIVE)")
+        print("=" * 70)
+        logger.start("Iniciando ciclo de remediación")
+        logger.info(f"Modo debug: {'Activado' if self.debug else 'Desactivado'}")
+        logger.info(f"Modo dry-run: {'Activado' if self.dry_run else 'Desactivado'}")
+        if self.target_folders:
+            logger.info(f"Carpetas objetivo: {', '.join(self.target_folders)}")
+        print("=" * 70 + "\n")
 
     def _print_summary(self):
-        print("\n" + "=" * 50)
-        print("📊 RESUMEN DE REMEDIACIÓN v.3.0 (ADAPTIVE)")
-        print("=" * 50)
-
         # Agrupar por estado
         fixed = [e for e in self.history if e["status"] == "FIXED"]
         already_fixed = [e for e in self.history if e["status"] == "ALREADY_FIXED"]
         errors = [e for e in self.history if e["status"] == "ERROR"]
+        no_change = [e for e in self.history if e["status"] == "NO_CHANGE"]
+
+        total = len(self.history)
+        success_count = len(fixed) + len(already_fixed)
+        failed_count = len(errors)
+        skipped_count = len(no_change)
+
+        logger.summary(total, success_count, failed_count, skipped_count)
 
         if fixed:
-            print("\n✅ REPARADOS (cambios aplicados):")
+            logger.info("\nDetalle de reparados:", indent=0)
             for e in fixed:
-                print(f"   • [{e['ms']}] {e['id']}")
+                logger.success(f"[{e['ms']}] {e['id']}")
 
         if already_fixed:
-            print("\n✓ YA ESTABAN REPARADOS (sin cambios):")
+            logger.info("\nDetalle de ya reparados:", indent=0)
             for e in already_fixed:
-                print(f"   • [{e['ms']}] {e['id']}")
+                logger.info(f"[{e['ms']}] {e['id']} - Ya estaba corregido")
 
         if errors:
-            print("\n❌ ERRORES:")
+            logger.error("\nDetalle de errores:", indent=0)
             for e in errors:
-                print(f"   • [{e['ms']}] {e['id']}: {e.get('explanation', 'Unknown error')[:50]}")
-
-        # Estadísticas
-        total = len(self.history)
-        if total > 0:
-            print(f"\n📈 Estadísticas:")
-            print(f"   Total procesados: {total}")
-            print(f"   Reparados ahora: {len(fixed)}")
-            print(f"   Ya reparados: {len(already_fixed)}")
-            print(f"   Errores: {len(errors)}")
-
-        print("=" * 50)
+                logger.error(f"[{e['ms']}] {e['id']}: {e.get('explanation', 'Unknown error')[:50]}")
 
 
 # ---------------------------------------------------------------------------

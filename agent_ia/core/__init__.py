@@ -286,13 +286,32 @@ class GradleProvider:
         if self.java_home:
             env["JAVA_HOME"] = self.java_home
             env["PATH"] = os.path.join(self.java_home, "bin") + os.pathsep + env.get("PATH", "")
+
+        process = None
         try:
             process = subprocess.Popen(
                 full_cmd, cwd=ms_path, stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT, text=True, shell=(os.name == 'nt'), env=env,
             )
+
+            # Registrar el proceso para poder terminarlo limpiamente si hay interrupción
+            try:
+                from agent_ia.core.shutdown_manager import shutdown_manager
+                shutdown_manager.register_process(process)
+            except ImportError:
+                pass
+
             lines = []
             while True:
+                # Verificar si hay interrupción pendiente
+                try:
+                    from agent_ia.core.shutdown_manager import shutdown_manager
+                    if shutdown_manager.is_shutting_down():
+                        process.terminate()
+                        break
+                except ImportError:
+                    pass
+
                 line = process.stdout.readline()
                 if not line and process.poll() is not None:
                     break
@@ -301,10 +320,24 @@ class GradleProvider:
                     if self.debug:
                         print(f"    [GRADLE] {line.strip()}")
             process.wait()
+
+            # Desregistrar el proceso
+            try:
+                from agent_ia.core.shutdown_manager import shutdown_manager
+                shutdown_manager.unregister_process(process)
+            except ImportError:
+                pass
+
             return process.returncode == 0, "".join(lines)
         except (FileNotFoundError, PermissionError) as e:
             return False, f"INFRA_ERROR: Fallo al ejecutar '{self._validation_bin}': {e}"
         except Exception as e:
+            # Asegurar que el proceso se termine si hay error
+            if process:
+                try:
+                    process.terminate()
+                except:
+                    pass
             return False, f"SYSTEM_ERROR: {e}"
 
 
