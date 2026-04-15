@@ -2,167 +2,167 @@
   "default": {
     "decisions": [
       {
-        "cve_id": "CVE-2026-33871",
-        "library": "io.netty:netty-codec-http2",
+        "cve_id": "CVE-2026-33870",
+        "library": "unknown",
         "microservice": "ms_sales",
         "attempted_action": "remediation_applied",
         "success": true,
         "error_message": null,
-        "timestamp": "2026-04-14T18:13:03.399618",
+        "timestamp": "2026-04-14T19:07:33.322229",
+        "gradle_version": null,
+        "java_version": null
+      },
+      {
+        "cve_id": "CVE-2026-33871",
+        "library": "unknown",
+        "microservice": "ms_sales",
+        "attempted_action": "remediation_applied",
+        "success": true,
+        "error_message": null,
+        "timestamp": "2026-04-14T19:07:33.323976",
         "gradle_version": null,
         "java_version": null
       },
       {
         "cve_id": "CVE-2026-44123",
-        "library": "io.netty:netty-handler",
+        "library": "unknown",
         "microservice": "ms_sales",
         "attempted_action": "remediation_applied",
         "success": true,
         "error_message": null,
-        "timestamp": "2026-04-14T18:13:09.752548",
+        "timestamp": "2026-04-14T19:07:33.325487",
         "gradle_version": null,
         "java_version": null
       },
       {
         "cve_id": "CVE-2026-33870",
-        "library": "io.netty:netty-codec-http",
-        "microservice": "ms_sales",
-        "attempted_action": "remediation_applied",
-        "success": true,
-        "error_message": null,
-        "timestamp": "2026-04-14T18:21:46.543902",
-        "gradle_version": null,
-        "java_version": null
-      },
-      {
-        "cve_id": "CVE-2026-33870",
-        "library": "io.netty:netty-codec-http",
-        "microservice": "ms-auth",
-        "attempted_action": "remediation_applied",
-        "success": true,
-        "error_message": null,
-        "timestamp": "2026-04-14T18:21:48.511032",
-        "gradle_version": null,
-        "java_version": null
-      },
-      {
-        "cve_id": "CVE-2026-33870",
-        "library": "io.netty:netty-codec-http",
+        "library": "unknown",
         "microservice": "ms-clients",
         "attempted_action": "remediation_applied",
         "success": true,
         "error_message": null,
-        "timestamp": "2026-04-14T18:21:50.782604",
+        "timestamp": "2026-04-14T19:08:38.254641",
         "gradle_version": null,
         "java_version": null
       },
       {
         "cve_id": "CVE-2026-33870",
-        "library": "io.netty:netty-codec-http",
-        "microservice": "ms-products",
-        "attempted_action": "remediation_applied",
-        "success": true,
-        "error_message": null,
-        "timestamp": "2026-04-14T18:21:52.610999",
-        "gradle_version": null,
-        "java_version": null
-      },
-      {
-        "cve_id": "CVE-2026-33871",
-        "library": "io.netty:netty-codec-http2",
-        "microservice": "ms_sales",
-        "attempted_action": "remediation_applied",
-        "success": true,
-        "error_message": null,
-        "timestamp": "2026-04-14T18:21:53.637677",
-        "gradle_version": null,
-        "java_version": null
-      },
-      {
-        "cve_id": "CVE-2026-33871",
-        "library": "io.netty:netty-codec-http2",
+        "library": "unknown",
         "microservice": "ms-auth",
         "attempted_action": "remediation_applied",
         "success": true,
         "error_message": null,
-        "timestamp": "2026-04-14T18:21:54.831956",
-        "gradle_version": null,
-        "java_version": null
-      },
-      {
-        "cve_id": "CVE-2026-33871",
-        "library": "io.netty:netty-codec-http2",
-        "microservice": "ms-clients",
-        "attempted_action": "remediation_applied",
-        "success": true,
-        "error_message": null,
-        "timestamp": "2026-04-14T18:21:56.279215",
-        "gradle_version": null,
-        "java_version": null
-      },
-      {
-        "cve_id": "CVE-2026-33871",
-        "library": "io.netty:netty-codec-http2",
-        "microservice": "ms-products",
-        "attempted_action": "remediation_applied",
-        "success": true,
-        "error_message": null,
-        "timestamp": "2026-04-14T18:21:57.952516",
-        "gradle_version": null,
-        "java_version": null
-      },
-      {
-        "cve_id": "CVE-2026-44123",
-        "library": "io.netty:netty-handler",
-        "microservice": "ms_sales",
-        "attempted_action": "remediation_applied",
-        "success": true,
-        "error_message": null,
-        "timestamp": "2026-04-14T18:21:58.963590",
-        "gradle_version": null,
-        "java_version": null
-      },
-      {
-        "cve_id": "CVE-2026-44123",
-        "library": "io.netty:netty-handler",
-        "microservice": "ms-auth",
-        "attempted_action": "remediation_applied",
-        "success": true,
-        "error_message": null,
-        "timestamp": "2026-04-14T18:22:00.186028",
-        "gradle_version": null,
-        "java_version": null
-      },
-      {
-        "cve_id": "CVE-2026-44123",
-        "library": "io.netty:netty-handler",
-        "microservice": "ms-clients",
-        "attempted_action": "remediation_applied",
-        "success": true,
-        "error_message": null,
-        "timestamp": "2026-04-14T18:22:01.609015",
-        "gradle_version": null,
-        "java_version": null
-      },
-      {
-        "cve_id": "CVE-2026-44123",
-        "library": "io.netty:netty-handler",
-        "microservice": "ms-products",
-        "attempted_action": "remediation_applied",
-        "success": true,
-        "error_message": null,
-        "timestamp": "2026-04-14T18:22:03.517751",
+        "timestamp": "2026-04-14T19:08:38.258218",
         "gradle_version": null,
         "java_version": null
       },
       {
         "cve_id": "CVE-2026-33870",
-        "library": "io.netty:netty-codec-http",
+        "library": "unknown",
         "microservice": "ms_sales",
         "attempted_action": "remediation_applied",
         "success": true,
         "error_message": null,
-        "timestamp": "2026-04-14T18:22:14.949827",
+        "timestamp": "2026-04-14T19:08:38.260267",
+        "gradle_version": null,
+        "java_version": null
+      },
+      {
+        "cve_id": "CVE-2026-33870",
+        "library": "unknown",
+        "microservice": "ms-products",
+        "attempted_action": "remediation_applied",
+        "success": true,
+        "error_message": null,
+        "timestamp": "2026-04-14T19:08:38.261915",
+        "gradle_version": null,
+        "java_version": null
+      },
+      {
+        "cve_id": "CVE-2026-33871",
+        "library": "unknown",
+        "microservice": "ms-auth",
+        "attempted_action": "remediation_applied",
+        "success": true,
+        "error_message": null,
+        "timestamp": "2026-04-14T19:08:38.263617",
+        "gradle_version": null,
+        "java_version": null
+      },
+      {
+        "cve_id": "CVE-2026-33871",
+        "library": "unknown",
+        "microservice": "ms_sales",
+        "attempted_action": "remediation_applied",
+        "success": true,
+        "error_message": null,
+        "timestamp": "2026-04-14T19:08:38.265992",
+        "gradle_version": null,
+        "java_version": null
+      },
+      {
+        "cve_id": "CVE-2026-33871",
+        "library": "unknown",
+        "microservice": "ms-products",
+        "attempted_action": "remediation_applied",
+        "success": true,
+        "error_message": null,
+        "timestamp": "2026-04-14T19:08:38.267941",
+        "gradle_version": null,
+        "java_version": null
+      },
+      {
+        "cve_id": "CVE-2026-33871",
+        "library": "unknown",
+        "microservice": "ms-clients",
+        "attempted_action": "remediation_applied",
+        "success": true,
+        "error_message": null,
+        "timestamp": "2026-04-14T19:08:38.269468",
+        "gradle_version": null,
+        "java_version": null
+      },
+      {
+        "cve_id": "CVE-2026-44123",
+        "library": "unknown",
+        "microservice": "ms-products",
+        "attempted_action": "remediation_applied",
+        "success": true,
+        "error_message": null,
+        "timestamp": "2026-04-14T19:08:38.271013",
+        "gradle_version": null,
+        "java_version": null
+      },
+      {
+        "cve_id": "CVE-2026-44123",
+        "library": "unknown",
+        "microservice": "ms_sales",
+        "attempted_action": "remediation_applied",
+        "success": true,
+        "error_message": null,
+        "timestamp": "2026-04-14T19:08:38.272612",
+        "gradle_version": null,
+        "java_version": null
+      },
+      {
+        "cve_id": "CVE-2026-44123",
+        "library": "unknown",
+        "microservice": "ms-clients",
+        "attempted_action": "remediation_applied",
+        "success": true,
+        "error_message": null,
+        "timestamp": "2026-04-14T19:08:38.274328",
+        "gradle_version": null,
+        "java_version": null
+      },
+      {
+        "cve_id": "CVE-2026-44123",
+        "library": "unknown",
+        "microservice": "ms-auth",
+        "attempted_action": "remediation_applied",
+        "success": true,
+        "error_message": null,
+        "timestamp": "2026-04-14T19:08:38.277307",
         "gradle_version": null,
         "java_version": null
       }
@@ -1169,7 +1169,17 @@
         "last_success": "2026-04-14T15:30:56.105854"
       }
     ],
-    "failure_patterns": [],
+    "failure_patterns": [
+      {
+        "library_family": "unknown",
+        "attempted_version": "unknown",
+        "error_type": "UNKNOWN_ERROR",
+        "error_signature": "Se_agotaron_los_intentos_de_autocuraci\u00f3n.",
+        "resolution": null,
+        "occurrences": 24,
+        "last_failure": "2026-04-14T18:52:37.198891"
+      }
+    ],
     "project_metadata": {}
   }
 }

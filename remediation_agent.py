@@ -3,7 +3,9 @@ import os
 import sys
 import argparse
 import re
-from typing import List, Dict, Optional
+import threading
+import time
+from typing import List, Dict, Optional, Tuple
 
 # Agente de Remediación v.3.0 — Módulos consolidados
 from agent_ia.core import (
@@ -20,6 +22,11 @@ from agent_ia.dry_run_mode import DryRunMode
 from agent_ia.config_manager import ConfigManager
 from agent_ia.core.logging_utils import logger, set_log_context, clear_log_context
 from agent_ia.core.shutdown_manager import shutdown_manager, setup_graceful_shutdown, ProcessContext
+from agent_ia.core.parallel_processor import (
+    ParallelProcessingConfig,
+    SequentialCVEProcessor,
+    MicroserviceResult
+)
 
 
 # ---------------------------------------------------------------------------
@@ -70,7 +77,10 @@ class RemediationAgent:
         self.target_folders = target_folders or []
         self.report_path = report_path or self.DEFAULT_REPORT
         self.history: List[Dict] = []
-        self.current_ms: Optional[str] = None
+
+        # Thread-local storage para current_ms (procesamiento paralelo)
+        self._thread_local = threading.local()
+        self._thread_local.current_ms = None
 
         # Configuración declarativa
         self.config = ConfigManager(root_path)
@@ -88,7 +98,32 @@ class RemediationAgent:
         # Modo dry-run
         self.dry_run_mode = DryRunMode() if self.dry_run else None
 
+        # Procesador paralelo de CVEs
+        parallel_config = ParallelProcessingConfig(
+            max_workers=4,  # Procesar hasta 4 MS en paralelo
+            timeout_per_ms=300,  # 5 minutos por MS
+            fail_fast=False,  # Continuar aunque haya errores
+            preserve_order=False
+        )
+        self.cve_processor = SequentialCVEProcessor(parallel_config)
+
+        # Inicializar engine y cycle_controller
+        self._init_engine()
+
         logger.start("Inicializando Cerebro Generativo v.3.0 (con Prompt Caching)...")
+
+    @property
+    def current_ms(self) -> Optional[str]:
+        """Thread-safe getter para current_ms."""
+        return getattr(self._thread_local, 'current_ms', None)
+
+    @current_ms.setter
+    def current_ms(self, value: Optional[str]):
+        """Thread-safe setter para current_ms."""
+        self._thread_local.current_ms = value
+
+    def _init_engine(self):
+        """Inicializa el engine y cycle_controller una sola vez."""
         self.engine = GenerativeAgentV2(
             model_path=self.MODEL_PATH if os.path.exists(self.MODEL_PATH) else None
         )
@@ -104,6 +139,9 @@ class RemediationAgent:
 
         # Registrar funciones de limpieza
         shutdown_manager.register_cleanup_function(self._cleanup_resources)
+
+        # Iniciar timer global
+        global_start_time = time.time()
 
         try:
             self._print_header()
@@ -128,16 +166,22 @@ class RemediationAgent:
                     logger.info("Asegúrate de que los nombres coincidan exactamente con las carpetas en el disco.")
                     return
 
-            for entry in vulnerabilities:
-                # Verificar si se solicitó interrupción
-                if shutdown_manager.is_shutting_down():
-                    logger.warning("Interrupción detectada. Deteniendo procesamiento...")
-                    break
+            # Procesar CVEs secuencialmente, pero MS en paralelo
+            results = self.cve_processor.process_all_cves(
+                vulnerabilities=vulnerabilities,
+                get_microservices_func=self._get_target_microservices,
+                process_ms_func=self._process_ms_for_cve,
+                skip_check_func=self._should_skip_ms_cve
+            )
 
-                self._process_entry(entry)
+            # Convertir resultados al formato de historial
+            self._convert_results_to_history(results)
 
             self.git.process_remediation(self.history)
-            self._print_summary()
+
+            # Calcular tiempo total
+            total_elapsed = time.time() - global_start_time
+            self._print_summary(total_elapsed)
 
         except KeyboardInterrupt:
             # El manejador de señales se encargará del cierre graceful
@@ -168,6 +212,99 @@ class RemediationAgent:
 
         except Exception as e:
             logger.error(f"Error durante la limpieza de recursos: {e}")
+
+    # ------------------------------------------------------------------
+    # Métodos para Procesamiento Paralelo
+    # ------------------------------------------------------------------
+
+    def _get_target_microservices(self) -> List[str]:
+        """Retorna la lista de microservicios a procesar."""
+        if self.target_folders:
+            return self.target_folders
+        return self.fs.get_microservices()
+
+    def _should_skip_ms_cve(self, ms: str, cve_id: str) -> bool:
+        """Verifica si se debe saltar un MS para un CVE específico."""
+        # Verificar si el MS está habilitado
+        if not self.config.is_microservice_enabled(ms):
+            logger.debug(f"{ms} está deshabilitado en la configuración")
+            return True
+
+        # Verificar si el CVE está en lista de exclusiones para este MS
+        if self.config.should_skip_vulnerability(ms, cve_id):
+            logger.debug(f"{cve_id} está en lista de exclusiones para {ms}")
+            return True
+
+        return False
+
+    def _process_ms_for_cve(self, ms: str, cve_data: Dict) -> Tuple[bool, str, Dict]:
+        """
+        Procesa un microservicio para un CVE específico.
+        Esta función se ejecuta en paralelo para cada MS.
+        """
+        vuln = Vulnerability(cve_data)
+
+        # Establecer contexto de logging y thread-local current_ms
+        set_log_context(ms=ms, cve=vuln.id)
+        self.current_ms = ms  # Thread-local setter
+
+        try:
+            ms_path = self.fs.get_ms_path(ms)
+            if not ms_path:
+                logger.error(f"No se encontró ruta para microservicio: {ms}")
+                self.current_ms = None
+                clear_log_context()
+                return False, f"Ruta no encontrada para {ms}", {}
+
+            # Modo dry-run: preview de cambios
+            if self.dry_run:
+                classified = VulnerabilityClassifier.classify(cve_data)
+                self._preview_remediation(ms_path, vuln, classified)
+                self.current_ms = None
+                clear_log_context()
+                return True, "Dry-run completado", {"changed": False, "already_fixed": False}
+
+            # Construir lineage (información de dependencias)
+            lineage_info = self._build_lineage(ms_path, vuln)
+
+            # Ejecutar ciclo de remediación (usa self.current_ms internamente)
+            success, explanation, metadata = self.cycle_controller.run_remediation_cycle(
+                cve_data, f"MS: {ms} | Lineage: {lineage_info}"
+            )
+
+            self.current_ms = None
+            clear_log_context()
+            return success, explanation, metadata or {}
+
+        except Exception as e:
+            logger.error(f"Error procesando {ms} para {vuln.id}: {e}")
+            self.current_ms = None
+            clear_log_context()
+            return False, str(e), {"error": str(e)}
+
+    def _convert_results_to_history(self, results_by_cve: Dict[str, List[MicroserviceResult]]):
+        """Convierte los resultados del procesador paralelo al formato de historial."""
+        for cve_id, results in results_by_cve.items():
+            for result in results:
+                self.history.append({
+                    "ms": result.ms_name,
+                    "id": result.cve_id,
+                    "status": result.status,
+                    "explanation": result.explanation,
+                    "changed": result.changed,
+                    "already_fixed": result.already_fixed,
+                })
+
+                # Guardar en memoria
+                decision = RemediationDecision(
+                    cve_id=result.cve_id,
+                    library="unknown",  # Se puede mejorar pasando más info
+                    microservice=result.ms_name,
+                    attempted_action=result.explanation if not result.success else "remediation_applied",
+                    success=result.success,
+                    error_message=result.error_message
+                )
+                self.memory.record_decision(decision)
 
     # ------------------------------------------------------------------
     # Procesamiento por Entrada
@@ -440,7 +577,7 @@ class RemediationAgent:
             logger.info(f"Carpetas objetivo: {', '.join(self.target_folders)}")
         print("=" * 70 + "\n")
 
-    def _print_summary(self):
+    def _print_summary(self, total_time: float = 0.0):
         # Agrupar por estado
         fixed = [e for e in self.history if e["status"] == "FIXED"]
         already_fixed = [e for e in self.history if e["status"] == "ALREADY_FIXED"]
@@ -453,6 +590,9 @@ class RemediationAgent:
         skipped_count = len(no_change)
 
         logger.summary(total, success_count, failed_count, skipped_count)
+
+        # Mostrar tiempo total formateado
+        logger.info(f"\n⏱️  Tiempo total de ejecución: {self._format_duration(total_time)}")
 
         if fixed:
             logger.info("\nDetalle de reparados:", indent=0)
@@ -468,6 +608,19 @@ class RemediationAgent:
             logger.error("\nDetalle de errores:", indent=0)
             for e in errors:
                 logger.error(f"[{e['ms']}] {e['id']}: {e.get('explanation', 'Unknown error')[:50]}")
+
+    def _format_duration(self, seconds: float) -> str:
+        """Formatea una duración en segundos a un string legible."""
+        if seconds < 60:
+            return f"{seconds:.1f}s"
+        elif seconds < 3600:
+            minutes = int(seconds // 60)
+            secs = int(seconds % 60)
+            return f"{minutes}m {secs}s"
+        else:
+            hours = int(seconds // 3600)
+            minutes = int((seconds % 3600) // 60)
+            return f"{hours}h {minutes}m"
 
 
 # ---------------------------------------------------------------------------
