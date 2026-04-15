@@ -15,26 +15,66 @@ A partir de la v.3.1, las vulnerabilidades en `snyk_monorepo.json` son **globale
 - **Prompt Caching**: Reducción de latencia en el ciclo ReAct
 - **Clasificación de Vulnerabilidades**: Scoring CVSS-like automático
 - **Memoria a Largo Plazo**: Aprendizaje persistente
-- **Event-Driven Architecture**: Procesamiento paralelo opcional
+- **Procesamiento Paralelo de Microservicios**: Hasta 4 workers simultáneos por CVE
+- **Graceful Shutdown**: Cierre limpio ante interrupciones manuales (Ctrl+C)
 - **Rollback Inteligente**: Reverse patches selectivos
 - **Configuración Declarativa**: Soporte para `.remediation.yaml`
+- **Thread-Local Context**: Seguridad en hilos para procesamiento paralelo
 
 ---
 
-### 1. Misión de Estabilidad Adaptativa
+### 1. Procesamiento Paralelo de Microservicios (v.3.1.2+)
+
+A partir de la v.3.1.2, el agente procesa **CVEs secuencialmente**, pero los **microservicios en paralelo** para maximizar la eficiencia:
+
+**Patrón de Ejecución**:
+```
+CVE-1: MS-1, MS-2, MS-3, MS-4 (en paralelo, hasta 4 workers)
+   ↓
+CVE-2: MS-1, MS-2, MS-3, MS-4 (en paralelo)
+   ↓
+CVE-3: MS-1, MS-2, MS-3, MS-4 (en paralelo)
+```
+
+**Configuración**:
+- `max_workers`: 4 microservicios simultáneos por CVE
+- `timeout_per_ms`: 300 segundos (5 minutos) por microservicio
+- `fail_fast`: false (continuar aunque haya errores)
+
+**Thread-Safety**:
+El contexto `current_ms` usa `threading.local()` para garantizar que cada hilo mantenga su propio estado, evitando condiciones de carrera en el procesamiento paralelo.
+
+---
+
+### 2. Graceful Shutdown y Manejo de Señales
+
+El agente implementa cierre graceful ante interrupciones:
+
+- **SIGINT (Ctrl+C)**: Captura la señal, termina procesos activos, ejecuta funciones de limpieza
+- **SIGTERM**: Mismo comportamiento para terminación externa
+- **Limpieza Automática**: Libera recursos, cierra conexiones y archivos al salir
+
+**Recursos Liberados**:
+- Procesos hijos activos (Gradle)
+- Conexiones de archivos
+- Referencias a objetos grandes (engine, cycle_controller)
+
+---
+
+### 3. Misión de Estabilidad Adaptativa
 
 El objetivo es la remediación autónoma que se ajusta a las limitaciones del entorno. El agente tiene la soberanía de adaptar el JDK y la infraestructura de soporte para lograr el `BUILD SUCCESSFUL`.
 
 ---
 
-### 2. Estándares de Entorno (JDKManager)
+### 4. Estándares de Entorno (JDKManager)
 
 - **Selección de Java**: Se prohíbe el uso de versiones de Java que causen incompatibilidad con el ecosistema de Gradle. El agente descubrirá y priorizará JDK 21 o 17 sobre JDK 25 si el sistema lo requiere.
 - **Acceso Modular**: Inyección obligatoria de `jvmargs` modularizados en `gradle.properties` para soportar Lombok y otras herramientas industriales.
 
 ---
 
-### 3. Inteligencia de Remediación y Soberanía de Nomenclatura (v.3.1)
+### 5. Inteligencia de Remediación y Soberanía de Nomenclatura (v.3.1)
 
 Para que el Cerebro Generativo mantenga el orden del monorepo, debe seguir estas leyes de ecosistemas:
 
@@ -61,7 +101,7 @@ El agente clasifica cada CVE usando el `VulnerabilityClassifier`:
 
 ---
 
-### 4. Leyes de Mutación Estructural (Precision First)
+### 6. Leyes de Mutación Estructural (Precision First)
 
 El Agente opera bajo reglas físicas estrictas:
 
@@ -85,7 +125,7 @@ El Agente opera bajo reglas físicas estrictas:
 
 ---
 
-### 5. Ciclo Adaptive ReAct (Self-Healing) con Mejoras v.3.1
+### 7. Ciclo Adaptive ReAct (Self-Healing) con Mejoras v.3.1
 
 1. **DESCUBRIMIENTO**: Identifica microservicios según `--folders` o todos los detectados.
 2. **CLASIFICACIÓN**: Calcula score de severidad para cada CVE.
@@ -97,7 +137,7 @@ El Agente opera bajo reglas físicas estrictas:
 
 ---
 
-### 6. Memoria a Largo Plazo
+### 8. Memoria a Largo Plazo
 
 El agente mantiene aprendizaje persistente en `.agent_memory.json`:
 
@@ -126,7 +166,7 @@ El agente mantiene aprendizaje persistente en `.agent_memory.json`:
 
 ---
 
-### 7. Rollback Inteligente
+### 9. Rollback Inteligente
 
 El sistema mantiene historial de snapshots en `.rollback_history.json`:
 
@@ -150,7 +190,7 @@ python3 remediation_agent.py --rollback <snapshot_id>
 
 ---
 
-### 8. Configuración Declarativa
+### 10. Configuración Declarativa
 
 El agente soporta configuración vía `.remediation.yaml`:
 
@@ -178,7 +218,7 @@ rules:
 
 ---
 
-### 9. Trazabilidad y Seguridad
+### 11. Trazabilidad y Seguridad
 
 - **Indentación**: Uso estricto de **4 espacios**.
 - **Rollback**: Ante cualquier fallo de infraestructura o compilación tras los 3 intentos recursivos, el agente restaura el estado original del microservicio (`Zero-Risk`).
@@ -187,7 +227,7 @@ rules:
 
 ---
 
-### 10. Interfaz y Ejecución (CLI)
+### 12. Interfaz y Ejecución (CLI)
 
 Para operar el Agente con la flexibilidad que exige la v.3.1:
 
@@ -201,16 +241,31 @@ Para operar el Agente con la flexibilidad que exige la v.3.1:
 | **Generar Config** | `python3 remediation_agent.py --generate-config` |
 | **Certificación QA** | `python3 agent_ia/scripts/run_master_certification.py` |
 
+**Salida de Ejecución**:
+```
+📊 RESUMEN DE EJECUCIÓN
+======================================================================
+  Total procesados: 3
+  Exitosos: 3
+  Fallidos: 0
+
+⏱️  Tiempo total de ejecución: 3.8s
+======================================================================
+```
+
 ---
 
-### 11. Arquitectura Consolidada (v.3.1)
+### 13. Arquitectura Consolidada (v.3.1.2)
 
-A partir de la v.3.1, el agente opera con **9 módulos Python**:
+A partir de la v.3.1.2, el agente opera con **12 módulos Python**:
 
 | Módulo | Contenido | Rol |
 | :--- | :--- | :--- |
 | `remediation_agent.py` | `RemediationAgent`, `RollbackManager` | CLI Orchestrator |
 | `agent_ia/core/__init__.py` | 11 clases principales | Motor Físico |
+| `agent_ia/core/logging_utils.py` | `RemediationLogger`, `LogLevel` | Logging estructurado con contexto |
+| `agent_ia/core/parallel_processor.py` | `ParallelMicroserviceProcessor`, `SequentialCVEProcessor` | Procesamiento paralelo |
+| `agent_ia/core/shutdown_manager.py` | `ShutdownManager` | Graceful shutdown |
 | `agent_ia/brain.py` | `GenerativeAgentV2`, `PromptCacheManager` | Cerebro ReAct |
 | `agent_ia/vulnerability_classifier.py` | `VulnerabilityClassifier` | Clasificación de CVEs |
 | `agent_ia/long_term_memory.py` | `LongTermMemory` | Memoria persistente |
@@ -227,7 +282,7 @@ A partir de la v.3.1, el agente opera con **9 módulos Python**:
 
 ---
 
-### 12. Resumen de Estados
+### 14. Resumen de Estados
 
 El agente reporta los siguientes estados por CVE:
 
@@ -242,4 +297,4 @@ El agente reporta los siguientes estados por CVE:
 
 *Este manual es una extensión de la visión v.3.1 Enhanced, optimizado para la automatización total del flujo DevSecOps.*
 
-*Última actualización: 2026-04-14 (v.3.1.1 - Ley de Profundidad de Detección + Ley de Exclusión Exacta)*
+*Última actualización: 2026-04-14 (v.3.1.2 - Procesamiento Paralelo + Graceful Shutdown + Tiempo de Ejecución)*
