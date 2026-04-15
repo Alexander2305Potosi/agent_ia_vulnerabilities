@@ -4,39 +4,6 @@
       {
         "cve_id": "CVE-2026-33870",
         "library": "unknown",
-        "microservice": "ms_sales",
-        "attempted_action": "remediation_applied",
-        "success": true,
-        "error_message": null,
-        "timestamp": "2026-04-14T19:07:33.322229",
-        "gradle_version": null,
-        "java_version": null
-      },
-      {
-        "cve_id": "CVE-2026-33871",
-        "library": "unknown",
-        "microservice": "ms_sales",
-        "attempted_action": "remediation_applied",
-        "success": true,
-        "error_message": null,
-        "timestamp": "2026-04-14T19:07:33.323976",
-        "gradle_version": null,
-        "java_version": null
-      },
-      {
-        "cve_id": "CVE-2026-44123",
-        "library": "unknown",
-        "microservice": "ms_sales",
-        "attempted_action": "remediation_applied",
-        "success": true,
-        "error_message": null,
-        "timestamp": "2026-04-14T19:07:33.325487",
-        "gradle_version": null,
-        "java_version": null
-      },
-      {
-        "cve_id": "CVE-2026-33870",
-        "library": "unknown",
         "microservice": "ms-clients",
         "attempted_action": "remediation_applied",
         "success": true,
@@ -163,6 +130,39 @@
         "success": true,
         "error_message": null,
         "timestamp": "2026-04-14T19:08:38.277307",
+        "gradle_version": null,
+        "java_version": null
+      },
+      {
+        "cve_id": "CVE-2026-33870",
+        "library": "unknown",
+        "microservice": "ms_sales",
+        "attempted_action": "remediation_applied",
+        "success": true,
+        "error_message": null,
+        "timestamp": "2026-04-14T19:19:10.175955",
+        "gradle_version": null,
+        "java_version": null
+      },
+      {
+        "cve_id": "CVE-2026-33871",
+        "library": "unknown",
+        "microservice": "ms_sales",
+        "attempted_action": "remediation_applied",
+        "success": true,
+        "error_message": null,
+        "timestamp": "2026-04-14T19:19:10.179055",
+        "gradle_version": null,
+        "java_version": null
+      },
+      {
+        "cve_id": "CVE-2026-44123",
+        "library": "unknown",
+        "microservice": "ms_sales",
+        "attempted_action": "remediation_applied",
+        "success": true,
+        "error_message": null,
+        "timestamp": "2026-04-14T19:19:10.182393",
         "gradle_version": null,
         "java_version": null
       }

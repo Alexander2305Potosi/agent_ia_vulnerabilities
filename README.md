@@ -105,7 +105,7 @@ Los siguientes directorios se excluyen automáticamente usando **coincidencia ex
 - `out`, `build`, `stress`, `tests`, `certification`
 - `api`, `usecase`, `domain`, `infrastructure`, `src`, `bin`
 
-> **Nota importante**: El sistema utiliza coincidencia exacta de nombres de carpeta, no búsqueda por subcadena. Esto permite detectar correctamente microservicios con nombres como `ms_adaptador_api_externa` sin que sean excluidos por contener la palabra `api`.
+> **Nota importante**: El sistema utiliza coincidencia exacta de nombres de carpeta, no búsqueda por subcadena. Esto permite detectar correctamente microservicios con nombres como `ms_endpoint_adapter` sin que sean excluidos por contener la palabra `api`.
 
 ---
 

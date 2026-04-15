@@ -1,5 +1,6 @@
 package com.example.ms_products.infrastructure.soap;
 
+import com.example.ms_products.domain.model.SoapProductRequest;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
@@ -7,11 +8,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.StringWriter;
-import java.util.Base64;
+import java.time.Instant;
+import java.util.UUID;
 
 /**
- * Utilidad para construir y parsear envelopes SOAP usando JAXB.
- * Reemplaza la construcción manual de XML con String.format().
+ * Utilidad para construir envelopes SOAP usando JAXB para subida de documentos.
  */
 @Slf4j
 @Component
@@ -20,29 +21,51 @@ public class SoapEnvelopeBuilder {
     private final JAXBContext requestContext;
 
     public SoapEnvelopeBuilder() throws JAXBException {
-        // Inicializar el contexto JAXB para las clases de request
-        this.requestContext = JAXBContext.newInstance(GetProductInfoRequest.class);
+        this.requestContext = JAXBContext.newInstance(UploadDocumentRequest.class);
     }
 
     /**
-     * Construye el envelope SOAP a partir de un objeto Java.
+     * Construye el envelope SOAP para subida de documento.
      *
-     * @param productId ID del producto a consultar
+     * @param entityId ID de la entidad a consultar
      * @return String con el XML del envelope SOAP
      */
-    public String buildSoapEnvelope(String productId) {
-        // Crear request básico con solo productId (backwards compatible)
-        GetProductInfoRequest request = GetProductInfoRequest.builder()
-                .productId(productId)
+    public String buildSoapEnvelope(String entityId) {
+        UploadDocumentRequest request = UploadDocumentRequest.builder()
+                .entityId(entityId)
+                .operation("QUERY")
+                .requestId(UUID.randomUUID().toString())
+                .timestamp(Instant.now().toString())
+                .sourceSystem("ms-products")
                 .build();
 
         return marshalRequest(request);
     }
 
     /**
-     * Construye el envelope SOAP con información completa de un archivo.
+     * Construye el envelope SOAP completo a partir de SoapProductRequest del dominio.
      *
-     * @param productId ID del producto
+     * @param request Request del dominio con todos los parámetros
+     * @return String con el XML del envelope SOAP
+     */
+    public String buildSoapEnvelope(SoapProductRequest request) {
+        UploadDocumentRequest jaxbRequest = UploadDocumentRequest.builder()
+                .entityId(request.getProductId())
+                .operation(request.getOperation())
+                .requestId(request.getRequestId())
+                .timestamp(request.getTimestamp())
+                .sourceSystem(request.getSourceSystem())
+                .userId(request.getUserId())
+                .sessionId(request.getSessionId())
+                .build();
+
+        return marshalRequest(jaxbRequest);
+    }
+
+    /**
+     * Construye el envelope SOAP con información de archivo adjunto.
+     *
+     * @param entityId ID de la entidad
      * @param fileName nombre del archivo
      * @param fileSize tamaño del archivo en bytes
      * @param fileExtension extensión del archivo
@@ -50,18 +73,22 @@ public class SoapEnvelopeBuilder {
      * @return String con el XML del envelope SOAP
      */
     public String buildSoapEnvelopeWithFile(
-            String productId,
+            String entityId,
             String fileName,
             Long fileSize,
             String fileExtension,
             byte[] content) {
 
-        GetProductInfoRequest request = GetProductInfoRequest.builder()
-                .productId(productId)
+        UploadDocumentRequest request = UploadDocumentRequest.builder()
+                .entityId(entityId)
+                .operation("UPLOAD_DOCUMENT")
+                .requestId(UUID.randomUUID().toString())
+                .timestamp(Instant.now().toString())
                 .fileName(fileName)
                 .fileSize(fileSize)
                 .fileExtension(fileExtension)
                 .content(content)
+                .sourceSystem("ms-products")
                 .build();
 
         return marshalRequest(request);
@@ -70,7 +97,7 @@ public class SoapEnvelopeBuilder {
     /**
      * Serializa el objeto request a XML usando JAXB.
      */
-    private String marshalRequest(GetProductInfoRequest request) {
+    private String marshalRequest(UploadDocumentRequest request) {
         try {
             Marshaller marshaller = requestContext.createMarshaller();
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
@@ -81,7 +108,7 @@ public class SoapEnvelopeBuilder {
             // Envolver con el envelope SOAP
             writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
             writer.write("<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" ");
-            writer.write("xmlns:prod=\"http://example.com/products\">\n");
+            writer.write("xmlns:doc=\"http://example.com/products\">\n");
             writer.write("    <soap:Header/>\n");
             writer.write("    <soap:Body>\n");
             writer.write("        ");
@@ -100,39 +127,69 @@ public class SoapEnvelopeBuilder {
     }
 
     /**
-     * Método fallback que usa String.format (método anterior).
+     * Método fallback que usa String.format para construcción manual.
      */
-    private String buildFallbackEnvelope(GetProductInfoRequest request) {
-        // Codificar content a Base64 si existe
-        String contentBase64 = request.getContent() != null
-                ? Base64.getEncoder().encodeToString(request.getContent())
-                : "";
-
+    private String buildFallbackEnvelope(UploadDocumentRequest request) {
         StringBuilder sb = new StringBuilder();
         sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
         sb.append("<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" ");
-        sb.append("xmlns:prod=\"http://example.com/products\">\n");
+        sb.append("xmlns:doc=\"http://example.com/products\">\n");
         sb.append("    <soap:Header/>\n");
         sb.append("    <soap:Body>\n");
-        sb.append("        <prod:GetProductInfoRequest>\n");
+        sb.append("        <doc:UploadDocumentRequest>\n");
 
-        if (request.getProductId() != null) {
-            sb.append(String.format("            <prod:ProductId>%s</prod:ProductId>\n", escapeXml(request.getProductId())));
+        // Campos obligatorios
+        if (request.getEntityId() != null) {
+            sb.append(String.format("            <doc:entityId>%s</doc:entityId>\n", escapeXml(request.getEntityId())));
         }
+        if (request.getOperation() != null) {
+            sb.append(String.format("            <doc:operation>%s</doc:operation>\n", escapeXml(request.getOperation())));
+        }
+        if (request.getRequestId() != null) {
+            sb.append(String.format("            <doc:requestId>%s</doc:requestId>\n", escapeXml(request.getRequestId())));
+        }
+        if (request.getTimestamp() != null) {
+            sb.append(String.format("            <doc:timestamp>%s</doc:timestamp>\n", escapeXml(request.getTimestamp())));
+        }
+
+        // Campos de archivo
         if (request.getFileName() != null) {
-            sb.append(String.format("            <prod:FileName>%s</prod:FileName>\n", escapeXml(request.getFileName())));
+            sb.append(String.format("            <doc:fileName>%s</doc:fileName>\n", escapeXml(request.getFileName())));
         }
         if (request.getFileSize() != null) {
-            sb.append(String.format("            <prod:FileSize>%d</prod:FileSize>\n", request.getFileSize()));
+            sb.append(String.format("            <doc:fileSize>%d</doc:fileSize>\n", request.getFileSize()));
         }
         if (request.getFileExtension() != null) {
-            sb.append(String.format("            <prod:FileExtension>%s</prod:FileExtension>\n", escapeXml(request.getFileExtension())));
+            sb.append(String.format("            <doc:fileExtension>%s</doc:fileExtension>\n", escapeXml(request.getFileExtension())));
         }
-        if (!contentBase64.isEmpty()) {
-            sb.append(String.format("            <prod:Content>%s</prod:Content>\n", contentBase64));
+        if (request.getContent() != null) {
+            String contentBase64 = java.util.Base64.getEncoder().encodeToString(request.getContent());
+            sb.append(String.format("            <doc:content>%s</doc:content>\n", contentBase64));
         }
 
-        sb.append("        </prod:GetProductInfoRequest>\n");
+        // Campos opcionales
+        if (request.getMimeType() != null) {
+            sb.append(String.format("            <doc:mimeType>%s</doc:mimeType>\n", escapeXml(request.getMimeType())));
+        }
+        if (request.getDescription() != null) {
+            sb.append(String.format("            <doc:description>%s</doc:description>\n", escapeXml(request.getDescription())));
+        }
+        if (request.getChecksum() != null) {
+            sb.append(String.format("            <doc:checksum>%s</doc:checksum>\n", escapeXml(request.getChecksum())));
+        }
+
+        // Metadatos
+        if (request.getSourceSystem() != null) {
+            sb.append(String.format("            <doc:sourceSystem>%s</doc:sourceSystem>\n", escapeXml(request.getSourceSystem())));
+        }
+        if (request.getUserId() != null) {
+            sb.append(String.format("            <doc:userId>%s</doc:userId>\n", escapeXml(request.getUserId())));
+        }
+        if (request.getSessionId() != null) {
+            sb.append(String.format("            <doc:sessionId>%s</doc:sessionId>\n", escapeXml(request.getSessionId())));
+        }
+
+        sb.append("        </doc:UploadDocumentRequest>\n");
         sb.append("    </soap:Body>\n");
         sb.append("</soap:Envelope>");
 

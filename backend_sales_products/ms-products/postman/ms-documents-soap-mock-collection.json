@@ -1,0 +1,335 @@
+{
+  "info": {
+    "_postman_id": "ms-documents-soap-mock-v1",
+    "name": "MS-Documents SOAP Mock API",
+    "description": "Colección para probar la API REST de documentos con mocks del servicio SOAP externo (http://localhost:8081/ws/product)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": {
+      "major": 2,
+      "minor": 0,
+      "patch": 0
+    }
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/documents/health",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "documents", "health"]
+        },
+        "description": "Verifica que el servicio de documentos esté operativo"
+      },
+      "response": [
+        {
+          "name": "Health OK",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/documents/health",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "documents", "health"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "\"OK\""
+        }
+      ]
+    },
+    {
+      "name": "Service Info",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/documents/info",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "documents", "info"]
+        },
+        "description": "Obtiene información del servicio de documentos"
+      },
+      "response": [
+        {
+          "name": "Service Info Response",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/documents/info",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "documents", "info"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"service\": \"ms-documents\",\n  \"version\": \"2.0.0\",\n  \"description\": \"Microservicio de gestión de documentos con integración SOAP\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Upload Document",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"entityId\": \"PROD-001\",\n  \"fileName\": \"documento-especificaciones.pdf\",\n  \"fileSize\": 1048576,\n  \"fileExtension\": \"pdf\",\n  \"fileContentBase64\": \"JVBERi0xLjQKJeLjz9MKMyAwIG9iago8PC9UeXBlL1BhZ2UvUGFyZW50IDIgMCBS...\",\n  \"mimeType\": \"application/pdf\",\n  \"description\": \"Especificaciones técnicas del documento\",\n  \"checksum\": \"d41d8cd98f00b204e9800998ecf8427e\",\n  \"isPublic\": false,\n  \"fileCategory\": \"SPECIFICATION\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/documents/upload",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "documents", "upload"]
+        },
+        "description": "Sube información de un documento al servicio SOAP externo. El contenido debe estar codificado en base64."
+      },
+      "response": [
+        {
+          "name": "Document Upload Success",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"entityId\": \"PROD-001\",\n  \"fileName\": \"documento-especificaciones.pdf\",\n  \"fileSize\": 1048576,\n  \"fileExtension\": \"pdf\",\n  \"fileContentBase64\": \"JVBERi0xLjQK...\",\n  \"mimeType\": \"application/pdf\",\n  \"description\": \"Especificaciones técnicas del documento\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/documents/upload",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "documents", "upload"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "X-Response-Time",
+              "value": "245ms"
+            }
+          ],
+          "body": "{\n  \"success\": true,\n  \"message\": \"Documento subido exitosamente\",\n  \"documentId\": \"DOC-2026-001\",\n  \"entityId\": \"PROD-001\",\n  \"fileName\": \"documento-especificaciones.pdf\",\n  \"fileSize\": 1048576,\n  \"fileUrl\": \"https://storage.example.com/docs/DOC-2026-001.pdf\",\n  \"status\": \"COMPLETED\",\n  \"responseCode\": \"200\",\n  \"processedAt\": \"2026-04-15T10:30:00Z\",\n  \"processingTimeMs\": 245,\n  \"requestId\": \"req-550e8400-e29b-41d4-a716-446655440000\",\n  \"validatedChecksum\": \"d41d8cd98f00b204e9800998ecf8427e\"\n}"
+        },
+        {
+          "name": "Document Upload - Invalid Base64",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"entityId\": \"PROD-001\",\n  \"fileName\": \"invalid-file.pdf\",\n  \"fileSize\": 1000,\n  \"fileExtension\": \"pdf\",\n  \"fileContentBase64\": \"NOT-VALID-BASE64!!!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/documents/upload",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "documents", "upload"]
+            }
+          },
+          "status": "Bad Request",
+          "code": 400,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"timestamp\": \"2026-04-15T10:30:00Z\",\n  \"status\": 400,\n  \"errorCode\": \"INVALID_FILE\",\n  \"message\": \"Contenido base64 inválido: Illegal base64 character 21\",\n  \"path\": \"/api/v1/documents/upload\",\n  \"traceId\": \"abc12345\"\n}"
+        },
+        {
+          "name": "Document Upload - Circuit Breaker Open",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"entityId\": \"PROD-001\",\n  \"fileName\": \"documento-especificaciones.pdf\",\n  \"fileSize\": 1048576,\n  \"fileExtension\": \"pdf\",\n  \"fileContentBase64\": \"JVBERi0xLjQK...\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/documents/upload",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "documents", "upload"]
+            }
+          },
+          "status": "Service Unavailable",
+          "code": 503,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"success\": false,\n  \"message\": \"Servicio SOAP no disponible - Circuit breaker abierto\",\n  \"entityId\": \"PROD-001\",\n  \"fileName\": \"documento-especificaciones.pdf\",\n  \"status\": \"CIRCUIT_BREAKER_OPEN\",\n  \"responseCode\": \"503\",\n  \"processedAt\": \"2026-04-15T10:30:00Z\"\n}"
+        },
+        {
+          "name": "Document Upload - Rate Limit",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"entityId\": \"PROD-001\",\n  \"fileName\": \"documento-especificaciones.pdf\",\n  \"fileSize\": 1048576,\n  \"fileExtension\": \"pdf\",\n  \"fileContentBase64\": \"JVBERi0xLjQK...\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/documents/upload",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "documents", "upload"]
+            }
+          },
+          "status": "Too Many Requests",
+          "code": 429,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Retry-After",
+              "value": "60"
+            }
+          ],
+          "body": "{\n  \"timestamp\": \"2026-04-15T10:30:00Z\",\n  \"status\": 429,\n  \"errorCode\": \"RATE_LIMIT\",\n  \"message\": \"Demasiadas solicitudes. Por favor espere antes de intentar nuevamente.\",\n  \"path\": \"/api/v1/documents/upload\",\n  \"retryAfter\": 60\n}"
+        }
+      ]
+    },
+    {
+      "name": "SOAP External Service - Mock",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "text/xml; charset=UTF-8"
+          },
+          {
+            "key": "SOAPAction",
+            "value": "http://example.com/products/UploadDocument"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"\n               xmlns:doc=\"http://example.com/documents\">\n    <soap:Header/>\n    <soap:Body>\n        <doc:UploadDocumentRequest>\n            <entityId>PROD-001</entityId>\n            <fileName>documento-especificaciones.pdf</fileName>\n            <fileSize>1048576</fileSize>\n            <fileExtension>pdf</fileExtension>\n            <content>JVBERi0xLjQK...</content>\n            <mimeType>application/pdf</mimeType>\n            <requestId>req-{{$randomUUID}}</requestId>\n            <timestamp>{{$isoTimestamp}}</timestamp>\n        </doc:UploadDocumentRequest>\n    </soap:Body>\n</soap:Envelope>"
+        },
+        "url": {
+          "raw": "http://localhost:8081/ws/document",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8081",
+          "path": ["ws", "document"]
+        },
+        "description": "Mock del servicio SOAP externo para subida de documentos."
+      },
+      "response": [
+        {
+          "name": "SOAP Upload Success Response",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=UTF-8"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n    <soap:Body>\n        <UploadDocumentRequest xmlns=\"http://example.com/documents\">\n            <entityId>PROD-001</entityId>\n            <fileName>documento-especificaciones.pdf</fileName>\n        </UploadDocumentRequest>\n    </soap:Body>\n</soap:Envelope>"
+            },
+            "url": {
+              "raw": "http://localhost:8081/ws/document",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8081",
+              "path": ["ws", "document"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=UTF-8"
+            }
+          ],
+          "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"\n               xmlns:doc=\"http://example.com/documents\">\n    <soap:Header>\n        <doc:ResponseHeader>\n            <requestId>req-550e8400-e29b-41d4-a716-446655440000</requestId>\n            <timestamp>2026-04-15T10:30:45.123Z</timestamp>\n            <sourceSystem>DOCUMENT-ERP-v2.5</sourceSystem>\n        </doc:ResponseHeader>\n    </soap:Header>\n    <soap:Body>\n        <doc:UploadDocumentResponse>\n            <document>\n                <documentId>DOC-2026-001</documentId>\n                <entityId>PROD-001</entityId>\n                <fileName>documento-especificaciones.pdf</fileName>\n                <fileSize>1048576</fileSize>\n                <fileUrl>https://storage.example.com/docs/DOC-2026-001.pdf</fileUrl>\n                <status>UPLOADED</status>\n                <mimeType>application/pdf</mimeType>\n                <uploadedAt>2026-04-15T10:30:00Z</uploadedAt>\n            </document>\n            <responseMetadata>\n                <success>true</success>\n                <message>Document uploaded successfully</message>\n                <responseTimeMs>245</responseTimeMs>\n            </responseMetadata>\n        </doc:UploadDocumentResponse>\n    </soap:Body>\n</soap:Envelope>"
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string",
+      "description": "Base URL del microservicio ms-documents"
+    },
+    {
+      "key": "entity_id",
+      "value": "PROD-001",
+      "type": "string",
+      "description": "ID de la entidad asociada al documento"
+    },
+    {
+      "key": "soap_service_url",
+      "value": "http://localhost:8081/ws/document",
+      "type": "string",
+      "description": "URL del servicio SOAP externo"
+    }
+  ],
+  "auth": {
+    "type": "noauth"
+  }
+}
