@@ -2,143 +2,117 @@
 
 Este directorio contiene un proyecto de **SoapUI** para mockear el servicio SOAP externo que consume `ms-products`.
 
-## Archivos
+## Archivo
 
 | Archivo | Descripción |
 |---------|-------------|
-| `ProductServiceMock-soapui-project.xml` | Proyecto SoapUI con el mock service |
-| `soap-ui-mock-project.xml` | Versión alternativa con casos de prueba |
+| `ProductServiceMock-simple.xml` | Proyecto SoapUI simplificado - **USAR ESTE** |
 
 ## Características del Mock
 
 El mock service simula el servicio SOAP externo con las siguientes respuestas:
 
-### Endpoints
-
-- **URL**: `http://localhost:8081/ws/product`
-- **SOAP Action**: `http://example.com/products/UploadDocument`
-
-### Respuestas Disponibles
-
 | Nombre | HTTP Status | Descripción |
 |--------|-------------|-------------|
 | **Success** (default) | 200 | Upload exitoso con documentId |
-| **QuerySuccess** | 200 | Respuesta para operación QUERY |
 | **ServerError** | 500 | Error interno del servidor |
-| **ValidationError** | 400 | Error de validación de campos |
 | **Timeout** | 504 | Simula timeout (>10 segundos) |
 
-## Uso
+## Instrucciones de Uso
 
-### Opción 1: SoapUI (Recomendado)
+### 1. Instalar SoapUI
+Descargar desde: https://www.soapui.org/downloads/soapui/
 
-1. **Instalar SoapUI**:
-   - Descargar desde: https://www.soapui.org/downloads/soapui/
+### 2. Importar el Proyecto
+```
+File → Import Project → ProductServiceMock-simple.xml
+```
 
-2. **Importar el proyecto**:
-   ```
-   File → Import Project → ProductServiceMock-soapui-project.xml
-   ```
+### 3. Iniciar el Mock Service
+1. En el panel izquierdo, expandir **"ProductServiceMockSimple"**
+2. Doble clic en **"ProductMockService"**
+3. Click en el botón verde **Start (▶)** arriba a la izquierda
+4. Verificar mensaje: **"Running on port [8081]"**
 
-3. **Iniciar el Mock Service**:
-   - Doble clic en `ProductServiceMock`
-   - Click en el botón verde "Start" (▶)
-   - Verificar que el puerto 8081 está disponible
+### 4. Probar el Mock
+Desde terminal:
+```bash
+curl -X POST http://localhost:8081/ws/product \
+  -H "Content-Type: text/xml; charset=UTF-8" \
+  -H "SOAPAction: http://example.com/products/UploadDocument" \
+  -d '<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:doc="http://example.com/products">
+   <soap:Header/>
+   <soap:Body>
+      <doc:UploadDocumentRequest>
+         <doc:entityId>PROD-TEST-001</doc:entityId>
+         <doc:operation>UPLOAD_DOCUMENT</doc:operation>
+         <doc:requestId>req-test-001</doc:requestId>
+         <doc:timestamp>2026-04-16T10:30:00Z</doc:timestamp>
+         <doc:sourceSystem>ms-products</doc:sourceSystem>
+      </doc:UploadDocumentRequest>
+   </soap:Body>
+</soap:Envelope>'
+```
 
-4. **Verificar funcionamiento**:
-   ```bash
-   curl -X POST http://localhost:8081/ws/product \
-     -H "Content-Type: text/xml; charset=UTF-8" \
-     -H "SOAPAction: http://example.com/products/UploadDocument" \
-     -d '<?xml version="1.0" encoding="UTF-8"?>
-   <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:doc="http://example.com/products">
-      <soap:Header/>
-      <soap:Body>
-         <doc:UploadDocumentRequest>
-            <doc:entityId>PROD-TEST-001</doc:entityId>
-            <doc:operation>UPLOAD_DOCUMENT</doc:operation>
-            <doc:requestId>req-test-001</doc:requestId>
-            <doc:timestamp>2026-04-16T10:30:00Z</doc:timestamp>
-            <doc:sourceSystem>ms-products</doc:sourceSystem>
-         </doc:UploadDocumentRequest>
-      </soap:Body>
-   </soap:Envelope>'
-   ```
+### 5. Cambiar entre Respuestas
+Para probar diferentes escenarios:
+1. Doble clic en la operación **"UploadDocument"**
+2. En el dropdown superior cambiar entre:
+   - **Success** → Respuesta exitosa (default)
+   - **ServerError** → Error 500
+   - **Timeout** → Delay de 11 segundos (prueba timeout del cliente)
 
-### Opción 2: Línea de Comandos (Maven/Gradle)
+## Configuración de ms-products
 
-Agregar al `application-test.properties`:
+En `application.properties` o variables de entorno:
 ```properties
 soap.service.url=http://localhost:8081/ws/product
 ```
 
-### Opción 3: Docker (MockServer o similar)
-
-Si prefieres no usar SoapUI, puedes usar MockServer:
-
-```yaml
-# docker-compose.yml
-version: '3.8'
-services:
-  soap-mock:
-    image: mockserver/mockserver:latest
-    ports:
-      - "8081:1080"
-    environment:
-      MOCKSERVER_INITIALIZATION_JSON_PATH: /config/expectations.json
-    volumes:
-      - ./mock-config:/config
-```
-
-## Configuración de ms-products
-
-El `SoapClientAdapter` está configurado para usar:
-
-```yaml
-soap:
-  service:
-    url: ${SOAP_SERVICE_URL:http://localhost:8081/ws/product}
-    timeout: 10000
-```
-
-## Cambiar entre Respuestas en SoapUI
-
-Para seleccionar una respuesta diferente:
-
-1. Abrir el proyecto en SoapUI
-2. Doble clic en `ProductServiceMock`
-3. Doble clic en la operación `UploadDocument`
-4. Seleccionar la respuesta deseada del dropdown
-5. Cambiar el dispatch method a "SEQUENCE" o "SCRIPT" para automatizar
-
 ## Troubleshooting
 
 ### Error: Puerto 8081 en uso
-
-Cambiar el puerto en el mock service:
-- Doble clic en `ProductServiceMock`
-- Cambiar el puerto (ej: 8082)
-- Actualizar `soap.service.url` en la configuración
+Cambiar el puerto en el mock:
+- Doble clic en `ProductMockService`
+- Cambiar el campo **Port** (ej: 8082)
+- Actualizar `soap.service.url` en ms-products
 
 ### Error: Connection Refused
-
 Verificar que:
-1. El mock service está iniciado (botón verde)
+1. El mock service está iniciado (botón verde presionado)
 2. El puerto no está bloqueado por firewall
-3. La URL coincide con la configuración de `ms-products`
+3. La URL coincide con la configuración de ms-products
 
-### Timeout en ms-products
+## Endpoint Mock
 
-El mock tiene una respuesta con delay de 11 segundos para probar el manejo de timeouts en el cliente.
+- **URL**: `http://localhost:8081/ws/product`
+- **SOAP Action**: `http://example.com/products/UploadDocument`
+- **Puerto**: `8081` (configurable)
 
-## Estructura del Proyecto
+## Respuesta Exitosa de Ejemplo
 
-```
-mock/
-├── ProductServiceMock-soapui-project.xml    # Proyecto SoapUI principal
-├── soap-ui-mock-project.xml                 # Versión con test suites
-├── README.md                                # Este archivo
-└── .gitkeep
+```xml
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:doc="http://example.com/products">
+   <soap:Header/>
+   <soap:Body>
+      <doc:UploadDocumentResponse>
+         <doc:success>true</doc:success>
+         <doc:message>Document uploaded successfully</doc:message>
+         <doc:documentId>DOC-550e8400-e29b-41d4-a716-446655440000</doc:documentId>
+         <doc:entityId>PROD-12345</doc:entityId>
+         <doc:fileName>documento.pdf</doc:fileName>
+         <doc:fileSize>1024</doc:fileSize>
+         <doc:fileUrl>http://localhost:8081/files/DOC-550e8400-e29b-41d4-a716-446655440000</doc:fileUrl>
+         <doc:status>PROCESSED</doc:status>
+         <doc:responseCode>200</doc:responseCode>
+         <doc:processedAt>2026-04-16T10:30:01Z</doc:processedAt>
+         <doc:processingTimeMs>150</doc:processingTimeMs>
+         <doc:requestId>req-12345-abcde</doc:requestId>
+         <doc:sourceSystem>ms-products-mock</doc:sourceSystem>
+      </doc:UploadDocumentResponse>
+   </soap:Body>
+</soap:Envelope>
 ```
 
 ## Referencias

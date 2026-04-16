@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:soapui-project id="product-mock-simple" activeEnvironment="Default"
+    name="ProductServiceMockSimple" soapui-version="5.7.2"
+    xmlns:con="http://eviware.com/soapui/config">
+
+    <con:settings/>
+
+    <!-- Simple Mock Service without WSDL dependency -->
+    <con:mockService id="mock-service-simple" port="8081" path="/ws/product"
+        host="localhost" name="ProductMockService" docroot="">
+
+        <con:settings/>
+        <con:properties/>
+
+        <!-- Mock Operation without interface binding -->
+        <con:mockOperation name="UploadDocument" id="mock-op-1">
+            <con:settings/>
+
+            <!-- Success Response -->
+            <con:mockResponse name="Success" id="mock-resp-1"
+                httpStatus="200" contentType="text/xml; charset=utf-8"
+                encoding="UTF-8">
+                <con:settings/>
+                <con:responseContent><![CDATA[<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:doc="http://example.com/products">
+   <soap:Header/>
+   <soap:Body>
+      <doc:UploadDocumentResponse>
+         <doc:success>true</doc:success>
+         <doc:message>Document uploaded successfully</doc:message>
+         <doc:documentId>DOC-550e8400-e29b-41d4-a716-446655440000</doc:documentId>
+         <doc:entityId>PROD-12345</doc:entityId>
+         <doc:fileName>documento.pdf</doc:fileName>
+         <doc:fileSize>1024</doc:fileSize>
+         <doc:fileUrl>http://localhost:8081/files/DOC-550e8400-e29b-41d4-a716-446655440000</doc:fileUrl>
+         <doc:status>PROCESSED</doc:status>
+         <doc:responseCode>200</doc:responseCode>
+         <doc:processedAt>2026-04-16T10:30:01Z</doc:processedAt>
+         <doc:processingTimeMs>150</doc:processingTimeMs>
+         <doc:requestId>req-12345-abcde</doc:requestId>
+         <doc:sourceSystem>ms-products-mock</doc:sourceSystem>
+      </doc:UploadDocumentResponse>
+   </soap:Body>
+</soap:Envelope>]]></con:responseContent>
+            </con:mockResponse>
+
+            <!-- Error 500 Response -->
+            <con:mockResponse name="ServerError" id="mock-resp-2"
+                httpStatus="500" contentType="text/xml; charset=utf-8"
+                encoding="UTF-8">
+                <con:settings/>
+                <con:responseContent><![CDATA[<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:doc="http://example.com/products">
+   <soap:Header/>
+   <soap:Body>
+      <soap:Fault>
+         <faultcode>soap:Server</faultcode>
+         <faultstring>Internal Server Error</faultstring>
+         <detail>
+            <doc:UploadDocumentResponse>
+               <doc:success>false</doc:success>
+               <doc:message>Error processing document upload</doc:message>
+               <doc:status>ERROR</doc:status>
+               <doc:responseCode>500</doc:responseCode>
+               <doc:errorCode>ERR-500</doc:errorCode>
+               <doc:errorMessage>Failed to process the upload request</doc:errorMessage>
+               <doc:requestId>req-error-001</doc:requestId>
+               <doc:sourceSystem>ms-products-mock</doc:sourceSystem>
+            </doc:UploadDocumentResponse>
+         </detail>
+      </soap:Fault>
+   </soap:Body>
+</soap:Envelope>]]></con:responseContent>
+            </con:mockResponse>
+
+            <!-- Timeout Response with delay -->
+            <con:mockResponse name="Timeout" id="mock-resp-3"
+                httpStatus="504" contentType="text/xml; charset=utf-8"
+                encoding="UTF-8" delay="11000">
+                <con:settings/>
+                <con:responseContent><![CDATA[<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:doc="http://example.com/products">
+   <soap:Header/>
+   <soap:Body>
+      <soap:Fault>
+         <faultcode>soap:Server</faultcode>
+         <faultstring>Gateway Timeout</faultstring>
+         <detail>
+            <doc:UploadDocumentResponse>
+               <doc:success>false</doc:success>
+               <doc:message>Request processing timeout</doc:message>
+               <doc:status>TIMEOUT</doc:status>
+               <doc:responseCode>504</doc:responseCode>
+               <doc:errorCode>ERR-504</doc:errorCode>
+               <doc:errorMessage>The request timed out after 10 seconds</doc:errorMessage>
+               <doc:requestId>req-timeout-001</doc:requestId>
+               <doc:sourceSystem>ms-products-mock</doc:sourceSystem>
+            </doc:UploadDocumentResponse>
+         </detail>
+      </soap:Fault>
+   </soap:Body>
+</soap:Envelope>]]></con:responseContent>
+            </con:mockResponse>
+
+        </con:mockOperation>
+    </con:mockService>
+
+    <con:properties>
+        <con:property>
+            <con:name>endpoint</con:name>
+            <con:value>http://localhost:8081/ws/product</con:value>
+        </con:property>
+    </con:properties>
+
+    <con:reporting/>
+</con:soapui-project>
