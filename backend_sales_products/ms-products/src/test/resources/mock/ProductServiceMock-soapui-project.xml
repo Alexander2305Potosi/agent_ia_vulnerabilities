@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:soapui-project id="product-mock-project" activeEnvironment="Default" name="ProductService SOAP Mock" soapui-version="5.7.2" xmlns:con="http://eviware.com/soapui/config">
+  <con:settings/>
+
+  <!-- Mock Service Definition -->
+  <con:mockService id="mock-service-1" port="8081" path="/ws/product" host="localhost" name="ProductServiceMock" docroot="">
+    <con:settings/>
+    <con:properties/>
+
+    <!-- Mock Operation: UploadDocument -->
+    <con:mockOperation name="UploadDocument" id="mock-op-1" interface="ProductServiceSoapBinding" operation="UploadDocument">
+      <con:settings/>
+
+      <!-- Response 1: Success (Default) -->
+      <con:mockResponse name="Success" id="mock-resp-1" httpStatus="200" contentType="text/xml; charset=utf-8" encoding="UTF-8">
+        <con:settings/>
+        <con:responseContent><![CDATA[<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:doc="http://example.com/products">
+   <soap:Header/>
+   <soap:Body>
+      <doc:UploadDocumentResponse>
+         <doc:success>true</doc:success>
+         <doc:message>Document uploaded successfully</doc:message>
+         <doc:documentId>DOC-550e8400-e29b-41d4-a716-446655440000</doc:documentId>
+         <doc:entityId>PROD-12345</doc:entityId>
+         <doc:fileName>documento.pdf</doc:fileName>
+         <doc:fileSize>1024</doc:fileSize>
+         <doc:fileUrl>http://localhost:8081/files/DOC-550e8400-e29b-41d4-a716-446655440000</doc:fileUrl>
+         <doc:status>PROCESSED</doc:status>
+         <doc:responseCode>200</doc:responseCode>
+         <doc:processedAt>2026-04-16T10:30:01Z</doc:processedAt>
+         <doc:processingTimeMs>150</doc:processingTimeMs>
+         <doc:requestId>req-12345-abcde</doc:requestId>
+         <doc:sourceSystem>ms-products-mock</doc:sourceSystem>
+      </doc:UploadDocumentResponse>
+   </soap:Body>
+</soap:Envelope>]]></con:responseContent>
+        <con:wsaConfig mustUnderstand="NONE" version="200508" action="http://example.com/products/UploadDocument"/>
+      </con:mockResponse>
+
+      <!-- Response 2: Query Success -->
+      <con:mockResponse name="QuerySuccess" id="mock-resp-2" httpStatus="200" contentType="text/xml; charset=utf-8" encoding="UTF-8">
+        <con:settings/>
+        <con:responseContent><![CDATA[<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:doc="http://example.com/products">
+   <soap:Header/>
+   <soap:Body>
+      <doc:UploadDocumentResponse>
+         <doc:success>true</doc:success>
+         <doc:message>Entity query completed successfully</doc:message>
+         <doc:documentId>DOC-QUERY-001</doc:documentId>
+         <doc:entityId>PROD-QUERY-001</doc:entityId>
+         <doc:status>FOUND</doc:status>
+         <doc:responseCode>200</doc:responseCode>
+         <doc:processedAt>2026-04-16T10:30:01Z</doc:processedAt>
+         <doc:processingTimeMs>50</doc:processingTimeMs>
+         <doc:requestId>req-query-001</doc:requestId>
+         <doc:sourceSystem>ms-products-mock</doc:sourceSystem>
+      </doc:UploadDocumentResponse>
+   </soap:Body>
+</soap:Envelope>]]></con:responseContent>
+        <con:wsaConfig mustUnderstand="NONE" version="200508" action="http://example.com/products/UploadDocument"/>
+      </con:mockResponse>
+
+      <!-- Response 3: Server Error -->
+      <con:mockResponse name="ServerError" id="mock-resp-3" httpStatus="500" contentType="text/xml; charset=utf-8" encoding="UTF-8">
+        <con:settings/>
+        <con:responseContent><![CDATA[<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:doc="http://example.com/products">
+   <soap:Header/>
+   <soap:Body>
+      <soap:Fault>
+         <faultcode>soap:Server</faultcode>
+         <faultstring>Internal Server Error</faultstring>
+         <detail>
+            <doc:UploadDocumentResponse>
+               <doc:success>false</doc:success>
+               <doc:message>Error processing document upload</doc:message>
+               <doc:status>ERROR</doc:status>
+               <doc:responseCode>500</doc:responseCode>
+               <doc:errorCode>ERR-500</doc:errorCode>
+               <doc:errorMessage>Failed to process the upload request</doc:errorMessage>
+               <doc:requestId>req-error-001</doc:requestId>
+               <doc:sourceSystem>ms-products-mock</doc:sourceSystem>
+            </doc:UploadDocumentResponse>
+         </detail>
+      </soap:Fault>
+   </soap:Body>
+</soap:Envelope>]]></con:responseContent>
+        <con:wsaConfig mustUnderstand="NONE" version="200508" action="http://example.com/products/UploadDocument"/>
+      </con:mockResponse>
+
+      <!-- Response 4: Validation Error -->
+      <con:mockResponse name="ValidationError" id="mock-resp-4" httpStatus="400" contentType="text/xml; charset=utf-8" encoding="UTF-8">
+        <con:settings/>
+        <con:responseContent><![CDATA[<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:doc="http://example.com/products">
+   <soap:Header/>
+   <soap:Body>
+      <soap:Fault>
+         <faultcode>soap:Client</faultcode>
+         <faultstring>Validation Error</faultstring>
+         <detail>
+            <doc:UploadDocumentResponse>
+               <doc:success>false</doc:success>
+               <doc:message>Invalid request parameters</doc:message>
+               <doc:status>VALIDATION_ERROR</doc:status>
+               <doc:responseCode>400</doc:responseCode>
+               <doc:errorCode>ERR-400</doc:errorCode>
+               <doc:errorMessage>Required fields missing: entityId or operation</doc:errorMessage>
+               <doc:requestId>req-validation-001</doc:requestId>
+               <doc:sourceSystem>ms-products-mock</doc:sourceSystem>
+            </doc:UploadDocumentResponse>
+         </detail>
+      </soap:Fault>
+   </soap:Body>
+</soap:Envelope>]]></con:responseContent>
+        <con:wsaConfig mustUnderstand="NONE" version="200508" action="http://example.com/products/UploadDocument"/>
+      </con:mockResponse>
+
+      <!-- Response 5: Timeout Simulation -->
+      <con:mockResponse name="Timeout" id="mock-resp-5" httpStatus="504" contentType="text/xml; charset=utf-8" encoding="UTF-8" delay="11000">
+        <con:settings/>
+        <con:responseContent><![CDATA[<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:doc="http://example.com/products">
+   <soap:Header/>
+   <soap:Body>
+      <soap:Fault>
+         <faultcode>soap:Server</faultcode>
+         <faultstring>Gateway Timeout</faultstring>
+         <detail>
+            <doc:UploadDocumentResponse>
+               <doc:success>false</doc:success>
+               <doc:message>Request processing timeout</doc:message>
+               <doc:status>TIMEOUT</doc:status>
+               <doc:responseCode>504</doc:responseCode>
+               <doc:errorCode>ERR-504</doc:errorCode>
+               <doc:errorMessage>The request timed out after 10 seconds</doc:errorMessage>
+               <doc:requestId>req-timeout-001</doc:requestId>
+               <doc:sourceSystem>ms-products-mock</doc:sourceSystem>
+            </doc:UploadDocumentResponse>
+         </detail>
+      </soap:Fault>
+   </soap:Body>
+</soap:Envelope>]]></con:responseContent>
+        <con:wsaConfig mustUnderstand="NONE" version="200508" action="http://example.com/products/UploadDocument"/>
+      </con:mockResponse>
+
+    </con:mockOperation>
+  </con:mockService>
+
+  <!-- WSDL Definition (simplified for mock) -->
+  <con:interface name="ProductServiceSoapBinding" id="interface-1" definition="" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="con:WsdlInterface">
+    <con:settings/>
+    <con:definitionCache type="TEXT" rootPart="">
+      <con:part>
+<![CDATA[
+<definitions name="ProductService"
+    targetNamespace="http://example.com/products"
+    xmlns="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:tns="http://example.com/products"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <types>
+        <xsd:schema targetNamespace="http://example.com/products">
+            <xsd:element name="UploadDocumentRequest">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="entityId" type="xsd:string"/>
+                        <xsd:element name="operation" type="xsd:string"/>
+                        <xsd:element name="requestId" type="xsd:string"/>
+                        <xsd:element name="timestamp" type="xsd:string"/>
+                        <xsd:element name="sourceSystem" type="xsd:string"/>
+                        <xsd:element name="fileName" type="xsd:string" minOccurs="0"/>
+                        <xsd:element name="fileSize" type="xsd:long" minOccurs="0"/>
+                        <xsd:element name="fileExtension" type="xsd:string" minOccurs="0"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="UploadDocumentResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="success" type="xsd:boolean"/>
+                        <xsd:element name="message" type="xsd:string"/>
+                        <xsd:element name="documentId" type="xsd:string" minOccurs="0"/>
+                        <xsd:element name="entityId" type="xsd:string" minOccurs="0"/>
+                        <xsd:element name="fileName" type="xsd:string" minOccurs="0"/>
+                        <xsd:element name="fileSize" type="xsd:long" minOccurs="0"/>
+                        <xsd:element name="fileUrl" type="xsd:string" minOccurs="0"/>
+                        <xsd:element name="status" type="xsd:string" minOccurs="0"/>
+                        <xsd:element name="responseCode" type="xsd:string" minOccurs="0"/>
+                        <xsd:element name="processedAt" type="xsd:string" minOccurs="0"/>
+                        <xsd:element name="processingTimeMs" type="xsd:long" minOccurs="0"/>
+                        <xsd:element name="requestId" type="xsd:string" minOccurs="0"/>
+                        <xsd:element name="errorCode" type="xsd:string" minOccurs="0"/>
+                        <xsd:element name="errorMessage" type="xsd:string" minOccurs="0"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:schema>
+    </types>
+
+    <message name="UploadDocumentRequestMessage">
+        <part name="parameters" element="tns:UploadDocumentRequest"/>
+    </message>
+
+    <message name="UploadDocumentResponseMessage">
+        <part name="parameters" element="tns:UploadDocumentResponse"/>
+    </message>
+
+    <portType name="ProductServicePortType">
+        <operation name="UploadDocument">
+            <input message="tns:UploadDocumentRequestMessage"/>
+            <output message="tns:UploadDocumentResponseMessage"/>
+        </operation>
+    </portType>
+
+    <binding name="ProductServiceSoapBinding" type="tns:ProductServicePortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="UploadDocument">
+            <soap:operation soapAction="http://example.com/products/UploadDocument"/>
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>
+    </binding>
+
+    <service name="ProductService">
+        <port name="ProductServicePort" binding="tns:ProductServiceSoapBinding">
+            <soap:address location="http://localhost:8081/ws/product"/>
+        </port>
+    </service>
+</definitions>
+]]>
+      </con:part>
+    </con:definitionCache>
+
+    <con:operation name="UploadDocument" id="op-1" bindingOperationName="UploadDocument" type="Request-Response" outputName="UploadDocumentResponse" inputName="UploadDocumentRequest">
+      <con:settings/>
+    </con:operation>
+  </con:interface>
+
+  <con:properties>
+    <con:property>
+      <con:name>endpoint</con:name>
+      <con:value>http://localhost:8081/ws/product</con:value>
+    </con:property>
+  </con:properties>
+
+  <con:reporting/>
+</con:soapui-project>

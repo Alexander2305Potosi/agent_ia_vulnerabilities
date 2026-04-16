@@ -1,590 +1,254 @@
 {
+  "aa4512dd09f88745": {
+    "response": {
+      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-INFRA. La librer\u00eda detectada es org.yaml:snakeyaml. \n            [ACCI\u00d3N]: snakeyamlVersion = '2.0'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'snakeyamlVersion'.\n"
+    },
+    "timestamp": "2026-04-15T20:38:34.394667",
+    "prompt_snippet": "{\"cve\": \"CVE-2026-INFRA\", \"library\": \"org.yaml:snakeyaml\", \"microservice\": \"ms-auth\", \"priority\": \"c..."
+  },
+  "927e8e181da568d0": {
+    "response": {
+      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-1001. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.160.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
+    },
+    "timestamp": "2026-04-15T20:38:34.710410",
+    "prompt_snippet": "{\"cve\": \"CVE-2026-1001\", \"library\": \"io.netty:netty-handler\", \"microservice\": \"ms-auth\", \"priority\":..."
+  },
+  "e74919c63fe62c17": {
+    "response": {
+      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-DEPTH. La librer\u00eda detectada es org.apache.commons:commons-lang3. No pertenece a un grupo com\u00fan. Genero variable espec\u00edfica 'commonsLang3Version'.\n            [ACCI\u00d3N]: commonsLang3Version = '3.14.0'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'commonsLang3Version'.\n"
+    },
+    "timestamp": "2026-04-15T20:38:35.021242",
+    "prompt_snippet": "{\"cve\": \"CVE-2026-DEPTH\", \"library\": \"org.apache.commons:commons-lang3\", \"microservice\": \"ms-auth\", ..."
+  },
+  "acfed0d65e1c26dc": {
+    "response": {
+      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-ALIGN. La librer\u00eda detectada es io.netty:netty-codec-http. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
+    },
+    "timestamp": "2026-04-15T20:38:35.340237",
+    "prompt_snippet": "{\"cve\": \"CVE-2026-ALIGN\", \"library\": \"io.netty:netty-codec-http\", \"microservice\": \"ms-sales\", \"prior..."
+  },
+  "baaefef65e8b007f": {
+    "response": {
+      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-2001. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.160.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
+    },
+    "timestamp": "2026-04-15T20:38:35.659784",
+    "prompt_snippet": "{\"cve\": \"CVE-2026-2001\", \"library\": \"io.netty:netty-handler\", \"microservice\": \"ms-auth\", \"priority\":..."
+  },
+  "59e47d1cfd484014": {
+    "response": {
+      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-2001. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.160.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
+    },
+    "timestamp": "2026-04-15T20:38:35.664885",
+    "prompt_snippet": "{\"cve\": \"CVE-2026-2001\", \"library\": \"io.netty:netty-handler\", \"microservice\": \"ms-auth\", \"priority\":..."
+  },
+  "7d3da43f1d11b4b8": {
+    "response": {
+      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-2001. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.160.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
+    },
+    "timestamp": "2026-04-15T20:38:35.665998",
+    "prompt_snippet": "{\"cve\": \"CVE-2026-2001\", \"library\": \"io.netty:netty-handler\", \"microservice\": \"ms-auth\", \"priority\":..."
+  },
+  "56b706f1c66b9f75": {
+    "response": {
+      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-2001. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.160.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
+    },
+    "timestamp": "2026-04-15T20:38:35.666205",
+    "prompt_snippet": "{\"cve\": \"CVE-2026-2001\", \"library\": \"io.netty:netty-handler\", \"microservice\": \"ms-auth\", \"priority\":..."
+  },
+  "bbeffc504fd89123": {
+    "response": {
+      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-2001. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.160.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
+    },
+    "timestamp": "2026-04-15T20:38:35.730980",
+    "prompt_snippet": "{\"cve\": \"CVE-2026-2001\", \"library\": \"io.netty:netty-handler\", \"microservice\": \"ms-auth\", \"priority\":..."
+  },
+  "1e07295f370d25ca": {
+    "response": {
+      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-3001. La librer\u00eda detectada es com.fasterxml.jackson.core:jackson-databind. Como artefacto de Jackson, aplico la pol\u00edtica de familia 'jacksonCoreVersion'.\n            [ACCI\u00d3N]: jacksonCoreVersion = '2.18.5'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'jacksonCoreVersion'.\n"
+    },
+    "timestamp": "2026-04-15T20:38:35.797818",
+    "prompt_snippet": "{\"cve\": \"CVE-2026-3001\", \"library\": \"com.fasterxml.jackson.core:jackson-databind\", \"microservice\": \"..."
+  },
+  "0484595dbfd77663": {
+    "response": {
+      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-3001. La librer\u00eda detectada es com.fasterxml.jackson.core:jackson-databind. Como artefacto de Jackson, aplico la pol\u00edtica de familia 'jacksonCoreVersion'.\n            [ACCI\u00d3N]: jacksonCoreVersion = '2.18.5'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'jacksonCoreVersion'.\n"
+    },
+    "timestamp": "2026-04-15T20:38:35.798122",
+    "prompt_snippet": "{\"cve\": \"CVE-2026-3001\", \"library\": \"com.fasterxml.jackson.core:jackson-databind\", \"microservice\": \"..."
+  },
+  "7c384a416ed72ebd": {
+    "response": {
+      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-3001. La librer\u00eda detectada es com.fasterxml.jackson.core:jackson-databind. Como artefacto de Jackson, aplico la pol\u00edtica de familia 'jacksonCoreVersion'.\n            [ACCI\u00d3N]: jacksonCoreVersion = '2.18.5'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'jacksonCoreVersion'.\n"
+    },
+    "timestamp": "2026-04-15T20:38:35.809354",
+    "prompt_snippet": "{\"cve\": \"CVE-2026-3001\", \"library\": \"com.fasterxml.jackson.core:jackson-databind\", \"microservice\": \"..."
+  },
+  "bdeb3a8dd009265b": {
+    "response": {
+      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-3001. La librer\u00eda detectada es com.fasterxml.jackson.core:jackson-databind. Como artefacto de Jackson, aplico la pol\u00edtica de familia 'jacksonCoreVersion'.\n            [ACCI\u00d3N]: jacksonCoreVersion = '2.18.5'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'jacksonCoreVersion'.\n"
+    },
+    "timestamp": "2026-04-15T20:38:35.810382",
+    "prompt_snippet": "{\"cve\": \"CVE-2026-3001\", \"library\": \"com.fasterxml.jackson.core:jackson-databind\", \"microservice\": \"..."
+  },
+  "8a6b564364e52bdc": {
+    "response": {
+      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-3001. La librer\u00eda detectada es com.fasterxml.jackson.core:jackson-databind. Como artefacto de Jackson, aplico la pol\u00edtica de familia 'jacksonCoreVersion'.\n            [ACCI\u00d3N]: jacksonCoreVersion = '2.18.5'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'jacksonCoreVersion'.\n"
+    },
+    "timestamp": "2026-04-15T20:38:35.851525",
+    "prompt_snippet": "{\"cve\": \"CVE-2026-3001\", \"library\": \"com.fasterxml.jackson.core:jackson-databind\", \"microservice\": \"..."
+  },
+  "fa82759821b9dc9b": {
+    "response": {
+      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-CLI. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.160.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
+    },
+    "timestamp": "2026-04-15T20:38:36.195673",
+    "prompt_snippet": "{\"cve\": \"CVE-2026-CLI\", \"library\": \"io.netty:netty-handler\", \"microservice\": \"ms-auth\", \"priority\": ..."
+  },
+  "8e0189a2cc4db1b7": {
+    "response": {
+      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-RETRY-LEARN. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '9.9.9.NONEXISTENT'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
+    },
+    "timestamp": "2026-04-15T20:38:36.943171",
+    "prompt_snippet": "{\"cve\": \"CVE-RETRY-LEARN\", \"library\": \"io.netty:netty-handler\", \"microservice\": \"ms-auth\", \"priority..."
+  },
   "07a4d207049666a6": {
     "response": {
       "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33870. La librer\u00eda detectada es io.netty:netty-codec-http. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
     },
-    "timestamp": "2026-04-14T14:19:22.452744",
+    "timestamp": "2026-04-15T20:38:37.249483",
     "prompt_snippet": "{\"cve\": \"CVE-2026-33870\", \"library\": \"io.netty:netty-codec-http\", \"microservice\": \"ms-sales\", \"prior..."
   },
   "b1cdbeccb595d244": {
     "response": {
       "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33871. La librer\u00eda detectada es io.netty:netty-codec-http2. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
     },
-    "timestamp": "2026-04-14T14:19:23.685992",
+    "timestamp": "2026-04-15T20:38:37.290441",
     "prompt_snippet": "{\"cve\": \"CVE-2026-33871\", \"library\": \"io.netty:netty-codec-http2\", \"microservice\": \"ms-sales\", \"prio..."
   },
-  "b444115ce2a534b3": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T14:19:32.016756",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"microservice\": \"ms-auth\", \"priority\"..."
-  },
-  "61ffddc2a6b7d3aa": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T14:20:10.006487",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"microservice\": \"ms-auth\", \"priority\"..."
-  },
-  "62ea513e6d403937": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T14:23:03.580175",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"microservice\": \"ms-auth\", \"priority\"..."
-  },
-  "d60bc56870208cac": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T14:33:10.504096",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"microservice\": \"ms-auth\", \"priority\"..."
-  },
-  "cb55ded475569b6b": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T14:34:40.488503",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"microservice\": \"ms-auth\", \"priority\"..."
-  },
-  "fc1337714aead1eb": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T14:35:55.197718",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"microservice\": \"ms-auth\", \"priority\"..."
-  },
-  "f0d20695c1d21336": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T14:36:14.405602",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"microservice\": \"ms-auth\", \"priority\"..."
-  },
-  "9506736dd702de79": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T14:38:02.124652",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"microservice\": \"ms-auth\", \"priority\"..."
-  },
-  "2aef02882cad42ad": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T14:44:15.557036",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"microservice\": \"ms-auth\", \"priority\"..."
-  },
-  "84e612ffd6100e35": {
+  "ade519b49af109bf": {
     "response": {
       "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33870. La librer\u00eda detectada es io.netty:netty-codec-http. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
     },
-    "timestamp": "2026-04-14T14:51:11.634368",
+    "timestamp": "2026-04-15T20:42:02.251894",
     "prompt_snippet": "{\"cve\": \"CVE-2026-33870\", \"library\": \"io.netty:netty-codec-http\", \"priority\": \"high\", \"safe_version\"..."
   },
-  "fa29d320deece318": {
+  "3ff36a3f79b2eb78": {
     "response": {
       "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33871. La librer\u00eda detectada es io.netty:netty-codec-http2. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
     },
-    "timestamp": "2026-04-14T14:51:13.495359",
+    "timestamp": "2026-04-15T20:42:02.614203",
     "prompt_snippet": "{\"cve\": \"CVE-2026-33871\", \"library\": \"io.netty:netty-codec-http2\", \"priority\": \"critical\", \"safe_ver..."
   },
-  "4e44f1969d74ef83": {
+  "1485f46002c242cc": {
     "response": {
       "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
     },
-    "timestamp": "2026-04-14T14:51:15.029134",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"priority\": \"high\", \"safe_version\": \"..."
-  },
-  "f575508c2522ac32": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33870. La librer\u00eda detectada es io.netty:netty-codec-http. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T14:54:23.193238",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-33870\", \"library\": \"io.netty:netty-codec-http\", \"priority\": \"high\", \"safe_version\"..."
-  },
-  "b806f72dd5c64c06": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33871. La librer\u00eda detectada es io.netty:netty-codec-http2. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T14:54:24.634427",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-33871\", \"library\": \"io.netty:netty-codec-http2\", \"priority\": \"critical\", \"safe_ver..."
-  },
-  "8b2ea33470c2fa66": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T14:54:26.017347",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"priority\": \"high\", \"safe_version\": \"..."
-  },
-  "c074846facec18a1": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T14:55:48.108953",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"priority\": \"high\", \"safe_version\": \"..."
-  },
-  "f2e9638734f03bd5": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33870. La librer\u00eda detectada es io.netty:netty-codec-http. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T14:56:31.451014",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-33870\", \"library\": \"io.netty:netty-codec-http\", \"priority\": \"high\", \"safe_version\"..."
-  },
-  "65a8d92571e9edcb": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33871. La librer\u00eda detectada es io.netty:netty-codec-http2. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T14:56:32.995133",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-33871\", \"library\": \"io.netty:netty-codec-http2\", \"priority\": \"critical\", \"safe_ver..."
-  },
-  "02f892a604a2d330": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T14:56:34.547619",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"priority\": \"high\", \"safe_version\": \"..."
-  },
-  "b47a1150d25a7eee": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T14:59:15.219889",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"microservice\": \"ms-auth\", \"priority\"..."
-  },
-  "dab4d9a78ebfb7f1": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T15:04:20.053527",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"microservice\": \"ms-auth\", \"priority\"..."
-  },
-  "768da8c80f9a442d": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T15:05:28.782533",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"microservice\": \"ms-auth\", \"priority\"..."
-  },
-  "4cd4dad77366357f": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33870. La librer\u00eda detectada es io.netty:netty-codec-http. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T15:27:04.335601",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-33870\", \"library\": \"io.netty:netty-codec-http\", \"priority\": \"high\", \"safe_version\"..."
-  },
-  "11beab09ee7f5bce": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33871. La librer\u00eda detectada es io.netty:netty-codec-http2. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T15:27:05.359297",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-33871\", \"library\": \"io.netty:netty-codec-http2\", \"priority\": \"critical\", \"safe_ver..."
-  },
-  "a49e348225b05ca4": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T15:27:06.390411",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"priority\": \"high\", \"safe_version\": \"..."
-  },
-  "e9b39f36464b6d0b": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33870. La librer\u00eda detectada es io.netty:netty-codec-http. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T15:28:13.619102",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-33870\", \"library\": \"io.netty:netty-codec-http\", \"priority\": \"high\", \"safe_version\"..."
-  },
-  "f0a66b9abbe203e0": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33870. La librer\u00eda detectada es io.netty:netty-codec-http. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T15:28:19.176940",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-33870\", \"library\": \"io.netty:netty-codec-http\", \"priority\": \"high\", \"safe_version\"..."
-  },
-  "175342e4c4abd57c": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33870. La librer\u00eda detectada es io.netty:netty-codec-http. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T15:28:21.264123",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-33870\", \"library\": \"io.netty:netty-codec-http\", \"priority\": \"high\", \"safe_version\"..."
-  },
-  "3ffacdb26aef7e80": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33871. La librer\u00eda detectada es io.netty:netty-codec-http2. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T15:28:22.697978",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-33871\", \"library\": \"io.netty:netty-codec-http2\", \"priority\": \"critical\", \"safe_ver..."
-  },
-  "c860c4032ef7abfc": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33871. La librer\u00eda detectada es io.netty:netty-codec-http2. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T15:28:27.104937",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-33871\", \"library\": \"io.netty:netty-codec-http2\", \"priority\": \"critical\", \"safe_ver..."
-  },
-  "d485a32dffd8cc8c": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T15:28:28.519832",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"priority\": \"high\", \"safe_version\": \"..."
-  },
-  "52122f9bc18b8f4e": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T15:28:31.322593",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"priority\": \"high\", \"safe_version\": \"..."
-  },
-  "d672cb1e39345f7e": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T15:28:32.800676",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"priority\": \"high\", \"safe_version\": \"..."
-  },
-  "277bddc2e42cccb7": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33870. La librer\u00eda detectada es io.netty:netty-codec-http. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T15:30:44.476640",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-33870\", \"library\": \"io.netty:netty-codec-http\", \"priority\": \"high\", \"safe_version\"..."
-  },
-  "9f20d88d118f2414": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33870. La librer\u00eda detectada es io.netty:netty-codec-http. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T15:30:48.495790",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-33870\", \"library\": \"io.netty:netty-codec-http\", \"priority\": \"high\", \"safe_version\"..."
-  },
-  "28c9f97ffb039940": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33871. La librer\u00eda detectada es io.netty:netty-codec-http2. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T15:30:49.770694",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-33871\", \"library\": \"io.netty:netty-codec-http2\", \"priority\": \"critical\", \"safe_ver..."
-  },
-  "978c63ca268ed000": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33871. La librer\u00eda detectada es io.netty:netty-codec-http2. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T15:30:53.667693",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-33871\", \"library\": \"io.netty:netty-codec-http2\", \"priority\": \"critical\", \"safe_ver..."
-  },
-  "b06a606475206d6b": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T15:30:54.891985",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"priority\": \"high\", \"safe_version\": \"..."
-  },
-  "0f6acfc76d7f33db": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T15:30:56.096788",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"priority\": \"high\", \"safe_version\": \"..."
-  },
-  "0252ac85b7fdad10": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T15:30:58.635991",
+    "timestamp": "2026-04-15T20:42:02.965429",
     "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"priority\": \"high\", \"safe_version\": \"..."
   },
   "576562e044d4903b": {
     "response": {
       "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33870. La librer\u00eda detectada es io.netty:netty-codec-http. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
     },
-    "timestamp": "2026-04-14T16:02:47.921331",
+    "timestamp": "2026-04-16T09:15:25.345710",
     "prompt_snippet": "{\"cve\": \"CVE-2026-33870\", \"library\": \"io.netty:netty-codec-http\", \"priority\": \"high\", \"safe_version\"..."
   },
-  "b78de9920c64705d": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33871. La librer\u00eda detectada es io.netty:netty-codec-http2. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T16:02:48.947369",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-33871\", \"library\": \"io.netty:netty-codec-http2\", \"priority\": \"critical\", \"safe_ver..."
-  },
-  "19432e2b56f48da0": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T16:02:49.913653",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"priority\": \"high\", \"safe_version\": \"..."
-  },
-  "2874203e83276fc8": {
+  "4cd4dad77366357f": {
     "response": {
       "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33870. La librer\u00eda detectada es io.netty:netty-codec-http. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
     },
-    "timestamp": "2026-04-14T16:16:15.967763",
+    "timestamp": "2026-04-16T09:15:25.593000",
     "prompt_snippet": "{\"cve\": \"CVE-2026-33870\", \"library\": \"io.netty:netty-codec-http\", \"priority\": \"high\", \"safe_version\"..."
   },
-  "1670a66fb1f9ec3a": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33871. La librer\u00eda detectada es io.netty:netty-codec-http2. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T16:16:17.258279",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-33871\", \"library\": \"io.netty:netty-codec-http2\", \"priority\": \"critical\", \"safe_ver..."
-  },
-  "9ee464ec78d0809d": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T16:16:18.308482",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"priority\": \"high\", \"safe_version\": \"..."
-  },
-  "14e8c3ab5ea52ba2": {
+  "f2e9638734f03bd5": {
     "response": {
       "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33870. La librer\u00eda detectada es io.netty:netty-codec-http. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
     },
-    "timestamp": "2026-04-14T16:29:49.934092",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-33870\", \"library\": \"io.netty:netty-codec-http\", \"priority\": \"high\", \"safe_version\"..."
-  },
-  "f38955aea64115f0": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33870. La librer\u00eda detectada es io.netty:netty-codec-http. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T16:29:54.934678",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-33870\", \"library\": \"io.netty:netty-codec-http\", \"priority\": \"high\", \"safe_version\"..."
-  },
-  "e601108208cf0f18": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33871. La librer\u00eda detectada es io.netty:netty-codec-http2. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T16:30:02.912109",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-33871\", \"library\": \"io.netty:netty-codec-http2\", \"priority\": \"critical\", \"safe_ver..."
-  },
-  "3680f6783860dbae": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T16:30:04.498788",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"priority\": \"high\", \"safe_version\": \"..."
-  },
-  "3f0eba0b694aefa2": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T16:30:05.719756",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"priority\": \"high\", \"safe_version\": \"..."
-  },
-  "80f57d79af337369": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T16:30:08.083474",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"priority\": \"high\", \"safe_version\": \"..."
-  },
-  "34471316cf3b1c3f": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33870. La librer\u00eda detectada es io.netty:netty-codec-http. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T18:12:52.084080",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-33870\", \"library\": \"io.netty:netty-codec-http\", \"priority\": \"high\", \"safe_version\"..."
-  },
-  "5b17f3a6e6382aed": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33870. La librer\u00eda detectada es io.netty:netty-codec-http. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T18:12:55.256705",
+    "timestamp": "2026-04-16T09:15:28.862019",
     "prompt_snippet": "{\"cve\": \"CVE-2026-33870\", \"library\": \"io.netty:netty-codec-http\", \"priority\": \"high\", \"safe_version\"..."
   },
   "c4a51948fe6bee21": {
     "response": {
       "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33870. La librer\u00eda detectada es io.netty:netty-codec-http. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
     },
-    "timestamp": "2026-04-14T18:12:56.712586",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-33870\", \"library\": \"io.netty:netty-codec-http\", \"priority\": \"high\", \"safe_version\"..."
-  },
-  "c0988afc94901d0c": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33871. La librer\u00eda detectada es io.netty:netty-codec-http2. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T18:12:59.022869",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-33871\", \"library\": \"io.netty:netty-codec-http2\", \"priority\": \"critical\", \"safe_ver..."
-  },
-  "80565d8f2b0e6c1d": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33871. La librer\u00eda detectada es io.netty:netty-codec-http2. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T18:13:00.892779",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-33871\", \"library\": \"io.netty:netty-codec-http2\", \"priority\": \"critical\", \"safe_ver..."
-  },
-  "650dd72778cd2f2f": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T18:13:07.237783",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"priority\": \"high\", \"safe_version\": \"..."
-  },
-  "a09f57d3939d90b2": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33870. La librer\u00eda detectada es io.netty:netty-codec-http. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T18:21:48.502250",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-33870\", \"library\": \"io.netty:netty-codec-http\", \"priority\": \"high\", \"safe_version\"..."
-  },
-  "623fe84a1d6112e4": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33870. La librer\u00eda detectada es io.netty:netty-codec-http. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T18:21:50.771119",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-33870\", \"library\": \"io.netty:netty-codec-http\", \"priority\": \"high\", \"safe_version\"..."
-  },
-  "c510e9b14844ca35": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33870. La librer\u00eda detectada es io.netty:netty-codec-http. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T18:21:52.600947",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-33870\", \"library\": \"io.netty:netty-codec-http\", \"priority\": \"high\", \"safe_version\"..."
-  },
-  "6783fe45b32824c6": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T18:22:01.601700",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"priority\": \"high\", \"safe_version\": \"..."
-  },
-  "ade519b49af109bf": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33870. La librer\u00eda detectada es io.netty:netty-codec-http. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T18:51:49.728226",
+    "timestamp": "2026-04-16T09:15:31.637695",
     "prompt_snippet": "{\"cve\": \"CVE-2026-33870\", \"library\": \"io.netty:netty-codec-http\", \"priority\": \"high\", \"safe_version\"..."
   },
   "ac27d32f945d1aa1": {
     "response": {
       "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33870. La librer\u00eda detectada es io.netty:netty-codec-http. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
     },
-    "timestamp": "2026-04-14T18:51:49.731094",
+    "timestamp": "2026-04-16T09:15:35.484046",
     "prompt_snippet": "{\"cve\": \"CVE-2026-33870\", \"library\": \"io.netty:netty-codec-http\", \"priority\": \"high\", \"safe_version\"..."
   },
-  "65c97f75f7c7d280": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33870. La librer\u00eda detectada es io.netty:netty-codec-http. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T18:51:49.731810",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-33870\", \"library\": \"io.netty:netty-codec-http\", \"priority\": \"high\", \"safe_version\"..."
-  },
-  "c4f7d5c26bcb1b0d": {
+  "11beab09ee7f5bce": {
     "response": {
       "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33871. La librer\u00eda detectada es io.netty:netty-codec-http2. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
     },
-    "timestamp": "2026-04-14T18:51:49.842668",
+    "timestamp": "2026-04-16T09:15:39.377794",
     "prompt_snippet": "{\"cve\": \"CVE-2026-33871\", \"library\": \"io.netty:netty-codec-http2\", \"priority\": \"critical\", \"safe_ver..."
   },
-  "3ff36a3f79b2eb78": {
+  "3ffacdb26aef7e80": {
     "response": {
       "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33871. La librer\u00eda detectada es io.netty:netty-codec-http2. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
     },
-    "timestamp": "2026-04-14T18:51:49.850680",
+    "timestamp": "2026-04-16T09:15:39.671841",
     "prompt_snippet": "{\"cve\": \"CVE-2026-33871\", \"library\": \"io.netty:netty-codec-http2\", \"priority\": \"critical\", \"safe_ver..."
   },
-  "0cd63662fc6748af": {
+  "b78de9920c64705d": {
     "response": {
       "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33871. La librer\u00eda detectada es io.netty:netty-codec-http2. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
     },
-    "timestamp": "2026-04-14T18:51:49.855279",
+    "timestamp": "2026-04-16T09:15:39.917941",
     "prompt_snippet": "{\"cve\": \"CVE-2026-33871\", \"library\": \"io.netty:netty-codec-http2\", \"priority\": \"critical\", \"safe_ver..."
   },
-  "32b9cefc65ecd863": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T18:51:49.947375",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"priority\": \"high\", \"safe_version\": \"..."
-  },
-  "1485f46002c242cc": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T18:51:49.953627",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"priority\": \"high\", \"safe_version\": \"..."
-  },
-  "4e526e99ecfc8227": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T18:51:49.957286",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"priority\": \"high\", \"safe_version\": \"..."
-  },
-  "68b815a6bdc12a19": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33870. La librer\u00eda detectada es io.netty:netty-codec-http. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T18:52:19.125605",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-33870\", \"library\": \"io.netty:netty-codec-http\", \"priority\": \"high\", \"safe_version\"..."
-  },
-  "56aac59a5b1d2727": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33870. La librer\u00eda detectada es io.netty:netty-codec-http. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T18:52:28.476577",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-33870\", \"library\": \"io.netty:netty-codec-http\", \"priority\": \"high\", \"safe_version\"..."
-  },
-  "d2b0d1d012f376b6": {
+  "65a8d92571e9edcb": {
     "response": {
       "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33871. La librer\u00eda detectada es io.netty:netty-codec-http2. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
     },
-    "timestamp": "2026-04-14T18:52:30.300528",
+    "timestamp": "2026-04-16T09:15:44.036962",
     "prompt_snippet": "{\"cve\": \"CVE-2026-33871\", \"library\": \"io.netty:netty-codec-http2\", \"priority\": \"critical\", \"safe_ver..."
   },
-  "a627ddddcf468d2c": {
+  "e601108208cf0f18": {
+    "response": {
+      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33871. La librer\u00eda detectada es io.netty:netty-codec-http2. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
+    },
+    "timestamp": "2026-04-16T09:15:44.742057",
+    "prompt_snippet": "{\"cve\": \"CVE-2026-33871\", \"library\": \"io.netty:netty-codec-http2\", \"priority\": \"critical\", \"safe_ver..."
+  },
+  "19432e2b56f48da0": {
     "response": {
       "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
     },
-    "timestamp": "2026-04-14T18:52:34.655877",
+    "timestamp": "2026-04-16T09:15:47.045657",
     "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"priority\": \"high\", \"safe_version\": \"..."
   },
-  "5bde01c55d8923aa": {
+  "a49e348225b05ca4": {
     "response": {
       "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
     },
-    "timestamp": "2026-04-14T18:52:35.855430",
+    "timestamp": "2026-04-16T09:15:49.154057",
     "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"priority\": \"high\", \"safe_version\": \"..."
   },
-  "5828e044d8dfe496": {
+  "3680f6783860dbae": {
     "response": {
       "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
     },
-    "timestamp": "2026-04-14T18:52:37.171245",
+    "timestamp": "2026-04-16T09:15:51.330220",
     "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"priority\": \"high\", \"safe_version\": \"..."
   },
-  "df12e86e9863db96": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33870. La librer\u00eda detectada es io.netty:netty-codec-http. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T19:04:30.499457",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-33870\", \"library\": \"io.netty:netty-codec-http\", \"priority\": \"high\", \"safe_version\"..."
-  },
-  "4bc7862b9b0296d0": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-33870. La librer\u00eda detectada es io.netty:netty-codec-http. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T19:04:40.763669",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-33870\", \"library\": \"io.netty:netty-codec-http\", \"priority\": \"high\", \"safe_version\"..."
-  },
-  "55e11d36d64b645c": {
+  "80f57d79af337369": {
     "response": {
       "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
     },
-    "timestamp": "2026-04-14T19:04:47.714609",
+    "timestamp": "2026-04-16T09:15:51.550589",
     "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"priority\": \"high\", \"safe_version\": \"..."
   },
-  "56df24b4327f4f96": {
+  "3f0eba0b694aefa2": {
     "response": {
       "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
     },
-    "timestamp": "2026-04-14T19:08:36.525511",
-    "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"priority\": \"high\", \"safe_version\": \"..."
-  },
-  "0d0a3deb04d8e449": {
-    "response": {
-      "response_text": "\n            [PENSAMIENTO]: Analizando CVE-2026-44123. La librer\u00eda detectada es io.netty:netty-handler. Al pertenecer al ecosistema Netty, lo asocio a la familia 'nettyCodecVersion'.\n            [ACCI\u00d3N]: nettyCodecVersion = '4.1.132.Final'\n            [EXPLICACI\u00d3N]: Se aplica el parche de versi\u00f3n \u00fanica para mitigar la vulnerabilidad, centralizando la definici\u00f3n en la variable de familia 'nettyCodecVersion'.\n"
-    },
-    "timestamp": "2026-04-14T19:08:38.242167",
+    "timestamp": "2026-04-16T09:15:54.981565",
     "prompt_snippet": "{\"cve\": \"CVE-2026-44123\", \"library\": \"io.netty:netty-handler\", \"priority\": \"high\", \"safe_version\": \"..."
   }
 }

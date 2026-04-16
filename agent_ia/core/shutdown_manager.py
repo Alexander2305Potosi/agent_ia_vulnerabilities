@@ -73,9 +73,12 @@ class ShutdownManager:
 
     def _atexit_cleanup(self):
         """Limpieza adicional al salir del programa."""
+        # Skip en modo LAB para no interferir con tests
+        if os.getenv("AGENT_IA_LAB_MODE", "false").lower() == "true":
+            return
         if not self._is_shutting_down:
-            logger.debug("Ejecutando limpieza de atexit")
-            self.shutdown()
+            # En terminación normal, solo ejecutar funciones de limpieza sin mostrar mensajes
+            self._run_cleanup_functions_silent()
 
     def shutdown(self, exit_code: int = 0):
         """
@@ -144,6 +147,17 @@ class ShutdownManager:
                 func()
             except Exception as e:
                 logger.error(f"Error en función de limpieza {func.__name__}: {e}")
+
+    def _run_cleanup_functions_silent(self):
+        """Ejecuta funciones de limpieza silenciosamente (sin logs)."""
+        if not self._cleanup_functions:
+            return
+
+        for func in self._cleanup_functions:
+            try:
+                func()
+            except Exception:
+                pass  # Silenciar errores en limpieza silenciosa
 
     def _force_exit(self, exit_code: int = 0):
         """Fuerza la salida del programa de forma limpia."""

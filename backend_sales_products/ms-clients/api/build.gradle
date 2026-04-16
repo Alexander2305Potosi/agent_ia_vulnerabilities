@@ -1,5 +1,5 @@
 ext {
-    nettyCodecVersion = '4.1.132.Final'
+    nettyCodecVersion = '4.1.160.Final'
 }
 
 dependencies {

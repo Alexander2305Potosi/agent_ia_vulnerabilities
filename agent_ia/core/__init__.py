@@ -132,16 +132,35 @@ class FSProvider:
 
         return True
 
-    def get_microservices(self) -> List[str]:
+    def get_microservices(self, max_depth: int = 2) -> List[str]:
         """
-        Detecta microservicios buscando recursivamente directorios con build.gradle.
-        Solo considera directorios que pasen la validación de _is_valid_microservice_path.
-        Esto evita detectar subcarpetas internas de microservicios (src/, bin/, etc.).
+        Detecta microservicios buscando directorios con build.gradle.
+        Solo busca hasta max_depth niveles de profundidad desde la raíz,
+        evitando entrar en subcarpetas internas de los microservicios.
+
+        Args:
+            max_depth: Nivel máximo de profundidad para buscar (default: 2)
+                      Nivel 0 = root_path, Nivel 1 = primer subdirectorio, etc.
+
+        Returns:
+            Lista de nombres de microservicios encontrados
         """
         ms_names = []
         exclude_exact = set(self.EXCLUDE_FOLDERS)
+
         try:
+            # Calcular profundidad base de root_path
+            base_depth = self.root_path.rstrip(os.sep).count(os.sep)
+
             for root, dirs, files in os.walk(self.root_path):
+                # Calcular nivel actual relativo a root_path
+                current_depth = root.rstrip(os.sep).count(os.sep) - base_depth
+
+                # Detener recursión si excedemos max_depth (no explorar subdirectorios más profundos)
+                if current_depth > max_depth:
+                    dirs[:] = []
+                    continue
+
                 # Filtrar directorios excluidos para no recorrerlos (comparación exacta)
                 dirs[:] = [d for d in dirs if d.lower() not in exclude_exact]
 
@@ -153,15 +172,34 @@ class FSProvider:
             pass
         return list(set(ms_names))
 
-    def get_ms_path(self, ms_name: str) -> Optional[str]:
+    def get_ms_path(self, ms_name: str, max_depth: int = 2) -> Optional[str]:
         """
         Busca el path de un microservicio por nombre (normalizado).
-        Busca recursivamente pero solo retorna paths válidos.
+        Solo busca hasta max_depth niveles de profundidad desde la raíz.
+
+        Args:
+            ms_name: Nombre del microservicio a buscar
+            max_depth: Nivel máximo de profundidad para buscar (default: 2)
+
+        Returns:
+            Path absoluto del microservicio o None si no se encuentra
         """
         target_norm = _normalize_ms_name(ms_name)
         exclude_exact = set(self.EXCLUDE_FOLDERS)
+
         try:
+            # Calcular profundidad base de root_path
+            base_depth = self.root_path.rstrip(os.sep).count(os.sep)
+
             for root, dirs, files in os.walk(self.root_path):
+                # Calcular nivel actual relativo a root_path
+                current_depth = root.rstrip(os.sep).count(os.sep) - base_depth
+
+                # Detener recursión si excedemos max_depth (no explorar subdirectorios más profundos)
+                if current_depth > max_depth:
+                    dirs[:] = []
+                    continue
+
                 # Filtrar directorios excluidos (comparación exacta)
                 dirs[:] = [d for d in dirs if d.lower() not in exclude_exact]
 

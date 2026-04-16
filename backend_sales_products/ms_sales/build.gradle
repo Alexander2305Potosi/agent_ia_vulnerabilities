@@ -2,7 +2,8 @@ buildscript {
     ext['log4j2.version'] = '2.25.3'
     ext['snakeyaml.version'] = '2.2'
 	ext {
-	    nettyCodecVersion = '4.1.132.Final'
+	    jacksonCoreVersion = '2.18.5'
+	    nettyCodecVersion = '4.1.160.Final'
 		cleanArchitectureVersion = '3.0.3'
 		springBootVersion = '3.5.6'
 		sonarVersion = '4.2.1.3168'

@@ -7,9 +7,9 @@ plugins {
 ext {
         snakeyamlVersion = '2.0'
     log4jCoreVersion = '2.24.1'
-    nettyCodecVersion = '4.1.132.Final'
+    nettyCodecVersion = '4.1.160.Final'
     springBootVersion = '3.3.4'
-    jacksonCoreVersion = '2.18.1'
+    jacksonCoreVersion = '2.18.5'
     lombokVersion = '1.18.36'
 }
 

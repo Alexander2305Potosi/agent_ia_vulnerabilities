@@ -4,6 +4,13 @@ Este documento define la visión técnica y las leyes de inyección del Agente v
 
 ---
 
+## Versión 3.1.3 - Cambios Clave
+
+### Nuevo: Profundidad de Detección Configurable
+- El `FSProvider` ahora soporta el parámetro `max_depth` en `get_microservices(max_depth=2)` y `get_ms_path(ms_name, max_depth=2)`
+- Permite adaptar la detección de microservicios a diferentes estructuras de monorepo
+- Valor por defecto: 2 (compatible con versiones anteriores)
+
 ## Versión 3.1 - Cambios Clave
 
 ### Remoción del campo `microservice`
@@ -113,10 +120,13 @@ El Agente opera bajo reglas físicas estrictas:
     2. Prioridad 2: `main.gradle`
 - **Standard de Metadatos (Auditoría y Zero-Watermark)**: El Motor Físico inyectará obligatoriamente la regla `details.because "Fix: CVE-XXXX"` al crear resoluciones transitivas. La infraestructura generada (ej. `dependencyMgmt.gradle`) se escribirá limpia y sin marcas de agua o comentarios del agente para salvaguardar la estética del repositorio.
 - **Exclusiones de Seguridad**: El sistema tiene instrucciones inquebrantables de ignorar carpetas de infraestructura (`agent_ia`), de estrés (`stress`) o de certificación (`certification`), protegiendo el entorno operativo.
-- **Ley de Profundidad de Detección (v.3.1+)**: El agente detecta microservicios buscando archivos `build.gradle` **solo en el primer y segundo nivel de directorios** (desde `root_path`). No realiza búsquedas recursivas profundas para evitar falsos positivos en subcarpetas internas de microservicios (ej: `src/`, `bin/`, `acceptance_*`).
+- **Ley de Profundidad de Detección (v.3.1.3+)**: El agente detecta microservicios buscando archivos `build.gradle` hasta un **nivel máximo configurable** (`max_depth`, por defecto: 2). No realiza búsquedas recursivas profundas para evitar falsos positivos en subcarpetas internas de microservicios (ej: `src/`, `bin/`, `acceptance_*`).
+  - **Configuración**: El parámetro `max_depth` controla la profundidad de búsqueda
+  - **Nivel 0**: `root_path` (directorio raíz del proyecto)
   - **Nivel 1**: Directorios hijos directos de `root_path`
-  - **Nivel 2**: Subdirectorios de los directorios de Nivel 1 (ej: `backend_sales_products/ms_sales`)
-  - **Nivel 3+**: Ignorado intencionalmente
+  - **Nivel 2** (default): Subdirectorios de los directorios de Nivel 1 (ej: `backend_sales_products/ms_sales`)
+  - **Nivel 3+**: Ignorado intencionalmente (subcarpetas internas de microservicios)
+  - **Portabilidad**: El sistema es portable y se adapta a diferentes estructuras de monorepo sin depender de nombres específicos de microservicios
 - **Ley de Exclusión Exacta (v.3.1.1+)**: El sistema utiliza **coincidencia exacta** (no por subcadena) para filtrar directorios excluidos durante el descubrimiento de microservicios. Esto permite que directorios con nombres como `ms_endpoint_adapter` sean detectados correctamente sin ser confundidos con palabras clave de exclusión (`api`). Las exclusiones aplican solo a nombres de carpeta exactos: `agent_ia`, `.git`, `.gradle`, `venv`, `__pycache__`, `out`, `build`, `stress`, `tests`, `certification`, `api`, `usecase`, `domain`, `infrastructure`, `src`, `bin`.
 - **Ley de Profundidad Hexagonal (Depth Sort)**: Para proyectos multi-módulo (ej: Arquitectura Hexagonal), el Agente inferirá el archivo `build.gradle` Maestro contando la profundidad de su ruta (menor cantidad de separadores = Raíz). Las variables `ext` se inyectarán exclusivamente en esta Raíz, mientras que la sustitución por variables `"${version}"` se aplicará en cascada a todos los submódulos.
 - **Inyección Seamless (Indent Sniffing)**: Si la arquitectura concentra sus variables dentro de un scope de compilación (ej. `buildscript { ext { } }`), el Agente es capaz de escanear la profundidad de su indentación y replicarla matemáticamente para las nuevas vulnerabilidades inyectadas, garantizando una alineación visual perfecta y erradicando el desfase de tabulaturas.
@@ -297,4 +307,4 @@ El agente reporta los siguientes estados por CVE:
 
 *Este manual es una extensión de la visión v.3.1 Enhanced, optimizado para la automatización total del flujo DevSecOps.*
 
-*Última actualización: 2026-04-14 (v.3.1.2 - Procesamiento Paralelo + Graceful Shutdown + Tiempo de Ejecución)*
+*Última actualización: 2026-04-15 (v.3.1.3 - Profundidad de Detección Configurable + Procesamiento Paralelo + Graceful Shutdown)*

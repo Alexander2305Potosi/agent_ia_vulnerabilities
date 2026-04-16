@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  # Opción 1: MockServer (recomendado)
+  mockserver:
+    image: mockserver/mockserver:5.15.0
+    ports:
+      - "8081:1080"
+    environment:
+      MOCKSERVER_SERVER_PORT: 1080
+      MOCKSERVER_LOG_LEVEL: INFO
+      MOCKSERVER_INITIALIZATION_JSON_PATH: /config/mockserver-expectations.json
+    volumes:
+      - ./mockserver-expectations.json:/config/mockserver-expectations.json:ro
+    command: >
+      -logLevel INFO
+      -serverPort 1080
+
+  # Opción 2: WireMock (alternativa)
+  wiremock:
+    image: wiremock/wiremock:3.3.1
+    ports:
+      - "8082:8080"
+    volumes:
+      - ./wiremock:/home/wiremock:ro
+    command: >
+      --port 8080
+      --verbose
+    profiles:
+      - wiremock
+
+networks:
+  default:
+    name: soap-mock-network

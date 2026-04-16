@@ -48,7 +48,7 @@ agent_ia/
 | :--- | :--- |
 | `Vulnerability` | Modelo de datos para CVEs/GHSAs (vulnerabilidades globales) |
 | `JDKManager` | Selección adaptativa de Java 21/17 |
-| `FSProvider` | Escaneo de monorepo (solo nivel 1-2), filtrado hexagonal |
+| `FSProvider` | Escaneo de monorepo (niveles 1-2 configurables), filtrado hexagonal |
 | `GradleProvider` | Descubrimiento de Gradle y validación de builds |
 | `GitProvider` | Commits de seguridad automáticos |
 | `DependencyGraph` | Análisis de linaje de dependencias transitivas |
@@ -86,17 +86,21 @@ graph TD
 
 ## 🔍 Detección de Microservicios
 
-El agente detecta automáticamente los microservicios buscando archivos `build.gradle` **solo en el primer y segundo nivel de directorios** desde la raíz del proyecto:
+El agente detecta automáticamente los microservicios buscando archivos `build.gradle` **solo hasta un nivel máximo de profundidad configurable** (por defecto: nivel 2) desde la raíz del proyecto:
 
 ```
 raiz_proyecto/              ← Nivel 0
 ├── backend_sales_products/ ← Nivel 1
-│   ├── ms_sales/           ← Nivel 2 ✅ Detectado
-│   │   ├── src/            ← Nivel 3 ❌ Ignorado
+│   ├── ms_sales/           ← Nivel 2 ✅ Detectado (por defecto)
+│   │   ├── src/            ← Nivel 3 ❌ Ignorado (excede max_depth)
 │   │   └── build.gradle
 │   └── ms-auth/            ← Nivel 2 ✅ Detectado
 └── agent_ia/               ← Nivel 1 ❌ Excluido
 ```
+
+> **Nota**: El parámetro `max_depth` controla hasta qué nivel se buscan microservicios:
+> - `max_depth=1`: Solo directorios inmediatos a la raíz
+> - `max_depth=2` (default): Incluye subdirectorios de nivel 2 (recomendado para monorepos)
 
 ### Exclusiones Automáticas (Coincidencia Exacta)
 

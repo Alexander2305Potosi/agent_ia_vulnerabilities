@@ -4,5 +4,9 @@ configurations.all {
             details.useVersion "${nettyCodecVersion}"
             details.because "Fix: CVE-2026-44123"
         }
+        if (details.requested.group == 'com.fasterxml.jackson.core') {
+            details.useVersion "${jacksonCoreVersion}"
+            details.because "Fix: CVE-2026-3001"
+        }
      }
 }
